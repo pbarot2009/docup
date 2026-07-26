@@ -1,0 +1,25 @@
+meta {
+    title: "System Architecture Test",
+    author: "Prathmesh",
+    version: "1.0.0"
+}
+
+h(1, id: "overview") { 1. Architecture Overview }
+
+p {
+    This is standard paragraph text. It supports b{bold text}, i{italic text}, and code{var x = 42;} inline formatting!
+}
+
+h(2) { 2. Embedded Go Code }
+
+codeblock(lang: "go", file: "main.go") {!
+    package main
+
+    import "fmt"
+
+    func main() {
+        // Closing braces } and quotes " causes ZERO parsing conflicts!
+        fmt.Println("Hello from DocUP raw block!")
+    }
+!}
+

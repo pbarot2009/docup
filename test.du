@@ -1,0 +1,68 @@
+meta {
+    title: "DocUP Phase 1 — Full Feature Test",
+    author: "Prathmesh",
+    version: "1.0.0"
+}
+
+h(1) { DocUP Phase 1 }
+h(2, id: "intro", class: "section") { Introduction }
+
+p {
+    DocUP is a document markup language with b{single-pass parsing},
+    i{zero ambiguity}, and explicit scoping. This paragraph shows
+    b{bold}, i{italic}, b{i{bold italic}}, and inline code{let x = 1;}
+    all in one place.
+}
+
+hr {}
+
+h(2, id: "links") { Links and Quotes }
+
+p {
+    Learn more at link("https://example.com") { the DocUP homepage },
+    or read the link("https://example.com/spec", title: "Spec") { language spec }.
+}
+
+quote {
+    Good design is as little design as possible.
+}
+
+hr {}
+
+h(2, id: "lists") { Lists }
+
+p { An unordered list of core features: }
+list {
+    item { Metadata blocks for document info }
+    item { Headings from h(1) through h(6) }
+    item { Paragraphs with b{bold}, i{italic}, and code{inline code} }
+}
+
+p { An ordered list of build steps: }
+list(ordered: true) {
+    item { Lex the source into tokens }
+    item { Parse tokens into an AST }
+    item { Analyze the AST for errors }
+    item { Generate the final HTML }
+}
+
+hr {}
+
+h(2, id: "media") { Images and Code }
+
+image("https://example.com/diagram.png", alt: "Architecture diagram")
+
+codeblock(lang: "go", file: "main.go") {!
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Closing brace } and quotes \" work fine!")
+}
+!}
+
+p {
+    That's all 10 Phase 1 features: meta, headings, paragraphs, inline
+    styling, codeblock, hr, list/item, link, quote, and image.
+}
