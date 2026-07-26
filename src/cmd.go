@@ -11,7 +11,7 @@ import (
 
 // version is the DocUP compiler's own version, reported by `docup version`
 // and `docup --version`. Bump this when the compiler's behavior changes.
-const version = "0.1.0"
+const version = "0.2.0"
 
 var (
 	colorReset  = "\033[0m"

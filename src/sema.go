@@ -53,15 +53,7 @@ func analyzeBlock(n Node) error {
 	case *HRNode:
 		return nil
 	case *ListNode:
-		if len(b.Items) == 0 {
-			return &SemaError{Line: b.Line, Col: b.Col, Message: "list must contain at least one item"}
-		}
-		for _, item := range b.Items {
-			if err := analyzeInlines(item.Children); err != nil {
-				return err
-			}
-		}
-		return nil
+		return analyzeList(b)
 	case *QuoteNode:
 		return analyzeInlines(b.Children)
 	case *ImageNode:
@@ -69,6 +61,8 @@ func analyzeBlock(n Node) error {
 			return &SemaError{Line: b.Line, Col: b.Col, Message: "image is missing a source URL"}
 		}
 		return nil
+	case *TableNode:
+		return analyzeTable(b)
 	case *MetaNode:
 		return &SemaError{Line: b.Line, Col: b.Col, Message: "meta block must appear only once, at document root"}
 	default:
@@ -76,16 +70,74 @@ func analyzeBlock(n Node) error {
 	}
 }
 
+func analyzeList(list *ListNode) error {
+	if len(list.Items) == 0 {
+		return &SemaError{Line: list.Line, Col: list.Col, Message: "list must contain at least one item"}
+	}
+	for _, item := range list.Items {
+		if err := analyzeItemChildren(item.Children); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func analyzeTable(t *TableNode) error {
+	if len(t.Rows) == 0 {
+		return &SemaError{Line: t.Line, Col: t.Col, Message: "table must contain at least one row"}
+	}
+	width := -1
+	for _, row := range t.Rows {
+		if len(row.Cells) == 0 {
+			return &SemaError{Line: row.Line, Col: row.Col, Message: "row must contain at least one cell"}
+		}
+		if width == -1 {
+			width = len(row.Cells)
+		} else if len(row.Cells) != width {
+			return &SemaError{Line: row.Line, Col: row.Col, Message: fmt.Sprintf("row has %d cells, expected %d to match the table's other rows", len(row.Cells), width)}
+		}
+		for _, cell := range row.Cells {
+			if err := analyzeInlines(cell.Children); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// analyzeItemChildren validates a list item's/task's children, which may
+// mix inline content with a nested ListNode (from nested "list { ... }").
+func analyzeItemChildren(children []Node) error {
+	for _, c := range children {
+		if nested, ok := c.(*ListNode); ok {
+			if err := analyzeList(nested); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := analyzeInlines([]Node{c}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func analyzeInlines(children []Node) error {
 	for _, c := range children {
+		if nested, ok := c.(*QuoteNode); ok {
+			if err := analyzeInlines(nested.Children); err != nil {
+				return err
+			}
+			continue
+		}
 		inline, ok := c.(*InlineNode)
 		if !ok {
-			continue
+			return fmt.Errorf("semantic error: unexpected node kind %q in prose content", c.Kind())
 		}
 		switch inline.NodeKind {
 		case InlineText, InlineCode:
 			// leaf inline kinds, nothing further to validate
-		case InlineBold, InlineItalic:
+		case InlineBold, InlineItalic, InlineStrike:
 			if err := analyzeInlines(inline.Children); err != nil {
 				return err
 			}

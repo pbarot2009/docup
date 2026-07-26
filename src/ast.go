@@ -51,6 +51,9 @@ func (n *ListNode) Kind() string { return "List" }
 type ItemNode struct {
 	Line, Col int
 	Children  []Node
+	// Done is nil for a regular list item, or non-nil (true/false) for a
+	// task list item created with task(done: ...) { ... }.
+	Done *bool
 }
 
 func (n *ItemNode) Kind() string { return "Item" }
@@ -70,12 +73,35 @@ type ImageNode struct {
 
 func (n *ImageNode) Kind() string { return "Image" }
 
+type TableNode struct {
+	Line, Col int
+	Rows      []*RowNode
+}
+
+func (n *TableNode) Kind() string { return "Table" }
+
+type RowNode struct {
+	Line, Col int
+	Header    bool
+	Cells     []*CellNode
+}
+
+func (n *RowNode) Kind() string { return "Row" }
+
+type CellNode struct {
+	Line, Col int
+	Children  []Node
+}
+
+func (n *CellNode) Kind() string { return "Cell" }
+
 const (
 	InlineText   = "Text"
 	InlineBold   = "Bold"
 	InlineItalic = "Italic"
 	InlineCode   = "InlineCode"
 	InlineLink   = "Link"
+	InlineStrike = "Strike"
 )
 
 type InlineNode struct {

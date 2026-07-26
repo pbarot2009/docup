@@ -25,8 +25,8 @@
 - [About](#about)
 - [Example Document](#example-document)
 - [Usage](#usage)
-- [Features (v0.1.0)](#features-v010)
-- [Roadmap: v0.2.0](#roadmap-v020)
+- [Features (v0.2.0)](#features-v020)
+- [Roadmap: v0.3.0](#roadmap-v030)
 - [Important Links](#important-links)
 - [Contributing](#contributing)
 - [License](#license)
@@ -44,6 +44,22 @@ DocUP is a document markup language designed the way a programming language is d
 **NOTE:** DocUP is not trying to replace Markdown. DocUP is built on the philosophy that document markup should be **Predictable**, **Explicit**, **Fast to parse**, and **Easy to extend**.
 
 **DocUP** compiles to a standalone HTML5 document with minimal default CSS, syntax-highlighted code blocks, and no external runtime dependencies.
+
+---
+
+## Build from Source
+
+Clone this repo and run the following script:
+
+```bash
+$ ./build.sh
+```
+
+to clean:
+
+```bash
+$ ./build.sh clean
+```
 
 ---
 
@@ -75,22 +91,6 @@ func main() {
 
 ---
 
-## Build from Source
-
-Clone this repo and run the following script:
-
-```bash
-$ ./build.sh
-```
-
-to clean:
-
-```bash
-$ ./build.sh clean
-```
-
----
-
 ## Usage
 
 ```
@@ -106,22 +106,24 @@ docup help
 
 ---
 
-## Features (v0.1.0)
+## Features (v0.2.0)
 
 - [x] Metadata block (`meta`)
 - [x] Headings (`h(1)` – `h(6)`, with `id`/`class` attributes)
 - [x] Paragraphs (`p`)
-- [x] Inline styling (`b`, `i`, `code`)
+- [x] Inline styling (`b`, `i`, `code`, `strike`)
 - [x] Raw code blocks (`codeblock`) with syntax highlighting
 - [x] Horizontal rule (`hr`)
-- [x] Lists (`list`, `item`, ordered/unordered)
+- [x] Lists (`list`, `item`, ordered/unordered, nestable)
+- [x] Task lists (`task`, `done`)
 - [x] Links (`link`)
-- [x] Blockquotes (`quote`)
+- [x] Blockquotes (`quote`, nestable)
 - [x] Images (`image`)
+- [x] Tables (`table`, `row`, `cell`)
 
 ---
 
-## Roadmap: v0.2.0
+## Roadmap: v0.3.0
 
 Target: 25 total features.
 
@@ -131,18 +133,18 @@ Target: 25 total features.
 - [x] Bold (`b`)
 - [x] Italic (`i`)
 - [x] Inline code (`code`)
+- [x] Strikethrough (`strike`)
 - [x] Raw code blocks (`codeblock`)
 - [x] Horizontal rule (`hr`)
 - [x] Lists (`list`, `item`)
+- [x] Nested lists
+- [x] Task lists (`task`, `done`)
 - [x] Links (`link`)
 - [x] Blockquotes (`quote`)
+- [x] Nested blockquotes
 - [x] Images (`image`)
-- [ ] Strikethrough (`strike`)
-- [ ] Nested blockquotes
-- [ ] Nested lists
+- [x] Tables (`table`, `row`, `cell`)
 - [ ] Ordered lists with custom start index
-- [ ] Task lists (`task`, `done`)
-- [ ] Tables (`table`, `row`, `cell`)
 - [ ] Footnotes (`fnref`, `fndef`)
 - [ ] Raw embeds (`raw`, e.g. `type: "html"`)
 - [ ] Linked images

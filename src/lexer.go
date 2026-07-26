@@ -239,23 +239,31 @@ func (l *Lexer) PeekChar() byte {
 	return l.peek()
 }
 
+// braceInlineKeywords lists inline elements of the form "kw{...}" (as
+// opposed to "link(...) {...}", which takes attributes first). Keeping
+// this as a single shared list means AtInlineStart and ReadTextRun can
+// never drift out of sync on which identifiers start an inline element.
+var braceInlineKeywords = map[string]bool{
+	"b":      true,
+	"i":      true,
+	"code":   true,
+	"strike": true,
+}
+
 // AtInlineStart reports whether the lexer is currently positioned at the
-// start of "b{", "i{", "code{", or "link(...) {", returning the matched
-// keyword if so. The lexer position is not moved.
+// start of a brace-style inline element ("b{", "i{", "code{", "strike{")
+// or "link(...) {", returning the matched keyword if so. The lexer
+// position is not moved.
 func (l *Lexer) AtInlineStart() (string, bool) {
 	if !isIdentStart(l.peek()) {
 		return "", false
 	}
 	ident := l.peekIdent()
-	switch ident {
-	case "b", "i", "code":
-		if l.charAfterIdent(ident) == '{' {
-			return ident, true
-		}
-	case "link":
-		if l.charAfterIdent(ident) == '(' {
-			return ident, true
-		}
+	if braceInlineKeywords[ident] && l.charAfterIdent(ident) == '{' {
+		return ident, true
+	}
+	if ident == "link" && l.charAfterIdent(ident) == '(' {
+		return ident, true
 	}
 	return "", false
 }
@@ -287,6 +295,15 @@ func (l *Lexer) ConsumeRBrace() error {
 	}
 	l.advance()
 	return nil
+}
+
+// AtRawIdent reports whether the identifier at the current raw position
+// exactly matches want, without consuming anything.
+func (l *Lexer) AtRawIdent(want string) bool {
+	if !isIdentStart(l.peek()) {
+		return false
+	}
+	return l.peekIdent() == want
 }
 
 // AtEOF reports whether the lexer has consumed the entire input.
@@ -340,9 +357,23 @@ func (l *Lexer) ConsumeRawByte(expected byte, what string) error {
 }
 
 // ReadTextRun reads plain text content inside a p/h block up to (but not
-// including) the next inline-start marker (b{, i{, code{, link() or a
-// closing }.
+// including) the next inline-start marker (b{, i{, code{, strike{,
+// link()) or a closing }.
 func (l *Lexer) ReadTextRun() string {
+	return l.readTextRunStoppingAt(nil)
+}
+
+// ReadTextRunUntilBlock behaves like ReadTextRun, but additionally stops
+// right before a bare occurrence of any keyword in stopWords (e.g. "list"
+// or "quote") followed by whitespace-then-'(' or whitespace-then-'{' —
+// i.e. the start of a nested block construct, not just the word appearing
+// in prose. This lets item/quote bodies detect a nested list{}/quote{}
+// without swallowing it as plain text first.
+func (l *Lexer) ReadTextRunUntilBlock(stopWords ...string) string {
+	return l.readTextRunStoppingAt(stopWords)
+}
+
+func (l *Lexer) readTextRunStoppingAt(stopWords []string) string {
 	var buf bytes.Buffer
 	for l.pos < len(l.src) {
 		c := l.peek()
@@ -351,16 +382,43 @@ func (l *Lexer) ReadTextRun() string {
 		}
 		if isIdentStart(c) {
 			ident := l.peekIdent()
-			if (ident == "b" || ident == "i" || ident == "code") && l.charAfterIdent(ident) == '{' {
+			if braceInlineKeywords[ident] && l.charAfterIdent(ident) == '{' {
 				break
 			}
 			if ident == "link" && l.charAfterIdent(ident) == '(' {
+				break
+			}
+			if stopWordMatches(stopWords, ident) && l.startsBlockAfterIdent(ident) {
 				break
 			}
 		}
 		buf.WriteByte(l.advance())
 	}
 	return buf.String()
+}
+
+func stopWordMatches(stopWords []string, ident string) bool {
+	for _, w := range stopWords {
+		if w == ident {
+			return true
+		}
+	}
+	return false
+}
+
+// startsBlockAfterIdent reports whether ident, at the current lexer
+// position, is immediately followed (allowing spaces/tabs) by '(' or '{'
+// — the shape of a block construct like "list {" or "list(ordered: true) {"
+// — as opposed to the word simply appearing in running prose.
+func (l *Lexer) startsBlockAfterIdent(ident string) bool {
+	i := l.pos + len(ident)
+	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
+		i++
+	}
+	if i >= len(l.src) {
+		return false
+	}
+	return l.src[i] == '(' || l.src[i] == '{'
 }
 
 func (l *Lexer) peekIdent() string {

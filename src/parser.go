@@ -50,7 +50,7 @@ func (p *Parser) ParseDocument() (*DocumentNode, error) {
 	doc := &DocumentNode{}
 	for p.cur.Type != TokEOF {
 		if p.cur.Type != TokIdent {
-			return nil, p.errorf("expected a top-level block (meta, h, p, codeblock, hr, list, quote, image), got %q", p.cur.Value)
+			return nil, p.errorf("expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table), got %q", p.cur.Value)
 		}
 		switch p.cur.Value {
 		case "meta":
@@ -104,6 +104,12 @@ func (p *Parser) ParseDocument() (*DocumentNode, error) {
 				return nil, err
 			}
 			doc.Blocks = append(doc.Blocks, img)
+		case "table":
+			tbl, err := p.parseTable()
+			if err != nil {
+				return nil, err
+			}
+			doc.Blocks = append(doc.Blocks, tbl)
 		default:
 			return nil, p.errorf("unknown block type %q", p.cur.Value)
 		}
@@ -377,6 +383,8 @@ func (p *Parser) parseInlineRaw(ident string) (*InlineNode, error) {
 		kind = InlineItalic
 	case "code":
 		kind = InlineCode
+	case "strike":
+		kind = InlineStrike
 	}
 	p.lex.ConsumeIdentOnly(ident)
 	if err := p.lex.ConsumeLBrace(); err != nil {
@@ -505,10 +513,16 @@ func (p *Parser) parseList() (*ListNode, error) {
 	}
 	var items []*ItemNode
 	for p.cur.Type != TokRBrace {
-		if p.cur.Type != TokIdent || p.cur.Value != "item" {
-			return nil, p.errorf("expected 'item' inside list, got %q", p.cur.Value)
+		if p.cur.Type != TokIdent || (p.cur.Value != "item" && p.cur.Value != "task") {
+			return nil, p.errorf("expected 'item' or 'task' inside list, got %q", p.cur.Value)
 		}
-		item, err := p.parseItem()
+		var item *ItemNode
+		var err error
+		if p.cur.Value == "task" {
+			item, err = p.parseTask()
+		} else {
+			item, err = p.parseItem()
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -528,18 +542,112 @@ func (p *Parser) parseItem() (*ItemNode, error) {
 	if p.cur.Type != TokLBrace {
 		return nil, p.errorf("expected '{' after item, got %q", p.cur.Value)
 	}
-	children, err := p.parseProseBlock()
+	children, err := p.parseItemBody()
 	if err != nil {
 		return nil, err
 	}
 	return &ItemNode{Line: line, Col: col, Children: children}, nil
 }
 
-// parseQuote parses "quote { ... }", identical in shape to a paragraph
-// but rendered as a blockquote. Quote bodies are prose only (text plus
-// b/i/code/link inline elements) — a literal "quote{...}" written inside
-// another quote's body is treated as plain text, since Phase 1 does not
-// support nested block-level constructs inside prose.
+// parseTask parses "task(done: true) { ... }" or "task(done: false) { ... }",
+// the task-list counterpart of parseItem.
+func (p *Parser) parseTask() (*ItemNode, error) {
+	line, col := p.cur.Line, p.cur.Col
+	if err := p.next(); err != nil { // consume 'task'
+		return nil, err
+	}
+	attrs, _, err := p.parseAttrs()
+	if err != nil {
+		return nil, err
+	}
+	done := attrs["done"] == "true"
+	if p.cur.Type != TokLBrace {
+		return nil, p.errorf("expected '{' after task(...), got %q", p.cur.Value)
+	}
+	children, err := p.parseItemBody()
+	if err != nil {
+		return nil, err
+	}
+	return &ItemNode{Line: line, Col: col, Children: children, Done: &done}, nil
+}
+
+// parseItemBody parses an item/task body: p.cur must be the opening '{'.
+// It behaves like ordinary prose, except that a "list { ... }" appearing
+// where a text run would otherwise be read is parsed as a genuinely
+// nested ListNode child instead of literal text — this is how DocUP
+// supports nested lists in Phase 1, without adding block-nesting to
+// prose everywhere.
+func (p *Parser) parseItemBody() ([]Node, error) {
+	var children []Node
+	for {
+		text := collapseWhitespace(p.lex.ReadTextRunUntilBlock("list"))
+		if text != "" {
+			children = append(children, &InlineNode{NodeKind: InlineText, Value: text})
+		}
+		if p.lex.AtEOF() {
+			return nil, &ParseError{Line: p.lex.line, Col: p.lex.col, Message: "unterminated item, expected '}'"}
+		}
+		if ident, ok := p.lex.AtInlineStart(); ok {
+			inline, err := p.parseInlineRaw(ident)
+			if err != nil {
+				return nil, err
+			}
+			children = append(children, inline)
+			continue
+		}
+		if p.lex.AtRawIdent("list") {
+			p.depth++
+			if p.depth > maxInlineDepth {
+				return nil, &ParseError{Line: p.lex.line, Col: p.lex.col, Message: fmt.Sprintf("lists nested too deeply (limit %d)", maxInlineDepth)}
+			}
+			nested, err := p.parseNestedList()
+			p.depth--
+			if err != nil {
+				return nil, err
+			}
+			children = append(children, nested)
+			// parseNestedList finishes via token-based parsing (its
+			// closing '}' is consumed with p.next(), which tokenizes
+			// one token past it) — the raw lexer position is now ahead
+			// of what plain ReadTextRun() scanning expects. A nested
+			// list must therefore be the last thing in an item's body:
+			// the only valid continuation here is the item's own
+			// closing '}', consumed as a token rather than raw bytes.
+			if p.cur.Type != TokRBrace {
+				return nil, p.errorf("expected '}' to close item after nested list, got %q", p.cur.Value)
+			}
+			if err := p.next(); err != nil {
+				return nil, err
+			}
+			trimBoundaryWhitespace(children)
+			return children, nil
+		}
+		if err := p.lex.ConsumeRBrace(); err != nil {
+			return nil, err
+		}
+		trimBoundaryWhitespace(children)
+		if err := p.next(); err != nil { // resync token stream past '}'
+			return nil, err
+		}
+		return children, nil
+	}
+}
+
+// parseNestedList resyncs the token stream to the lexer's current raw
+// position (which is sitting exactly at "list"), then delegates to the
+// ordinary token-based parseList, which itself consumes the leading
+// "list" token — so this must NOT advance past it first.
+func (p *Parser) parseNestedList() (*ListNode, error) {
+	if err := p.next(); err != nil { // p.cur becomes the 'list' token
+		return nil, err
+	}
+	return p.parseList()
+}
+
+// parseQuote parses "quote { ... }", rendered as a blockquote. A quote's
+// body is prose (text plus b/i/code/strike/link inline elements) that
+// may also directly contain a nested "quote { ... }" block, which is
+// parsed as a genuinely nested QuoteNode child rather than literal text.
 func (p *Parser) parseQuote() (*QuoteNode, error) {
 	line, col := p.cur.Line, p.cur.Col
 	if err := p.next(); err != nil { // consume 'quote'
@@ -548,11 +656,72 @@ func (p *Parser) parseQuote() (*QuoteNode, error) {
 	if p.cur.Type != TokLBrace {
 		return nil, p.errorf("expected '{' after quote, got %q", p.cur.Value)
 	}
-	children, err := p.parseProseBlock()
+	children, err := p.parseQuoteBody()
 	if err != nil {
 		return nil, err
 	}
 	return &QuoteNode{Line: line, Col: col, Children: children}, nil
+}
+
+// parseQuoteBody mirrors parseItemBody, but recognizes a nested "quote"
+// block instead of a nested "list" block.
+func (p *Parser) parseQuoteBody() ([]Node, error) {
+	var children []Node
+	for {
+		text := collapseWhitespace(p.lex.ReadTextRunUntilBlock("quote"))
+		if text != "" {
+			children = append(children, &InlineNode{NodeKind: InlineText, Value: text})
+		}
+		if p.lex.AtEOF() {
+			return nil, &ParseError{Line: p.lex.line, Col: p.lex.col, Message: "unterminated quote, expected '}'"}
+		}
+		if ident, ok := p.lex.AtInlineStart(); ok {
+			inline, err := p.parseInlineRaw(ident)
+			if err != nil {
+				return nil, err
+			}
+			children = append(children, inline)
+			continue
+		}
+		if p.lex.AtRawIdent("quote") {
+			p.depth++
+			if p.depth > maxInlineDepth {
+				return nil, &ParseError{Line: p.lex.line, Col: p.lex.col, Message: fmt.Sprintf("quotes nested too deeply (limit %d)", maxInlineDepth)}
+			}
+			if err := p.next(); err != nil {
+				p.depth--
+				return nil, err
+			}
+			nested, err := p.parseQuote()
+			p.depth--
+			if err != nil {
+				return nil, err
+			}
+			children = append(children, nested)
+			// As with nested lists, parseQuote finishes via a token-based
+			// resync one token past its closing '}', so plain raw-byte
+			// ReadTextRun() scanning can no longer be trusted here. A
+			// nested quote must be the last thing in its parent quote's
+			// body: the only valid continuation is the parent's own
+			// closing '}', consumed as a token.
+			if p.cur.Type != TokRBrace {
+				return nil, p.errorf("expected '}' to close quote after nested quote, got %q", p.cur.Value)
+			}
+			if err := p.next(); err != nil {
+				return nil, err
+			}
+			trimBoundaryWhitespace(children)
+			return children, nil
+		}
+		if err := p.lex.ConsumeRBrace(); err != nil {
+			return nil, err
+		}
+		trimBoundaryWhitespace(children)
+		if err := p.next(); err != nil { // resync token stream past '}'
+			return nil, err
+		}
+		return children, nil
+	}
 }
 
 // parseImage parses the self-closing "image(url, alt: "...")" block. It
@@ -596,6 +765,83 @@ func (p *Parser) parseImage() (*ImageNode, error) {
 		return nil, err
 	}
 	return &ImageNode{Line: line, Col: col, Src: srcTok.Value, Alt: alt}, nil
+}
+
+// parseTable parses "table { row { cell { ... } cell { ... } } ... }".
+// Rows may be marked as a header row with row(header: true) { ... }.
+func (p *Parser) parseTable() (*TableNode, error) {
+	line, col := p.cur.Line, p.cur.Col
+	if err := p.next(); err != nil { // consume 'table'
+		return nil, err
+	}
+	if _, _, err := p.parseAttrs(); err != nil { // table-level attrs (e.g. class) parsed and discarded in Phase 1
+		return nil, err
+	}
+	if _, err := p.expect(TokLBrace, "'{' after table"); err != nil {
+		return nil, err
+	}
+	var rows []*RowNode
+	for p.cur.Type != TokRBrace {
+		if p.cur.Type != TokIdent || p.cur.Value != "row" {
+			return nil, p.errorf("expected 'row' inside table, got %q", p.cur.Value)
+		}
+		row, err := p.parseRow()
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, row)
+	}
+	if _, err := p.expect(TokRBrace, "'}' to close table"); err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return nil, &ParseError{Line: line, Col: col, Message: "table must contain at least one row"}
+	}
+	return &TableNode{Line: line, Col: col, Rows: rows}, nil
+}
+
+func (p *Parser) parseRow() (*RowNode, error) {
+	line, col := p.cur.Line, p.cur.Col
+	if err := p.next(); err != nil { // consume 'row'
+		return nil, err
+	}
+	attrs, _, err := p.parseAttrs()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := p.expect(TokLBrace, "'{' after row"); err != nil {
+		return nil, err
+	}
+	var cells []*CellNode
+	for p.cur.Type != TokRBrace {
+		if p.cur.Type != TokIdent || p.cur.Value != "cell" {
+			return nil, p.errorf("expected 'cell' inside row, got %q", p.cur.Value)
+		}
+		cell, err := p.parseCell()
+		if err != nil {
+			return nil, err
+		}
+		cells = append(cells, cell)
+	}
+	if _, err := p.expect(TokRBrace, "'}' to close row"); err != nil {
+		return nil, err
+	}
+	return &RowNode{Line: line, Col: col, Header: attrs["header"] == "true", Cells: cells}, nil
+}
+
+func (p *Parser) parseCell() (*CellNode, error) {
+	line, col := p.cur.Line, p.cur.Col
+	if err := p.next(); err != nil { // consume 'cell'
+		return nil, err
+	}
+	if p.cur.Type != TokLBrace {
+		return nil, p.errorf("expected '{' after cell, got %q", p.cur.Value)
+	}
+	children, err := p.parseProseBlock()
+	if err != nil {
+		return nil, err
+	}
+	return &CellNode{Line: line, Col: col, Children: children}, nil
 }
 
 func isSpace(c byte) bool {

@@ -54,6 +54,10 @@ ul, ol {
   padding-left: 1.6em;
 }
 li { margin: 0.25em 0; }
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
 blockquote {
   margin: 1em 0;
   padding: 0 1em;
@@ -68,6 +72,21 @@ img {
   height: auto;
   border-radius: 4px;
 }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 0.5em 0.9em;
+  text-align: left;
+}
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+s { color: #57606a; }
 .codeblock {
   margin: 1em 0;
   border: 1px solid #eaecef;
@@ -173,19 +192,60 @@ func renderBlock(w *strings.Builder, n Node) {
 		renderList(w, b)
 	case *QuoteNode:
 		w.WriteString("<blockquote>\n")
-		renderBlockquoteBody(w, b.Children)
+		renderQuoteBody(w, b.Children)
 		w.WriteString("</blockquote>\n")
 	case *ImageNode:
 		fmt.Fprintf(w, `<img src="%s" alt="%s">`+"\n", html.EscapeString(b.Src), html.EscapeString(b.Alt))
+	case *TableNode:
+		renderTable(w, b)
 	}
 }
 
-// renderBlockquoteBody wraps quote content in a <p> the same way a
-// paragraph would, since quote{} bodies are plain prose in Phase 1.
-func renderBlockquoteBody(w *strings.Builder, children []Node) {
-	w.WriteString("  <p>")
-	renderInlines(w, children)
-	w.WriteString("</p>\n")
+// renderQuoteBody renders a quote's children, which may mix plain prose
+// (wrapped in a <p>, same as a paragraph) with nested QuoteNode children
+// (rendered as nested <blockquote> elements). Consecutive inline nodes
+// are grouped into a single <p> rather than one per node.
+// trimPendingInlineEdges trims a leading space from the first text node
+// and a trailing space from the last text node in a run of inline
+// children that's about to be flushed as its own <p> or <li> content —
+// needed because a text run immediately before a nested block (list or
+// quote) keeps its natural trailing space from the source, which would
+// otherwise render right before the block's opening tag.
+func trimPendingInlineEdges(nodes []Node) {
+	if len(nodes) == 0 {
+		return
+	}
+	if first, ok := nodes[0].(*InlineNode); ok && first.NodeKind == InlineText {
+		first.Value = strings.TrimPrefix(first.Value, " ")
+	}
+	if last, ok := nodes[len(nodes)-1].(*InlineNode); ok && last.NodeKind == InlineText {
+		last.Value = strings.TrimSuffix(last.Value, " ")
+	}
+}
+
+func renderQuoteBody(w *strings.Builder, children []Node) {
+	var pending []Node
+	flush := func() {
+		if len(pending) == 0 {
+			return
+		}
+		trimPendingInlineEdges(pending)
+		w.WriteString("  <p>")
+		renderInlines(w, pending)
+		w.WriteString("</p>\n")
+		pending = nil
+	}
+	for _, c := range children {
+		if nested, ok := c.(*QuoteNode); ok {
+			flush()
+			w.WriteString("  <blockquote>\n")
+			renderQuoteBody(w, nested.Children)
+			w.WriteString("  </blockquote>\n")
+			continue
+		}
+		pending = append(pending, c)
+	}
+	flush()
 }
 
 func renderList(w *strings.Builder, l *ListNode) {
@@ -195,11 +255,57 @@ func renderList(w *strings.Builder, l *ListNode) {
 	}
 	fmt.Fprintf(w, "<%s>\n", tag)
 	for _, item := range l.Items {
-		w.WriteString("  <li>")
-		renderInlines(w, item.Children)
-		w.WriteString("</li>\n")
+		renderItem(w, item)
 	}
 	fmt.Fprintf(w, "</%s>\n", tag)
+}
+
+// renderItem renders a single <li>, handling three cases: a plain item
+// (inline content only), a task item (item.Done != nil, rendered with a
+// checkbox), and an item whose body contains a nested ListNode (rendered
+// as a nested <ul>/<ol> inside the <li>).
+func renderItem(w *strings.Builder, item *ItemNode) {
+	if item.Done != nil {
+		checked := ""
+		if *item.Done {
+			checked = " checked"
+		}
+		fmt.Fprintf(w, `  <li class="task-item"><input type="checkbox" disabled%s> `, checked)
+	} else {
+		w.WriteString("  <li>")
+	}
+
+	var inline []Node
+	for _, c := range item.Children {
+		if nested, ok := c.(*ListNode); ok {
+			trimPendingInlineEdges(inline)
+			renderInlines(w, inline)
+			inline = nil
+			renderList(w, nested)
+			continue
+		}
+		inline = append(inline, c)
+	}
+	renderInlines(w, inline)
+	w.WriteString("</li>\n")
+}
+
+func renderTable(w *strings.Builder, t *TableNode) {
+	w.WriteString("<table>\n")
+	for _, row := range t.Rows {
+		w.WriteString("  <tr>\n")
+		cellTag := "td"
+		if row.Header {
+			cellTag = "th"
+		}
+		for _, cell := range row.Cells {
+			fmt.Fprintf(w, "    <%s>", cellTag)
+			renderInlines(w, cell.Children)
+			fmt.Fprintf(w, "</%s>\n", cellTag)
+		}
+		w.WriteString("  </tr>\n")
+	}
+	w.WriteString("</table>\n")
 }
 
 func renderInlines(w *strings.Builder, children []Node) {
@@ -219,6 +325,10 @@ func renderInlines(w *strings.Builder, children []Node) {
 			w.WriteString("<em>")
 			renderInlines(w, inline.Children)
 			w.WriteString("</em>")
+		case InlineStrike:
+			w.WriteString("<s>")
+			renderInlines(w, inline.Children)
+			w.WriteString("</s>")
 		case InlineCode:
 			w.WriteString("<code>")
 			w.WriteString(html.EscapeString(inline.Value))
