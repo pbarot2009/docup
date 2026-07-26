@@ -70,6 +70,22 @@ func main() {
 
 ---
 
+## Build from Source
+
+Clone this repo and run the following script:
+
+```bash
+$ ./build.sh
+```
+
+to clean:
+
+```bash
+$ ./build.sh clean
+```
+
+---
+
 ## Usage
 
 ```
