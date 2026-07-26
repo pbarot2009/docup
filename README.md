@@ -1,17 +1,22 @@
-# DocUP
+<p align="center">
+  <img src="banner.png" alt="DocUP Banner" width="100%">
+</p>
 
-**Document Markup, Unambiguous & Precise**
+<h1 align="center">DocUP</h1>
 
-A document markup language with programming-language semantics single-pass parsing, zero ambiguity, explicit scoping. 
+<p align="center">
+  <strong>Document Unambiguous Precise</strong><br>
+  A document markup language with programming-language semantics that compiles to HTML5.
+</p>
 
-Compiles `.du` files to standalone HTML5.
-
-![License](https://img.shields.io/github/license/pbarot2009/docup?style=flat-square)
-![Stars](https://img.shields.io/github/stars/pbarot2009/docup?style=flat-square)
-![Forks](https://img.shields.io/github/forks/pbarot2009/docup?style=flat-square)
-![Issues](https://img.shields.io/github/issues/pbarot2009/docup?style=flat-square)
-![Last Commit](https://img.shields.io/github/last-commit/pbarot2009/docup?style=flat-square)
-![Top Language](https://img.shields.io/github/languages/top/pbarot2009/docup?style=flat-square)
+<p align="center">
+  <img src="https://img.shields.io/github/license/pbarot2009/docup?style=flat-square" alt="License">
+  <img src="https://img.shields.io/github/stars/pbarot2009/docup?style=flat-square" alt="Stars">
+  <img src="https://img.shields.io/github/forks/pbarot2009/docup?style=flat-square" alt="Forks">
+  <img src="https://img.shields.io/github/issues/pbarot2009/docup?style=flat-square" alt="Issues">
+  <img src="https://img.shields.io/github/last-commit/pbarot2009/docup?style=flat-square" alt="Last Commit">
+  <img src="https://img.shields.io/github/languages/top/pbarot2009/docup?style=flat-square" alt="Top Language">
+</p>
 
 ---
 
