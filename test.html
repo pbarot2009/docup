@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DocUP Phase 1 — Full Feature Test</title>
+  <title>DocUP — Full Feature Test</title>
   <meta name="author" content="Prathmesh">
   <meta name="version" content="1.0.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,6 +54,10 @@ ul, ol {
   padding-left: 1.6em;
 }
 li { margin: 0.25em 0; }
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
 blockquote {
   margin: 1em 0;
   padding: 0 1em;
@@ -68,6 +72,21 @@ img {
   height: auto;
   border-radius: 4px;
 }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 0.5em 0.9em;
+  text-align: left;
+}
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+s { color: #57606a; }
 .codeblock {
   margin: 1em 0;
   border: 1px solid #eaecef;
@@ -106,18 +125,25 @@ img {
 <body>
 <h1>DocUP Phase 1</h1>
 <h2 id="intro" class="section">Introduction</h2>
-<p>DocUP is a document markup language with <strong>single-pass parsing</strong>, <em>zero ambiguity</em>, and explicit scoping. This paragraph shows <strong>bold</strong>, <em>italic</em>, <strong><em>bold italic</em></strong>, and inline <code>let x = 1;</code> all in one place.</p>
+<p>DocUP is a document markup language with <strong>single-pass parsing</strong>, <em>zero ambiguity</em>, and explicit scoping. This paragraph shows <strong>bold</strong>, <em>italic</em>, <strong><em>bold italic</em></strong>, <s>strikethrough</s>, and inline <code>let x = 1;</code> all in one place.</p>
 <hr>
 <h2 id="links">Links and Quotes</h2>
 <p>Learn more at <a href="https://example.com">the DocUP homepage</a>, or read the <a href="https://example.com/spec">language spec</a>.</p>
 <blockquote>
   <p>Good design is as little design as possible.</p>
+  <blockquote>
+  <p>A nested quote, for attributing a quote within a quote.</p>
+  </blockquote>
 </blockquote>
 <hr>
 <h2 id="lists">Lists</h2>
-<p>An unordered list of core features:</p>
+<p>An unordered list of core features, with a nested sub-list:</p>
 <ul>
-  <li>Metadata blocks for document info</li>
+  <li>Metadata blocks for document info<ol>
+  <li>Nested ordered child A</li>
+  <li>Nested ordered child B</li>
+</ol>
+</li>
   <li>Headings from h(1) through h(6)</li>
   <li>Paragraphs with <strong>bold</strong>, <em>italic</em>, and <code>inline code</code></li>
 </ul>
@@ -128,6 +154,12 @@ img {
   <li>Analyze the AST for errors</li>
   <li>Generate the final HTML</li>
 </ol>
+<p>A task list of project milestones:</p>
+<ul>
+  <li class="task-item"><input type="checkbox" disabled checked> Design the grammar</li>
+  <li class="task-item"><input type="checkbox" disabled checked> Write the parser</li>
+  <li class="task-item"><input type="checkbox" disabled> Reach v0.2.0</li>
+</ul>
 <hr>
 <h2 id="media">Images and Code</h2>
 <img src="https://example.com/diagram.png" alt="Architecture diagram">
@@ -144,6 +176,22 @@ img {
     fmt.Println(<span class="tok-string">&#34;Closing brace } and quotes \&#34; work fine!&#34;</span>)
 }</code></pre>
 </div>
-<p>That&#39;s all 10 Phase 1 features: meta, headings, paragraphs, inline styling, codeblock, hr, list/item, link, quote, and image.</p>
+<hr>
+<h2 id="table">Tables</h2>
+<table>
+  <tr>
+    <th>Feature</th>
+    <th>Status</th>
+  </tr>
+  <tr>
+    <td>Tables</td>
+    <td><strong>Done</strong></td>
+  </tr>
+  <tr>
+    <td>Nested lists and quotes</td>
+    <td><strong>Done</strong></td>
+  </tr>
+</table>
+<p>That&#39;s all 15 features: meta, headings, paragraphs, inline styling (bold, italic, code, strikethrough), codeblock, hr, list/item, link, quote, image, nested lists, nested quotes, task lists, and tables.</p>
 </body>
 </html>
