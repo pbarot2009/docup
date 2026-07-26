@@ -56,4 +56,3 @@ func SourceSnippet(src []byte, line, col int) string {
 	pad := strings.Repeat(" ", len(gutter)+caretPos)
 	return fmt.Sprintf("%s%s\n%s^", gutter, text, pad)
 }
-

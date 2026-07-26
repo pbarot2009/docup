@@ -14,7 +14,7 @@ body {
   margin: 0 auto;
   max-width: 760px;
   padding: 2.5rem 1.25rem 4rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: #24292f;
@@ -41,7 +41,7 @@ code {
   background: #f6f8fa;
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
   font-size: 0.9em;
 }
 hr {
@@ -82,7 +82,7 @@ img {
   border-bottom: 1px solid #eaecef;
   font-size: 0.8em;
   color: #57606a;
-  font-family: ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
 }
 .codeblock pre {
   margin: 0;
@@ -94,8 +94,23 @@ img {
   background: none;
   padding: 0;
   font-size: 0.9em;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
 }
+.tok-keyword { color: #cf222e; font-weight: 600; }
+.tok-type    { color: #953800; }
+.tok-string  { color: #0a3069; }
+.tok-comment { color: #6e7781; font-style: italic; }
+.tok-number  { color: #0550ae; }
 `
+
+// googleFontsLink loads Google Sans Flex (body text) and Google Sans Code
+// (monospace/code) from Google Fonts' CDN. Both are listed with a full
+// system-font fallback in pageCSS above, so rendering is never blocked on
+// the network — if the CDN is unreachable, the browser silently falls
+// back to the platform's default UI and monospace fonts.
+const googleFontsLink = `<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">`
 
 // Generate produces a complete standalone HTML5 document from the AST.
 func Generate(doc *DocumentNode) string {
@@ -123,12 +138,13 @@ func Generate(doc *DocumentNode) string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>%s</title>
-%s  <style>%s</style>
+%s  %s
+  <style>%s</style>
 </head>
 <body>
 %s</body>
 </html>
-`, html.EscapeString(title), metaTags.String(), pageCSS, body.String())
+`, html.EscapeString(title), metaTags.String(), googleFontsLink, pageCSS, body.String())
 }
 
 func renderBlock(w *strings.Builder, n Node) {
@@ -233,7 +249,8 @@ func renderCodeBlock(w *strings.Builder, b *CodeBlockNode) {
 	if b.Language != "" {
 		langClass = fmt.Sprintf(" language-%s", html.EscapeString(b.Language))
 	}
-	fmt.Fprintf(w, "  <pre><code class=\"%s\">%s</code></pre>\n", strings.TrimSpace(langClass), html.EscapeString(b.RawCode))
+	highlighted := HighlightCode(b.RawCode, b.Language)
+	fmt.Fprintf(w, "  <pre><code class=\"%s\">%s</code></pre>\n", strings.TrimSpace(langClass), highlighted)
 	w.WriteString("</div>\n")
 }
 

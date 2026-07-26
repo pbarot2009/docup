@@ -17,10 +17,8 @@ const (
 	TokRBrace
 	TokComma
 	TokColon
-	TokRawScopeOpen  // {!
-	TokRawScopeBody  // captured raw bytes
-	TokText          // plain text run inside p/h
-	TokNumber        // bare integer literal, e.g. heading level
+	TokRawScopeOpen // {!
+	TokNumber       // bare integer literal, e.g. heading level
 )
 
 type Token struct {

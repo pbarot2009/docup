@@ -3,9 +3,14 @@ package src
 import "fmt"
 
 type Parser struct {
-	lex    *Lexer
-	cur    Token
+	lex   *Lexer
+	cur   Token
+	depth int
 }
+
+// maxInlineDepth bounds nested inline elements (b{i{b{...}}}) to prevent
+// pathological or adversarial input from overflowing the Go call stack.
+const maxInlineDepth = 64
 
 func NewParser(src []byte) (*Parser, error) {
 	lex := NewLexer(src)
@@ -354,6 +359,12 @@ func trimRightSpace(s string) string {
 func (p *Parser) parseInlineRaw(ident string) (*InlineNode, error) {
 	line, col := p.lex.line, p.lex.col
 
+	p.depth++
+	defer func() { p.depth-- }()
+	if p.depth > maxInlineDepth {
+		return nil, &ParseError{Line: line, Col: col, Message: fmt.Sprintf("inline elements nested too deeply (limit %d)", maxInlineDepth)}
+	}
+
 	if ident == "link" {
 		return p.parseLinkRaw(line, col)
 	}
@@ -407,7 +418,10 @@ func (p *Parser) parseLinkRaw(line, col int) (*InlineNode, error) {
 			return nil, err
 		}
 		p.lex.SkipRawSpaces()
-		p.lex.ReadRawIdent() // attribute name, e.g. "title" (unused in Phase 1)
+		attrName := p.lex.ReadRawIdent()
+		if attrName == "" {
+			return nil, p.lex.errorf("expected attribute name in link(...)")
+		}
 		p.lex.SkipRawSpaces()
 		if err := p.lex.ConsumeRawByte(':', "':' in link attribute"); err != nil {
 			return nil, err
@@ -522,9 +536,10 @@ func (p *Parser) parseItem() (*ItemNode, error) {
 }
 
 // parseQuote parses "quote { ... }", identical in shape to a paragraph
-// but semantically a blockquote. Quotes may nest (a quote{} inside a
-// quote{} body is just another top-level-style block via parseProseBlock's
-// text/inline grammar), since Phase 1 keeps quote content to prose only.
+// but rendered as a blockquote. Quote bodies are prose only (text plus
+// b/i/code/link inline elements) — a literal "quote{...}" written inside
+// another quote's body is treated as plain text, since Phase 1 does not
+// support nested block-level constructs inside prose.
 func (p *Parser) parseQuote() (*QuoteNode, error) {
 	line, col := p.cur.Line, p.cur.Col
 	if err := p.next(); err != nil { // consume 'quote'
