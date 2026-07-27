@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVS</title>
+  <meta name="author" content="Prathmesh">
+  <meta name="version" content="1.0.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">
+  <style>
+body {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #24292f;
+  background: #ffffff;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+}
+h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 0.9em; color: #57606a; }
+p { margin: 0.8em 0; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  background: #f6f8fa;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-size: 0.9em;
+}
+hr {
+  border: none;
+  border-top: 1px solid #eaecef;
+  margin: 2em 0;
+}
+ul, ol {
+  margin: 0.8em 0;
+  padding-left: 1.6em;
+}
+li { margin: 0.25em 0; }
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+blockquote {
+  margin: 1em 0;
+  padding: 0 1em;
+  color: #57606a;
+  border-left: 0.25em solid #d0d7de;
+}
+blockquote blockquote {
+  margin: 0.6em 0;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 0.5em 0.9em;
+  text-align: left;
+}
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+s { color: #57606a; }
+.codeblock {
+  margin: 1em 0;
+  border: 1px solid #eaecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.codeblock-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4em 0.9em;
+  background: #f6f8fa;
+  border-bottom: 1px solid #eaecef;
+  font-size: 0.8em;
+  color: #57606a;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+}
+.codeblock pre {
+  margin: 0;
+  padding: 1em;
+  overflow-x: auto;
+  background: #f6f8fa;
+}
+.codeblock code {
+  background: none;
+  padding: 0;
+  font-size: 0.9em;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+}
+.tok-keyword { color: #cf222e; font-weight: 600; }
+.tok-type    { color: #953800; }
+.tok-string  { color: #0a3069; }
+.tok-comment { color: #6e7781; font-style: italic; }
+.tok-number  { color: #0550ae; }
+</style>
+</head>
+<body>
+<p>Assume we are working with this custom struct:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">type Buffer struct {
+    len usize,
+    capacity usize,
+}</code></pre>
+</div>
+<hr>
+<h1>Read-Only (Default / None)</h1>
+<p>The caller retains full ownership. The function gets a read-only view and cannot modify the variable.</p>
+<p><strong><em>Syntax Exmaple:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">// Function Definition (no keyword before &#39;buf&#39;)</span>
+fn print_info(buf Buffer) void {
+    let size = buf.len;
+}
+
+fn main() void {
+    let my_buf = Buffer.new();
+    
+    <span class="tok-comment">// Call Site: passed normally</span>
+    print_info(my_buf);
+}</code></pre>
+</div>
+<p><strong><em>Transplied C:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-comment">// Emits const + restrict pointer so GCC/Clang can aggressively optimize</span>
+<span class="tok-type">void</span> print_info(<span class="tok-keyword">const</span> Buffer* restrict buf) {
+    uintptr_t size = buf-&gt;len;
+}
+
+<span class="tok-type">int</span> main() {
+    Buffer my_buf = Buffer_new();
+    
+    <span class="tok-comment">// Automatically passes address as const pointer</span>
+    print_info(&amp;my_buf);
+    <span class="tok-keyword">return</span> <span class="tok-number">0</span>;
+}</code></pre>
+</div>
+<blockquote>
+  <p><strong>Compiler Guarantee:</strong> Modifying <code>buf</code> inside <code>print_info</code> triggers a compile error before C code is ever generated.</p>
+</blockquote>
+<hr>
+<h1>In-Place Mutation (<code>mut</code>)</h1>
+<p>The function receives exclusive mutable access to an existing variable in the caller&#39;s scope.</p>
+<p><strong><em>Syntax Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">// Function Definition</span>
+fn clear(mut buf Buffer) void {
+    buf.len = <span class="tok-number">0</span>;
+}
+
+fn main() void {
+    var my_buf = Buffer.new();
+    
+    <span class="tok-comment">// Call Site: &#39;mut&#39; keyword is required</span>
+    clear(mut my_buf);
+}</code></pre>
+</div>
+<p><strong><em>Transplied C:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-comment">// Emits mutable restrict pointer (guarantees no pointer aliasing)</span>
+<span class="tok-type">void</span> clear(Buffer* restrict buf) {
+    buf-&gt;len = <span class="tok-number">0</span>;
+}
+
+<span class="tok-type">int</span> main() {
+    Buffer my_buf = Buffer_new();
+    
+    <span class="tok-comment">// Automatically takes address for &#39;mut&#39;</span>
+    clear(&amp;my_buf);
+    <span class="tok-keyword">return</span> <span class="tok-number">0</span>;
+}</code></pre>
+</div>
+<blockquote>
+  <p><strong>Compiler Guarantee:</strong> The call site must pass a <code>var</code> binding. Passing a <code>let</code> variable to <code>mut</code> is a compile error.</p>
+</blockquote>
+<hr>
+<h1>Ownership Move / Consume (<code>move</code>)</h1>
+<p>The caller surrenders ownership of the variable to the function. The function takes responsibility for destroying the resource when it exits.</p>
+<p><strong><em>Syntax Exmaple:</em></strong></p>
+<div class="codeblock">
+  <pre><code class=""><span class="tok-comment">// Function Definition</span>
+fn consume_buffer(move buf Buffer) void {
+    <span class="tok-comment">// Uses &#39;buf&#39;...</span>
+} <span class="tok-comment">// &#39;buf&#39; goes out of scope here; compiler automatically calls its destructor!</span>
+
+fn main() {
+    var my_buf = Buffer.new();
+    
+    <span class="tok-comment">// Call Site: &#39;move&#39; keyword is required</span>
+    consume_buffer(move my_buf);
+    
+    <span class="tok-comment">// COMPILE ERROR: Cannot use &#39;my_buf&#39; here, it was moved!</span>
+}</code></pre>
+</div>
+<p><strong><em>Transplied C:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-type">void</span> consume_buffer(Buffer buf) {
+    <span class="tok-comment">// ... work with buf ...</span>
+    
+    <span class="tok-comment">// Compiler automatically emits destructor at scope end</span>
+    Buffer_destroy(&amp;buf); 
+}
+
+<span class="tok-type">int</span> main() {
+    Buffer my_buf = Buffer_new();
+    
+    <span class="tok-comment">// Value is moved to the function</span>
+    consume_buffer(my_buf);
+    
+    <span class="tok-comment">// &#39;my_buf&#39; is marked dead in compiler AST; no cleanup needed here in main</span>
+    <span class="tok-keyword">return</span> <span class="tok-number">0</span>;
+}</code></pre>
+</div>
+<blockquote>
+  <p><strong>Compiler Guarantee</strong>: After <code>move my_buf</code>, the variable <code>my_buf</code> is marked as invalidated in the compiler AST. Any subsequent access to <code>my_buf</code> causes a compile-time error.</p>
+</blockquote>
+<hr>
+<h1>Initialize / Out (<code>set</code>)</h1>
+<p>The function receives uninitialized memory provided by the caller and <strong>must</strong> populate it before returning.</p>
+<p><strong><em>Syntax Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">// Function Definition</span>
+fn init_default(set buf Buffer, cap usize) void {
+    buf.len = <span class="tok-number">0</span>;
+    buf.capacity = cap;
+}
+
+fn main() void {
+    <span class="tok-comment">// Uninitialized allocation slot</span>
+    var my_buf Buffer = uninit;
+    
+    <span class="tok-comment">// Call Site: &#39;set&#39; keyword is required</span>
+    init_default(set my_buf, <span class="tok-number">1024</span>);
+    
+    <span class="tok-comment">// &#39;my_buf&#39; is now safely initialized and ready to use!</span>
+}</code></pre>
+</div>
+<p><strong><em>Transplied C:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-type">void</span> init_default(Buffer* restrict buf, uintptr_t cap) {
+    buf-&gt;len = <span class="tok-number">0</span>;
+    buf-&gt;capacity = cap;
+}
+
+<span class="tok-type">int</span> main() {
+    Buffer my_buf; <span class="tok-comment">// Stack space allocated, uninitialized</span>
+    
+    <span class="tok-comment">// Function writes directly into caller&#39;s memory</span>
+    init_default(&amp;my_buf, <span class="tok-number">1024</span>);
+    <span class="tok-keyword">return</span> <span class="tok-number">0</span>;
+}</code></pre>
+</div>
+<blockquote>
+  <p><strong>Compiler Guarantee:</strong> The compiler verifies that every field in <code>buf</code> is assigned inside <code>init_default</code>. Returning without initializing <code>buf</code> triggers a compile error.</p>
+</blockquote>
+<hr>
+<h2>Side-by-Side Summary</h2>
+<table>
+  <tr>
+    <th>Mode</th>
+    <th>Parameter Def</th>
+    <th>Call Site</th>
+    <th>Transpiled C Param</th>
+    <th>Compiler Safety Guard</th>
+  </tr>
+  <tr>
+    <td><strong>Read-Only</strong></td>
+    <td><code>buf Buffer</code></td>
+    <td><code>func(my_buf)</code></td>
+    <td><code>const Buffer* restrict</code></td>
+    <td>Read-only enforcement</td>
+  </tr>
+  <tr>
+    <td><strong>Mutation</strong></td>
+    <td><code>mut buf Buffer</code></td>
+    <td><code>func(mut my_buf)</code></td>
+    <td><code>Buffer* restrict</code></td>
+    <td>Requires var, non-null</td>
+  </tr>
+  <tr>
+    <td><strong>Move</strong></td>
+    <td><code>move buf Buffer</code></td>
+    <td><code>func(move my_buf)</code></td>
+    <td><code>Buffer</code> (or owned pointer)</td>
+    <td>Caller variable invalidated</td>
+  </tr>
+  <tr>
+    <td><strong>Initialize</strong></td>
+    <td><code>set buf Buffer</code></td>
+    <td><code>func(set my_buf)</code></td>
+    <td><code>Buffer* restrict</code></td>
+    <td>Must write before return</td>
+  </tr>
+</table>
+<h2>Complete Example</h2>
+<p>Here is how all 4 modes look working together in a single pipeline:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+    <span class="tok-comment">// 1. Allocate uninitialized memory slot</span>
+    var buf Buffer = uninit;
+    
+    <span class="tok-comment">// 2. Initialize it (&#39;set&#39;)</span>
+    init_default(set buf, <span class="tok-number">512</span>);
+
+    <span class="tok-comment">// 3. Mutate it (&#39;mut&#39;)</span>
+    clear(mut buf);
+
+    <span class="tok-comment">// 4. Read it (Default)</span>
+    print_info(buf);
+
+    <span class="tok-comment">// 5. Move ownership (&#39;move&#39;)</span>
+    consume_buffer(move buf);
+}</code></pre>
+</div>
+<p><strong><em>Transpiled C:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-type">int</span> main() {
+    Buffer buf; <span class="tok-comment">// Uninitialized</span>
+    
+    init_default(&amp;buf, <span class="tok-number">512</span>);
+    clear(&amp;buf);
+    print_info(&amp;buf);
+    consume_buffer(buf); <span class="tok-comment">// Ownership transferred</span>
+    
+    <span class="tok-keyword">return</span> <span class="tok-number">0</span>;
+}</code></pre>
+</div>
+</body>
+</html>

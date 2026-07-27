@@ -1,0 +1,277 @@
+meta {
+    title: "MVS",
+    author: "Prathmesh",
+    version: "1.0.0"
+}
+
+p { Assume we are working with this custom struct: }
+
+codeblock(lang: "tinoc") {!
+type Buffer struct {
+    len usize,
+    capacity usize,
+}
+!}
+
+hr {}
+
+h(1) { Read-Only (Default / None) }
+
+p { The caller retains full ownership. The function gets a read-only view and cannot modify the variable. }
+
+p { b{i{Syntax Exmaple:}} }
+
+codeblock(lang: "tinoc") {!
+// Function Definition (no keyword before 'buf')
+fn print_info(buf Buffer) void {
+    let size = buf.len;
+}
+
+fn main() void {
+    let my_buf = Buffer.new();
+    
+    // Call Site: passed normally
+    print_info(my_buf);
+}
+!}
+
+p { b{i{Transplied C:}} }
+
+codeblock(lang: "c") {!
+// Emits const + restrict pointer so GCC/Clang can aggressively optimize
+void print_info(const Buffer* restrict buf) {
+    uintptr_t size = buf->len;
+}
+
+int main() {
+    Buffer my_buf = Buffer_new();
+    
+    // Automatically passes address as const pointer
+    print_info(&my_buf);
+    return 0;
+}
+!}
+
+quote {
+    b{Compiler Guarantee:} Modifying code{buf} inside code{print_info} triggers a compile error before C code is ever generated.
+}
+
+hr {}
+
+h(1) { In-Place Mutation (code{mut}) }
+
+p { The function receives exclusive mutable access to an existing variable in the caller's scope. }
+
+p { b{i{Syntax Example:}} }
+
+codeblock(lang: "tinoc") {!
+// Function Definition
+fn clear(mut buf Buffer) void {
+    buf.len = 0;
+}
+
+fn main() void {
+    var my_buf = Buffer.new();
+    
+    // Call Site: 'mut' keyword is required
+    clear(mut my_buf);
+}
+!}
+
+p { b{i{Transplied C:}} }
+
+codeblock(lang: "c") {!
+// Emits mutable restrict pointer (guarantees no pointer aliasing)
+void clear(Buffer* restrict buf) {
+    buf->len = 0;
+}
+
+int main() {
+    Buffer my_buf = Buffer_new();
+    
+    // Automatically takes address for 'mut'
+    clear(&my_buf);
+    return 0;
+}
+!}
+
+quote {
+    b{Compiler Guarantee:} The call site must pass a code{var} binding. Passing a code{let} variable to code{mut} is a compile error.
+}
+
+hr {}
+
+h(1) { Ownership Move / Consume (code{move}) }
+
+p { The caller surrenders ownership of the variable to the function. The function takes responsibility for destroying the resource when it exits. }
+
+p { b{i{Syntax Exmaple:}} }
+
+codeblock {!
+// Function Definition
+fn consume_buffer(move buf Buffer) void {
+    // Uses 'buf'...
+} // 'buf' goes out of scope here; compiler automatically calls its destructor!
+
+fn main() {
+    var my_buf = Buffer.new();
+    
+    // Call Site: 'move' keyword is required
+    consume_buffer(move my_buf);
+    
+    // COMPILE ERROR: Cannot use 'my_buf' here, it was moved!
+}
+!}
+
+p { b{i{Transplied C:}} }
+
+codeblock(lang: "c") {!
+void consume_buffer(Buffer buf) {
+    // ... work with buf ...
+    
+    // Compiler automatically emits destructor at scope end
+    Buffer_destroy(&buf); 
+}
+
+int main() {
+    Buffer my_buf = Buffer_new();
+    
+    // Value is moved to the function
+    consume_buffer(my_buf);
+    
+    // 'my_buf' is marked dead in compiler AST; no cleanup needed here in main
+    return 0;
+}
+!}
+
+quote {
+    b{Compiler Guarantee}: After code{move my_buf}, the variable code{my_buf} is marked as invalidated in the compiler AST. Any subsequent access to code{my_buf} causes a compile-time error.
+}
+
+hr {}
+
+h(1) { Initialize / Out (code{set}) }
+
+p { The function receives uninitialized memory provided by the caller and b{must} populate it before returning. }
+
+p { b{i{Syntax Example:}} }
+
+codeblock(lang: "tinoc") {!
+// Function Definition
+fn init_default(set buf Buffer, cap usize) void {
+    buf.len = 0;
+    buf.capacity = cap;
+}
+
+fn main() void {
+    // Uninitialized allocation slot
+    var my_buf Buffer = uninit;
+    
+    // Call Site: 'set' keyword is required
+    init_default(set my_buf, 1024);
+    
+    // 'my_buf' is now safely initialized and ready to use!
+}
+!}
+
+p { b{i{Transplied C:}} }
+
+codeblock(lang: "c") {!
+void init_default(Buffer* restrict buf, uintptr_t cap) {
+    buf->len = 0;
+    buf->capacity = cap;
+}
+
+int main() {
+    Buffer my_buf; // Stack space allocated, uninitialized
+    
+    // Function writes directly into caller's memory
+    init_default(&my_buf, 1024);
+    return 0;
+}
+!}
+
+quote {
+    b{Compiler Guarantee:} The compiler verifies that every field in code{buf} is assigned inside code{init_default}. Returning without initializing code{buf} triggers a compile error.
+}
+
+hr {}
+
+h(2) { Side-by-Side Summary }
+
+table {
+    row(header: true) {
+        cell { Mode }
+        cell { Parameter Def }
+        cell { Call Site }
+        cell { Transpiled C Param }
+        cell { Compiler Safety Guard }
+    }
+    row {
+        cell { b{Read-Only} }
+        cell { code{buf Buffer} }
+        cell { code{func(my_buf)} }
+        cell { code{const Buffer* restrict} }
+        cell { Read-only enforcement }
+    }
+    row {
+        cell { b{Mutation} }
+        cell { code{mut buf Buffer} }
+        cell { code{func(mut my_buf)} }
+        cell { code{Buffer* restrict} }
+        cell { Requires var, non-null }
+    }
+    row {
+        cell { b{Move} }
+        cell { code{move buf Buffer} }
+        cell { code{func(move my_buf)} }
+        cell { code{Buffer} (or owned pointer) }
+        cell { Caller variable invalidated }
+    }
+    row {
+        cell { b{Initialize} }
+        cell { code{set buf Buffer} }
+        cell { code{func(set my_buf)} }
+        cell { code{Buffer* restrict} }
+        cell { Must write before return }
+    }
+}
+
+h(2) { Complete Example }
+
+p { Here is how all 4 modes look working together in a single pipeline: }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+    // 1. Allocate uninitialized memory slot
+    var buf Buffer = uninit;
+    
+    // 2. Initialize it ('set')
+    init_default(set buf, 512);
+
+    // 3. Mutate it ('mut')
+    clear(mut buf);
+
+    // 4. Read it (Default)
+    print_info(buf);
+
+    // 5. Move ownership ('move')
+    consume_buffer(move buf);
+}
+!}
+
+p { b{i{Transpiled C:}} }
+
+codeblock(lang: "c") {!
+int main() {
+    Buffer buf; // Uninitialized
+    
+    init_default(&buf, 512);
+    clear(&buf);
+    print_info(&buf);
+    consume_buffer(buf); // Ownership transferred
+    
+    return 0;
+}
+!}
+

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tinoc Specs</title>
+  <meta name="author" content="Tinoc">
+  <meta name="version" content="1.0.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">
+  <style>
+body {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #24292f;
+  background: #ffffff;
+}
+* {
+  box-sizing: border-box;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  overflow-wrap: break-word;
+}
+h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 0.9em; color: #57606a; }
+p {
+  margin: 0.8em 0;
+  overflow-wrap: break-word;
+}
+strong { font-weight: 600; }
+em { font-style: italic; }
+a {
+  color: #0969da;
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
+a:hover { text-decoration: underline; }
+code {
+  background: #f6f8fa;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-size: 0.9em;
+  overflow-wrap: break-word;
+}
+hr {
+  border: none;
+  border-top: 1px solid #eaecef;
+  margin: 2em 0;
+}
+ul, ol {
+  margin: 0.8em 0;
+  padding-left: 1.6em;
+}
+li {
+  margin: 0.25em 0;
+  overflow-wrap: break-word;
+}
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+blockquote {
+  margin: 1em 0;
+  padding: 0 1em;
+  color: #57606a;
+  border-left: 0.25em solid #d0d7de;
+  overflow-wrap: break-word;
+}
+blockquote blockquote {
+  margin: 0.6em 0;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1em 0;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+  margin: 0;
+}
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 0.5em 0.9em;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+s { color: #57606a; }
+.codeblock {
+  margin: 1em 0;
+  border: 1px solid #eaecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.codeblock-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75em;
+  padding: 0.4em 0.9em;
+  background: #f6f8fa;
+  border-bottom: 1px solid #eaecef;
+  font-size: 0.8em;
+  color: #57606a;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.codeblock pre {
+  margin: 0;
+  padding: 1em;
+  overflow-x: auto;
+  background: #f6f8fa;
+}
+.codeblock code {
+  background: none;
+  padding: 0;
+  font-size: 0.9em;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+.tok-keyword { color: #cf222e; font-weight: 600; }
+.tok-type    { color: #953800; }
+.tok-string  { color: #0a3069; }
+.tok-comment { color: #6e7781; font-style: italic; }
+.tok-number  { color: #0550ae; }
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 1rem 3rem;
+    font-size: 15px;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.35em; }
+  h3 { font-size: 1.15em; }
+  th, td { padding: 0.4em 0.6em; }
+}
+</style>
+</head>
+<body>
+<h1 id="variable">Variable</h1>
+<p><strong>Variable</strong> can be mutated.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">var &lt;identifier&gt; &lt;type&gt;; <span class="tok-comment">// Decl only with explicit type.</span>
+var &lt;identifier&gt; &lt;type&gt; = &lt;expression&gt;; <span class="tok-comment">// Decl + Init with Explicit type</span>
+var &lt;identifier&gt; = &lt;expression&gt;; <span class="tok-comment">// Decl + Init with Infered way</span></code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+	var name str = <span class="tok-string">&#34;Lucifer&#34;</span>;
+	name = <span class="tok-string">&#34;Julius&#34;</span>
+	var number = <span class="tok-number">101</span>; <span class="tok-comment">// infer as i32</span>
+	number += <span class="tok-number">10</span>;
+	var isAdmin = false; <span class="tok-comment">// infer as bool</span>
+	isAdmin = true; 
+}</code></pre>
+</div>
+<hr>
+<h1 id="constant">Constant</h1>
+<p><strong>Constant</strong> can not be mutated.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">const &lt;identifier&gt; &lt;type&gt;; <span class="tok-comment">// Decl only with explicit type.</span>
+const &lt;identifier&gt; &lt;type&gt; = &lt;expression&gt;; <span class="tok-comment">// Decl + Init with Explicit type</span>
+const &lt;identifier&gt; = &lt;expression&gt;; <span class="tok-comment">// Decl + Init with Infered way</span></code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+	const lang str = <span class="tok-string">&#34;Tinoc&#34;</span>;
+	const codename = <span class="tok-string">&#34;C^&#34;</span>;
+	<span class="tok-comment">// lang = &#34;Tinoc Is Not C&#34; </span>
+	<span class="tok-comment">// Won&#39;t work, Compile Error.</span>
+}</code></pre>
+</div>
+<hr>
+<h1 id="integers">Integers</h1>
+<p><strong><em>Example of Integer Literal:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">const decimal_int = <span class="tok-number">98222</span>;
+const hex_int = <span class="tok-number">0xff</span>; 
+const another_hex_int = <span class="tok-number">0xFF</span>;
+const octal_int = <span class="tok-number">0</span>o755;
+const binary_int = <span class="tok-number">0b11110000</span>; 
+
+<span class="tok-comment">// underscores may be placed between two digits as a visual separator </span>
+const one_billion = <span class="tok-number">1_000_000_000</span>; 
+const binary_mask = <span class="tok-number">0b1_1111_1111</span>; 
+const permissions = <span class="tok-number">0</span>o7_5_5;
+const big_address = <span class="tok-number">0xFF80_0000_0000_0000</span>;</code></pre>
+</div>
+<p>Compiler will infer the size of each integer literal, mostly default to <code>i32</code> but if literal&#39;s size if more than <code>i32</code> so it will go for <code>i64</code>..<code>i128</code>.</p>
+<p>For <strong>not comptime</strong> known you must explit add type:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn divide(a i32, b i32) i32 {
+    return a / b;
+}</code></pre>
+</div>
+<hr>
+<h1 id="floats">Floats</h1>
+<p><strong><em>Float Literals:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">const floating_point = <span class="tok-number">123.0E</span>+<span class="tok-number">77</span>; 
+const another_float = <span class="tok-number">123.0</span>;
+const yet_another = <span class="tok-number">123.0e</span>+<span class="tok-number">77</span>; 
+const hex_floating_point = <span class="tok-number">0x103.70</span>p-<span class="tok-number">5</span>; 
+const another_hex_float = <span class="tok-number">0x103.70</span>; 
+const yet_another_hex_float = <span class="tok-number">0x103.70</span>P-<span class="tok-number">5</span>; 
+
+<span class="tok-comment">// underscores may be placed between two digits as a visual separator </span>
+const lightspeed = <span class="tok-number">299_792_458.000_000</span>; 
+const nanosecond = <span class="tok-number">0.000_000_001</span>; 
+const more_hex = <span class="tok-number">0x1234_5678.9ABC_CDEF</span>p-<span class="tok-number">10</span>;</code></pre>
+</div>
+<p><strong>Tinoc</strong> does not has any special syntax for <em>NaN</em>, <em>Infinity (∞)</em>, <em>Negetive Infinity (-∞)</em>. Use <code>std.math</code> library for these.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">#import std.math;</span>
+
+const inf = math.inf();
+const negative_inf = - math.inf();
+const nan = math.nan();</code></pre>
+</div>
+<hr>
+<h1 id="operators">Operators</h1>
+<p>See this table to know about what&#39;s operator is doing.</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Name</strong></th>
+    <th><strong>Syntax</strong></th>
+    <th><strong>Types</strong></th>
+    <th><strong>Notes</strong></th>
+    <th><strong>Example</strong></th>
+  </tr>
+  <tr>
+    <td>Addition</td>
+    <td><code>a + b</code>, <code>a += b</code></td>
+    <td>Integers, Floats</td>
+    <td>Can cause overflow</td>
+    <td><code>2 + 5 == 7</code></td>
+  </tr>
+  <tr>
+    <td>Wrapping Addition</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Saturating Addition</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Subtraction</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Wrapping Subtraction</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Saturating Subtraction</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Negation</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Wrapping Negation</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Multiplication</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Wrapping Multiplication</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Saturating Multiplication</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Division</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Remainder Division</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bit Shift Left</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Saturating Bit Shift Left</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bit Shift Right</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bitwise And</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bitwise Or</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bitwise Xor</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Bitwise Not</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Defaulting Optional Unwrap</td>
+    <td><code>a orelse b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Optional Unwrap</td>
+    <td><code>a?</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Defaulting Error Unwrap</td>
+    <td><code>a catch b</code>, <code>a catch |err| b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Logical And</td>
+    <td><code>a and b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Logical Or</td>
+    <td><code>!a</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Equality</td>
+    <td><code>a == b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Null Check</td>
+    <td><code>a == null</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Inequality</td>
+    <td><code>a != b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Non-Null Check</td>
+    <td><code>a != null</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Greater Than</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Greater or Equal</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Less Than</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Lesser or Equal</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Array Multiplication</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Pointer Dereference</td>
+    <td><code>a^</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Address Of</td>
+    <td><code>&amp;a</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Error Set Merge</td>
+    <td><code>a || b</code></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+</div>
+<p><strong><em>Precedence:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">x() x[] x.y x^ x? a!b x{} !x -x -%x ~x &amp;x ?x * / % ** *% *| || + - ++ +% -% +| -| &lt;&lt; &gt;&gt; &lt;&lt;| &amp; ^ | orelse catch == != &lt; &gt; &lt;= &gt;= and or = *= *%= *|= /= %= += +%= +|= -= -%= -|= &lt;&lt;= &lt;&lt;|= &gt;&gt;= &amp;= ^= |=</code></pre>
+</div>
+<hr>
+<h1 id="function">Function</h1>
+<p><strong>Function</strong> is used to make reusable block of code.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn &lt;identifier&gt;() &lt;type&gt; {...}
+fn &lt;identifier&gt;(&lt;param&gt; &lt;type&gt;, ...) &lt;type&gt; {...}
+fn &lt;identifier&gt;:T() &lt;type&gt; {...}
+fn &lt;identifier&gt;:T(&lt;param&gt; &lt;type&gt;, ...) &lt;type&gt; {...}
+fn &lt;identifier&gt;:(T, ...)() &lt;type&gt; {...}
+fn &lt;identifier&gt;:(T, ...)(&lt;param&gt; &lt;type&gt;, ...) &lt;type&gt; {...}
+
+<span class="tok-comment">// Call</span>
+
+&lt;identifier&gt;();
+&lt;identifier&gt;(value, ...);
+&lt;identifier&gt;:T();
+<span class="tok-comment">// same for other</span></code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">#import std.io;</span>
+
+fn add(a i8, b i8) i8 {
+	return a + b;
+}
+
+fn greet() void {
+	io.println(<span class="tok-string">&#34;Hi&#34;</span>);
+}
+
+fn Identity:T(val T) T {
+	return val;
+}
+
+fn main() void {
+	const result = add(<span class="tok-number">10</span>, <span class="tok-number">25</span>);
+	greet();
+	io.println(<span class="tok-string">&#34;result = {d}&#34;</span>,result);
+	io.println(<span class="tok-string">&#34;{any}&#34;</span>, Identify:str(<span class="tok-string">&#34;Tinoc&#34;</span>));
+}</code></pre>
+</div>
+<hr>
+<h1 id="types">Types</h1>
+<p><strong>Tinoc</strong> has a rich type system covering primitives, compounds, pointer/optional/error types, and heap-allocated collections.</p>
+<h2 id="primitive-types">Primitive Types</h2>
+<h3 id="integer-types">Integer Types</h3>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>u8</code></td>
+    <td><code>uint8_t</code></td>
+    <td>Unsigned Integer</td>
+  </tr>
+  <tr>
+    <td><code>u16</code></td>
+    <td><code>uint16_t</code></td>
+    <td>Unsigned Integer</td>
+  </tr>
+  <tr>
+    <td><code>u32</code></td>
+    <td><code>uint32_t</code></td>
+    <td>Unsigned Integer</td>
+  </tr>
+  <tr>
+    <td><code>u64</code></td>
+    <td><code>uint64_t</code></td>
+    <td>Unsigned Integer</td>
+  </tr>
+  <tr>
+    <td><code>u128</code></td>
+    <td><code>__uint128_t</code> <em>(GCC/Clang only)</em></td>
+    <td>Unsigned Integer</td>
+  </tr>
+  <tr>
+    <td><code>usize</code></td>
+    <td><code>size_t</code></td>
+    <td>Unsigned Integer (platform-width)</td>
+  </tr>
+  <tr>
+    <td><code>i8</code></td>
+    <td><code>int8_t</code></td>
+    <td>Signed Integer</td>
+  </tr>
+  <tr>
+    <td><code>i16</code></td>
+    <td><code>int16_t</code></td>
+    <td>Signed Integer</td>
+  </tr>
+  <tr>
+    <td><code>i32</code></td>
+    <td><code>int32_t</code></td>
+    <td>Signed Integer</td>
+  </tr>
+  <tr>
+    <td><code>i64</code></td>
+    <td><code>int64_t</code></td>
+    <td>Signed Integer</td>
+  </tr>
+  <tr>
+    <td><code>i128</code></td>
+    <td><code>__int128_t</code> <em>(GCC/Clang only)</em></td>
+    <td>Signed Integer</td>
+  </tr>
+  <tr>
+    <td><code>isize</code></td>
+    <td><code>ptrdiff_t</code></td>
+    <td>Signed Integer (platform-width)</td>
+  </tr>
+</table>
+</div>
+<h3 id="floating-point-types">Floating-Point Types</h3>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>f32</code></td>
+    <td><code>float</code></td>
+    <td>Float</td>
+  </tr>
+  <tr>
+    <td><code>f64</code></td>
+    <td><code>double</code></td>
+    <td>Float</td>
+  </tr>
+  <tr>
+    <td><code>f128</code></td>
+    <td><code>__float128</code> <em>(GCC/Clang only)</em></td>
+    <td>Float</td>
+  </tr>
+</table>
+</div>
+<h3 id="core-primitives">Core Primitives</h3>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>bool</code></td>
+    <td><code>_Bool</code> / <code>stdbool.h bool</code></td>
+    <td>Boolean</td>
+  </tr>
+  <tr>
+    <td><code>char</code></td>
+    <td><code>uint32_t</code> <em>(Unicode codepoint)</em></td>
+    <td>Character</td>
+  </tr>
+  <tr>
+    <td><code>void</code></td>
+    <td><code>void</code></td>
+    <td>Void</td>
+  </tr>
+</table>
+</div>
+<h2 id="string-type">String Type</h2>
+<p><code>str</code> has no direct C primitive equivalent. It is represented as a C struct:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-keyword">typedef</span> <span class="tok-keyword">struct</span> {
+    <span class="tok-keyword">const</span> <span class="tok-type">char</span>* data;
+    size_t len;
+} str;</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>str</code></td>
+    <td><code>struct { const char* data; size_t len; }</code></td>
+    <td>String (struct)</td>
+  </tr>
+</table>
+</div>
+<h2 id="array-and-slice-types">Array &amp; Slice Types</h2>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>[N]T</code></td>
+    <td><code>T arr[N]</code></td>
+    <td>Fixed-size Array</td>
+  </tr>
+  <tr>
+    <td><code>[_]T</code></td>
+    <td><code>T arr[N]</code> <em>(size inferred by compiler)</em></td>
+    <td>Inferred-size Array</td>
+  </tr>
+  <tr>
+    <td><code>[]T</code></td>
+    <td><code>struct { T* ptr; size_t len; }</code></td>
+    <td>Slice (fat pointer struct)</td>
+  </tr>
+</table>
+</div>
+<p><code>[]T</code> has no direct C equivalent. Represented as:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-keyword">typedef</span> <span class="tok-keyword">struct</span> {
+    T* ptr;
+    size_t len;
+} slice_T;</code></pre>
+</div>
+<h2 id="pointer-type">Pointer Type</h2>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>^T</code></td>
+    <td><code>T*</code></td>
+    <td>Pointer</td>
+  </tr>
+</table>
+</div>
+<h2 id="optional-type">Optional Type</h2>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>?T</code></td>
+    <td><code>struct { T value; bool has_value; }</code></td>
+    <td>Optional (nullable wrapper)</td>
+  </tr>
+</table>
+</div>
+<p>No direct C equivalent. Represented as:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-keyword">typedef</span> <span class="tok-keyword">struct</span> {
+    T value;
+    bool has_value;
+} optional_T;</code></pre>
+</div>
+<h2 id="error-union-types">Error Union Types</h2>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>!T</code></td>
+    <td><code>struct { T value; int err; bool is_err; }</code></td>
+    <td>Inferred Error Union</td>
+  </tr>
+  <tr>
+    <td><code>E!T</code></td>
+    <td><code>struct { T value; E err; bool is_err; }</code></td>
+    <td>Explicit Error Union</td>
+  </tr>
+</table>
+</div>
+<p>No direct C equivalent for either. General pattern:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>c</span>
+  </div>
+  <pre><code class="language-c"><span class="tok-keyword">typedef</span> <span class="tok-keyword">struct</span> {
+    T value;
+    E err;      <span class="tok-comment">// error code/enum</span>
+    bool is_err;
+} result_T;</code></pre>
+</div>
+<h2 id="compound-types">Compound Types</h2>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>struct</code></td>
+    <td><code>struct</code></td>
+    <td>Compound</td>
+  </tr>
+  <tr>
+    <td><code>enum</code></td>
+    <td><code>enum</code> + <code>int</code></td>
+    <td>Compound</td>
+  </tr>
+  <tr>
+    <td><code>union</code></td>
+    <td><code>union</code></td>
+    <td>Compound</td>
+  </tr>
+</table>
+</div>
+<h2 id="heap-allocated-types">Heap-Allocated Types (<code>std.collections</code>)</h2>
+<p>Generic syntax uses <code>:T</code> and <code>:(K, V)</code>.</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th><strong>Tinoc Type</strong></th>
+    <th><strong>C Equivalent</strong></th>
+    <th><strong>Category</strong></th>
+  </tr>
+  <tr>
+    <td><code>hstr</code></td>
+    <td>None <em>(heap-managed <code>str</code>)</em></td>
+    <td>Heap String</td>
+  </tr>
+  <tr>
+    <td><code>vec:T</code></td>
+    <td>None <em>(dynamic array)</em></td>
+    <td>Heap Collection</td>
+  </tr>
+  <tr>
+    <td><code>map:(K, V)</code></td>
+    <td>None <em>(hash map)</em></td>
+    <td>Heap Collection</td>
+  </tr>
+  <tr>
+    <td><code>set:T</code></td>
+    <td>None <em>(hash set)</em></td>
+    <td>Heap Collection</td>
+  </tr>
+</table>
+</div>
+<p>These are library types with no single C equivalent. They require manual implementation (dynamic arrays, hash tables, etc.) in plain C.</p>
+<hr>
+<h1 id="struct">Struct</h1>
+<p><strong>Struct</strong> is a compound type and tells compiler how to handle data.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">struct &lt;identifier&gt; {
+	&lt;field&gt; &lt;type&gt;;
+	...
+	
+	fn &lt;identifier&gt;(self ^&lt;type-of-struct&gt;, ...) &lt;type&gt; {...}
+	static fn &lt;identifier&gt;() &lt;type&gt; {...}
+	static fn &lt;identifier&gt;(&lt;param&gt; &lt;type&gt;, ...) &lt;type&gt; {...}
+}</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">#import std.io;</span>
+
+<span class="tok-comment">// simple struct with method</span>
+struct Point {
+    x f32;
+    y f32;
+
+    fn translate(self ^Point, dx f32, dy f32) void {
+        self^.x += dx;
+        self^.y += dy;
+    }
+
+    fn length(self ^Point) f32 {
+        return sqrt(self^.x * self^.x + self^.y * self^.y);
+    }
+}
+
+<span class="tok-comment">// generic struct with method</span>
+struct Pair:T {
+    first T;
+    second T;
+
+    fn swap(self ^Pair:T) void {
+        var tmp T = self^.first;
+        self^.first = self^.second;
+        self^.second = tmp;
+    }
+}
+
+<span class="tok-comment">// multi-param generic struct</span>
+struct Map:(K, V) {
+    key K;
+    value V;
+}
+
+fn main() void {
+    var p Point = Point { .x = <span class="tok-number">1.0</span>, .y = <span class="tok-number">2.0</span> };
+    p.translate(<span class="tok-number">0.5</span>, <span class="tok-number">1.5</span>);
+
+    var pair Pair:i32 = Pair:i32 { .first = <span class="tok-number">10</span>, .second = <span class="tok-number">20</span> };
+    pair.swap();
+    io.println(<span class="tok-string">&#34;{any}&#34;</span>, p);
+}</code></pre>
+</div>
+<hr>
+<h1 id="enum">Enum</h1>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">#import std.{io, collection.*};</span>
+
+enum Direction {
+	North, East, South, West,
+}
+
+<span class="tok-comment">// enum with data and method</span>
+enum Shape {
+    Circle(f32),       <span class="tok-comment">// radius</span>
+    Rect(f32, f32),    <span class="tok-comment">// width, height</span>
+    Point,
+
+    fn area(self ^Shape) f32 {
+        <span class="tok-comment">// match on self variant</span>
+    }
+}
+
+enum Literal {
+	String(hstr),
+	Integer(usize),
+	<span class="tok-comment">// ...</span>
+	<span class="tok-comment">// also can make methods and static methods same as struct</span>
+}
+
+enum Something:T {
+	First,
+	Second(T),
+}
+
+fn main() void {
+	const direction1 = Direction.North;
+	io.println(<span class="tok-string">&#34;{any}&#34;</span>, direction1);
+	const literal1 = Literal.String(hstr.from(<span class="tok-string">&#34;String Literal&#34;</span>));
+	io.println(<span class="tok-string">&#34;{any}&#34;</span>, literal1); <span class="tok-comment">// prints: String(&#34;String Literal&#34;)</span>
+	
+	var s Shape = Shape.Circle(<span class="tok-number">5.0</span>);
+    var a f32 = s.area();
+}</code></pre>
+</div>
+<hr>
+<h1 id="union">Union</h1>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">Syntax:
+    union &lt;Name&gt; {
+        &lt;field_name&gt; &lt;type&gt;;
+        ...
+        fn &lt;method_name&gt;(self ^&lt;Name&gt;, &lt;param_name&gt; &lt;type&gt;, ...) &lt;return_type&gt; { ... }
+    }
+    --&gt; simple union with methods.
+
+    union &lt;Name&gt;:&lt;T&gt; {
+        &lt;field_name&gt; &lt;type&gt;;
+        ...
+        fn &lt;method_name&gt;(self ^&lt;Name&gt;:&lt;T&gt;, &lt;param_name&gt; &lt;type&gt;, ...) &lt;return_type&gt; { ... }
+    }
+    --&gt; generic union with methods.
+    union &lt;Name&gt;:(&lt;T&gt;, &lt;U&gt;, ...) {
+        &lt;field_name&gt; &lt;type&gt;;
+        ...
+    }
+    --&gt; multi-param generic union.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">// simple union with method</span>
+union Data {
+    as_int i32;
+    as_float f32;
+    as_bytes [<span class="tok-number">4</span>]u8;
+
+    fn zero(self ^Data) void {
+        self^.as_int = <span class="tok-number">0</span>;
+    }
+}
+
+<span class="tok-comment">// generic union with method</span>
+union Either:T {
+    value T;
+    raw u64;
+
+    fn clear(self ^Either:T) void {
+        self^.raw = <span class="tok-number">0</span>;
+    }
+}
+
+<span class="tok-comment">// multi-param generic union</span>
+union OneOf:(A, B) {
+    a A;
+    b B;
+}
+
+fn main() void {
+    var d Data;
+    d.as_int = <span class="tok-number">42</span>;
+    d.zero();
+    <span class="tok-comment">// d.as_float now reads the same memory as f32</span>
+}</code></pre>
+</div>
+<hr>
+<h1 id="switch">Switch</h1>
+<p><strong>Tinoc</strong> uses <code>switch</code> for matching on integer or enum values.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">Syntax:
+    switch &lt;expression&gt; {
+        &lt;value&gt; =&gt; { ... }
+        &lt;value&gt; =&gt; { ... }
+        _ =&gt; { ... }
+    }
+    --&gt; switch with default.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">enum TokenKind {
+    Int,
+    Ident,
+    Plus,
+    Eof,
+}
+
+fn main() void {
+    var tok TokenKind = TokenKind.Plus;
+
+    switch tok {
+        TokenKind.Int   =&gt; { <span class="tok-comment">/* handle int */</span> }
+        TokenKind.Ident =&gt; { <span class="tok-comment">/* handle ident */</span> }
+        TokenKind.Plus  =&gt; { <span class="tok-comment">/* handle plus */</span> }
+        _               =&gt; { <span class="tok-comment">/* default */</span> }
+    }
+
+    var x i32 = <span class="tok-number">2</span>;
+
+    switch x {
+        <span class="tok-number">1</span> =&gt; { <span class="tok-comment">/* one */</span> }
+        <span class="tok-number">2</span> =&gt; { <span class="tok-comment">/* two */</span> }
+        _ =&gt; { <span class="tok-comment">/* anything else */</span> }
+    }
+}</code></pre>
+</div>
+<p><strong><em>Notes:</em></strong></p>
+<ul>
+  <li>No parentheses around the expression.</li>
+  <li><code>_</code> is the default case.</li>
+  <li>No fallthrough; each arm is independent.</li>
+  <li>Braces are required per arm.</li>
+</ul>
+<hr>
+<h1 id="if-else">If / Else</h1>
+<p><strong>Tinoc</strong> uses <code>if</code> and <code>else</code> for conditional branching. No parentheses around the condition.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">    if &lt;condition&gt; { ... }
+    --&gt; simple if.
+
+    if &lt;condition&gt; { ... } else { ... }
+    --&gt; if / else.
+
+    if &lt;condition&gt; { ... } else if &lt;condition&gt; { ... } else { ... }
+    --&gt; if / else if chain.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+    var x i32 = <span class="tok-number">10</span>;
+
+    if x &gt; <span class="tok-number">0</span> {
+        <span class="tok-comment">// positive</span>
+    }
+
+    if x &gt; <span class="tok-number">0</span> {
+        <span class="tok-comment">// positive</span>
+    } else {
+        <span class="tok-comment">// zero or negative</span>
+    }
+
+    if x &gt; <span class="tok-number">0</span> {
+        <span class="tok-comment">// positive</span>
+    } else if x == <span class="tok-number">0</span> {
+        <span class="tok-comment">// zero</span>
+    } else {
+        <span class="tok-comment">// negative</span>
+    }
+}</code></pre>
+</div>
+<p><strong><em>Notes:</em></strong></p>
+<ul>
+  <li>No parentheses around the condition.</li>
+  <li>Braces are required; no single-line braceless form.</li>
+</ul>
+<hr>
+<h1 id="for">For</h1>
+<p><strong>Tinoc</strong> uses <code>for</code> with a range and a capture binding for iteration.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">Syntax:
+    for &lt;start&gt;..&lt;end&gt; |&lt;i&gt;| { ... }
+    --&gt; iterate over a range, capturing index.
+
+    for &lt;collection&gt; |&lt;item&gt;| { ... }
+    --&gt; iterate over a collection.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+    <span class="tok-comment">// range loop — 0 to 9</span>
+    for <span class="tok-number">0..10</span> |i| {
+        <span class="tok-comment">// i goes 0, 1, 2, ... 9</span>
+    }
+
+    <span class="tok-comment">// range with step is done via while if needed</span>
+    var i i32 = <span class="tok-number">0</span>;
+    while i &lt; <span class="tok-number">10</span> {
+        i += <span class="tok-number">2</span>;
+    }
+
+    <span class="tok-comment">// iterate over a slice</span>
+    var nums [<span class="tok-number">5</span>]i32 = [<span class="tok-number">1</span>, <span class="tok-number">2</span>, <span class="tok-number">3</span>, <span class="tok-number">4</span>, <span class="tok-number">5</span>];
+    for nums |n| {
+        <span class="tok-comment">// n is each element</span>
+    }
+}</code></pre>
+</div>
+<p><strong><em>Notes:</em></strong></p>
+<ul>
+  <li>No parentheses around the range or collection.</li>
+  <li><code>|i|</code> captures the loop variable, its not a closure, just binding syntax.</li>
+  <li>Range <code>0..10</code> is exclusive on the right, iterates 0 through 9.</li>
+  <li><code>break</code> exits the loop, <code>continue</code> skips to the next iteration.</li>
+</ul>
+<hr>
+<h1 id="while">While</h1>
+<p><strong>Tinoc</strong> uses <code>while</code> for condition-based loops. <code>while true</code> covers the infinite loop / do-while pattern.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">Syntax:
+    while &lt;condition&gt; { ... }
+    --&gt; loops while condition is true.
+
+    while true { ... }
+    --&gt; infinite loop.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">fn main() void {
+    var i i32 = <span class="tok-number">0</span>;
+
+    <span class="tok-comment">// normal while</span>
+    while i &lt; <span class="tok-number">10</span> {
+        i += <span class="tok-number">1</span>;
+    }
+
+    <span class="tok-comment">// infinite loop — break to exit</span>
+    while true {
+        if i == <span class="tok-number">20</span> {
+            break;
+        }
+        i += <span class="tok-number">1</span>;
+    }
+
+    <span class="tok-comment">// do-while equivalent — run body first, check at end</span>
+    while true {
+        i += <span class="tok-number">1</span>;
+        if i &gt;= <span class="tok-number">5</span> {
+            break;
+        }
+    }
+}</code></pre>
+</div>
+<p><strong><em>Notes:</em></strong></p>
+<ul>
+  <li>No parentheses around the condition.</li>
+  <li>Braces are required.</li>
+  <li><code>while true</code> replaces both infinite loops and do-while patterns from C.</li>
+  <li><code>break</code> exits the loop, <code>continue</code> skips to the next iteration.</li>
+</ul>
+<hr>
+<h1 id="modules">Modules</h1>
+<p><strong>Tinoc</strong> uses <code>#import</code> for module resolution. The <code>#</code> prefix marks module and preprocessor directives.</p>
+<p><strong><em>Syntax:</em></strong></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">Syntax:
+    <span class="tok-comment">#import &lt;module.path&gt;;</span>
+    --&gt; import a specific module.
+
+    <span class="tok-comment">#import &lt;module.path&gt;.*;</span>
+    --&gt; import all exports from a module.</code></pre>
+</div>
+<p><strong><em>Example:</em></strong></p>
+<p><code>util.tnc</code>:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc">pub fn add(a i32, b i32) i32 {
+	return a + b;
+}</code></pre>
+</div>
+<p><code>main.tnc</code>:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <span>tinoc</span>
+  </div>
+  <pre><code class="language-tinoc"><span class="tok-comment">#import std.io;</span>
+<span class="tok-comment">#import util;</span>
+<span class="tok-comment">#import std.collections.*;</span>
+
+fn main() void {
+    <span class="tok-comment">// std.io symbols accessed via module name</span>
+    io.println(<span class="tok-string">&#34;Hello, Tinoc&#34;</span>);
+
+    <span class="tok-comment">// std.collections.* symbols available directly</span>
+    var v vec:i32;
+    
+    const result = util.add(<span class="tok-number">125</span>, <span class="tok-number">2022</span>);
+    io.println(<span class="tok-string">&#34;{any}&#34;</span>,result);
+}</code></pre>
+</div>
+<p><strong><em>Notes:</em></strong></p>
+<ul>
+  <li><code>#import</code> replaces C <code>#include</code>; it uses semantic module resolution, not file text insertion.</li>
+  <li><code>.*</code> wildcard imports all public exports from a module into the current scope.</li>
+  <li><code>pub</code> keyword is used to declare a function/struct/enum/union/const etc. public for import.</li>
+  <li>Without <code>.*</code>, symbols are accessed via the last path segment (e.g. <code>std.io</code> → <code>io.println</code>).</li>
+</ul>
+<p>.tnc is extension and Tinoc is lang name.</p>
+</body>
+</html>

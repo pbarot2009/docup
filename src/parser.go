@@ -392,7 +392,7 @@ func (p *Parser) parseInlineRaw(ident string) (*InlineNode, error) {
 	}
 
 	if kind == InlineCode {
-		raw := p.lex.ReadTextRun()
+		raw := p.lex.ReadBalancedBraces()
 		if err := p.lex.ConsumeRBrace(); err != nil {
 			return nil, err
 		}

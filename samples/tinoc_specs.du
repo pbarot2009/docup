@@ -1,0 +1,1207 @@
+meta {
+    title: "Tinoc Specs",
+    author: "Tinoc",
+    version: "1.0.0"
+}
+
+h(1, id: "variable") { Variable }
+
+p { b{Variable} can be mutated. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+var <identifier> <type>; // Decl only with explicit type.
+var <identifier> <type> = <expression>; // Decl + Init with Explicit type
+var <identifier> = <expression>; // Decl + Init with Infered way
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+	var name str = "Lucifer";
+	name = "Julius"
+	var number = 101; // infer as i32
+	number += 10;
+	var isAdmin = false; // infer as bool
+	isAdmin = true; 
+}
+!}
+
+hr {}
+
+h(1, id: "constant") { Constant }
+
+p { b{Constant} can not be mutated. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+const <identifier> <type>; // Decl only with explicit type.
+const <identifier> <type> = <expression>; // Decl + Init with Explicit type
+const <identifier> = <expression>; // Decl + Init with Infered way
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+	const lang str = "Tinoc";
+	const codename = "C^";
+	// lang = "Tinoc Is Not C" 
+	// Won't work, Compile Error.
+}
+!}
+
+hr {}
+
+h(1, id: "integers") { Integers }
+
+p { b{i{Example of Integer Literal:}} }
+
+codeblock(lang: "tinoc") {!
+const decimal_int = 98222;
+const hex_int = 0xff; 
+const another_hex_int = 0xFF;
+const octal_int = 0o755;
+const binary_int = 0b11110000; 
+
+// underscores may be placed between two digits as a visual separator 
+const one_billion = 1_000_000_000; 
+const binary_mask = 0b1_1111_1111; 
+const permissions = 0o7_5_5;
+const big_address = 0xFF80_0000_0000_0000;
+!}
+
+p { Compiler will infer the size of each integer literal, mostly default to code{i32} but if literal's size if more than code{i32} so it will go for code{i64}..code{i128}. }
+
+p { For b{not comptime} known you must explit add type: }
+
+codeblock(lang: "tinoc") {!
+fn divide(a i32, b i32) i32 {
+    return a / b;
+}
+!}
+
+hr {}
+
+h(1, id: "floats") { Floats }
+
+p { b{i{Float Literals:}} }
+
+codeblock(lang: "tinoc") {!
+const floating_point = 123.0E+77; 
+const another_float = 123.0;
+const yet_another = 123.0e+77; 
+const hex_floating_point = 0x103.70p-5; 
+const another_hex_float = 0x103.70; 
+const yet_another_hex_float = 0x103.70P-5; 
+
+// underscores may be placed between two digits as a visual separator 
+const lightspeed = 299_792_458.000_000; 
+const nanosecond = 0.000_000_001; 
+const more_hex = 0x1234_5678.9ABC_CDEFp-10;
+!}
+
+p { b{Tinoc} does not has any special syntax for i{NaN}, i{Infinity (∞)}, i{Negetive Infinity (-∞)}. Use code{std.math} library for these. }
+
+codeblock(lang: "tinoc") {!
+#import std.math;
+
+const inf = math.inf();
+const negative_inf = - math.inf();
+const nan = math.nan();
+!}
+
+hr {}
+
+h(1, id: "operators") { Operators }
+
+p { See this table to know about what's operator is doing. }
+
+table {
+    row(header: true) {
+        cell { b{Name} }
+        cell { b{Syntax} }
+        cell { b{Types} }
+        cell { b{Notes} }
+        cell { b{Example} }
+    }
+    row {
+        cell { Addition }
+        cell { code{a + b}, code{a += b} }
+        cell { Integers, Floats }
+        cell { Can cause overflow }
+        cell { code{2 + 5 == 7} }
+    }
+    row {
+        cell { Wrapping Addition }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Saturating Addition }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Subtraction }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Wrapping Subtraction }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Saturating Subtraction }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Negation }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Wrapping Negation }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Multiplication }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Wrapping Multiplication }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Saturating Multiplication }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Division }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Remainder Division }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bit Shift Left }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Saturating Bit Shift Left }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bit Shift Right }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bitwise And }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bitwise Or }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bitwise Xor }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Bitwise Not }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Defaulting Optional Unwrap }
+        cell { code{a orelse b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Optional Unwrap }
+        cell { code{a?} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Defaulting Error Unwrap }
+        cell { code{a catch b}, code{a catch |err| b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Logical And }
+        cell { code{a and b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Logical Or }
+        cell { code{!a} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Equality }
+        cell { code{a == b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Null Check }
+        cell { code{a == null} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Inequality }
+        cell { code{a != b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Non-Null Check }
+        cell { code{a != null} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Greater Than }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Greater or Equal }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Less Than }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Lesser or Equal }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Array Multiplication }
+        cell {}
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Pointer Dereference }
+        cell { code{a^} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Address Of }
+        cell { code{&a} }
+        cell {}
+        cell {}
+        cell {}
+    }
+    row {
+        cell { Error Set Merge }
+        cell { code{a || b} }
+        cell {}
+        cell {}
+        cell {}
+    }
+}
+
+p { b{i{Precedence:}} }
+
+codeblock(lang: "tinoc") {!
+x() x[] x.y x^ x? a!b x{} !x -x -%x ~x &x ?x * / % ** *% *| || + - ++ +% -% +| -| << >> <<| & ^ | orelse catch == != < > <= >= and or = *= *%= *|= /= %= += +%= +|= -= -%= -|= <<= <<|= >>= &= ^= |=
+!}
+
+hr {}
+
+h(1, id: "function") { Function }
+
+p { b{Function} is used to make reusable block of code. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+fn <identifier>() <type> {...}
+fn <identifier>(<param> <type>, ...) <type> {...}
+fn <identifier>:T() <type> {...}
+fn <identifier>:T(<param> <type>, ...) <type> {...}
+fn <identifier>:(T, ...)() <type> {...}
+fn <identifier>:(T, ...)(<param> <type>, ...) <type> {...}
+
+// Call
+
+<identifier>();
+<identifier>(value, ...);
+<identifier>:T();
+// same for other 
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+#import std.io;
+
+fn add(a i8, b i8) i8 {
+	return a + b;
+}
+
+fn greet() void {
+	io.println("Hi");
+}
+
+fn Identity:T(val T) T {
+	return val;
+}
+
+fn main() void {
+	const result = add(10, 25);
+	greet();
+	io.println("result = {d}",result);
+	io.println("{any}", Identify:str("Tinoc"));
+}
+!}
+
+hr {}
+
+h(1, id: "types") { Types }
+
+p { b{Tinoc} has a rich type system covering primitives, compounds, pointer/optional/error types, and heap-allocated collections. }
+
+h(2, id: "primitive-types") { Primitive Types }
+
+h(3, id: "integer-types") { Integer Types }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{u8} }
+        cell { code{uint8_t} }
+        cell { Unsigned Integer }
+    }
+    row {
+        cell { code{u16} }
+        cell { code{uint16_t} }
+        cell { Unsigned Integer }
+    }
+    row {
+        cell { code{u32} }
+        cell { code{uint32_t} }
+        cell { Unsigned Integer }
+    }
+    row {
+        cell { code{u64} }
+        cell { code{uint64_t} }
+        cell { Unsigned Integer }
+    }
+    row {
+        cell { code{u128} }
+        cell { code{__uint128_t} i{(GCC/Clang only)} }
+        cell { Unsigned Integer }
+    }
+    row {
+        cell { code{usize} }
+        cell { code{size_t} }
+        cell { Unsigned Integer (platform-width) }
+    }
+    row {
+        cell { code{i8} }
+        cell { code{int8_t} }
+        cell { Signed Integer }
+    }
+    row {
+        cell { code{i16} }
+        cell { code{int16_t} }
+        cell { Signed Integer }
+    }
+    row {
+        cell { code{i32} }
+        cell { code{int32_t} }
+        cell { Signed Integer }
+    }
+    row {
+        cell { code{i64} }
+        cell { code{int64_t} }
+        cell { Signed Integer }
+    }
+    row {
+        cell { code{i128} }
+        cell { code{__int128_t} i{(GCC/Clang only)} }
+        cell { Signed Integer }
+    }
+    row {
+        cell { code{isize} }
+        cell { code{ptrdiff_t} }
+        cell { Signed Integer (platform-width) }
+    }
+}
+
+h(3, id: "floating-point-types") { Floating-Point Types }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{f32} }
+        cell { code{float} }
+        cell { Float }
+    }
+    row {
+        cell { code{f64} }
+        cell { code{double} }
+        cell { Float }
+    }
+    row {
+        cell { code{f128} }
+        cell { code{__float128} i{(GCC/Clang only)} }
+        cell { Float }
+    }
+}
+
+h(3, id: "core-primitives") { Core Primitives }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{bool} }
+        cell { code{_Bool} / code{stdbool.h bool} }
+        cell { Boolean }
+    }
+    row {
+        cell { code{char} }
+        cell { code{uint32_t} i{(Unicode codepoint)} }
+        cell { Character }
+    }
+    row {
+        cell { code{void} }
+        cell { code{void} }
+        cell { Void }
+    }
+}
+
+h(2, id: "string-type") { String Type }
+
+p { code{str} has no direct C primitive equivalent. It is represented as a C struct: }
+
+codeblock(lang: "c") {!
+typedef struct {
+    const char* data;
+    size_t len;
+} str;
+!}
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{str} }
+        cell { code{struct { const char* data; size_t len; }} }
+        cell { String (struct) }
+    }
+}
+
+h(2, id: "array-and-slice-types") { Array & Slice Types }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{[N]T} }
+        cell { code{T arr[N]} }
+        cell { Fixed-size Array }
+    }
+    row {
+        cell { code{[_]T} }
+        cell { code{T arr[N]} i{(size inferred by compiler)} }
+        cell { Inferred-size Array }
+    }
+    row {
+        cell { code{[]T} }
+        cell { code{struct { T* ptr; size_t len; }} }
+        cell { Slice (fat pointer struct) }
+    }
+}
+
+p { code{[]T} has no direct C equivalent. Represented as: }
+
+codeblock(lang: "c") {!
+typedef struct {
+    T* ptr;
+    size_t len;
+} slice_T;
+!}
+
+h(2, id: "pointer-type") { Pointer Type }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{^T} }
+        cell { code{T*} }
+        cell { Pointer }
+    }
+}
+
+h(2, id: "optional-type") { Optional Type }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{?T} }
+        cell { code{struct { T value; bool has_value; }} }
+        cell { Optional (nullable wrapper) }
+    }
+}
+
+p { No direct C equivalent. Represented as: }
+
+codeblock(lang: "c") {!
+typedef struct {
+    T value;
+    bool has_value;
+} optional_T;
+!}
+
+h(2, id: "error-union-types") { Error Union Types }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{!T} }
+        cell { code{struct { T value; int err; bool is_err; }} }
+        cell { Inferred Error Union }
+    }
+    row {
+        cell { code{E!T} }
+        cell { code{struct { T value; E err; bool is_err; }} }
+        cell { Explicit Error Union }
+    }
+}
+
+p { No direct C equivalent for either. General pattern: }
+
+codeblock(lang: "c") {!
+typedef struct {
+    T value;
+    E err;      // error code/enum
+    bool is_err;
+} result_T;
+!}
+
+h(2, id: "compound-types") { Compound Types }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{struct} }
+        cell { code{struct} }
+        cell { Compound }
+    }
+    row {
+        cell { code{enum} }
+        cell { code{enum} + code{int} }
+        cell { Compound }
+    }
+    row {
+        cell { code{union} }
+        cell { code{union} }
+        cell { Compound }
+    }
+}
+
+h(2, id: "heap-allocated-types") { Heap-Allocated Types (code{std.collections}) }
+
+p { Generic syntax uses code{:T} and code{:(K, V)}. }
+
+table {
+    row(header: true) {
+        cell { b{Tinoc Type} }
+        cell { b{C Equivalent} }
+        cell { b{Category} }
+    }
+    row {
+        cell { code{hstr} }
+        cell { None i{(heap-managed code{str})} }
+        cell { Heap String }
+    }
+    row {
+        cell { code{vec:T} }
+        cell { None i{(dynamic array)} }
+        cell { Heap Collection }
+    }
+    row {
+        cell { code{map:(K, V)} }
+        cell { None i{(hash map)} }
+        cell { Heap Collection }
+    }
+    row {
+        cell { code{set:T} }
+        cell { None i{(hash set)} }
+        cell { Heap Collection }
+    }
+}
+
+p { These are library types with no single C equivalent. They require manual implementation (dynamic arrays, hash tables, etc.) in plain C. }
+
+hr {}
+
+h(1, id: "struct") { Struct }
+
+p { b{Struct} is a compound type and tells compiler how to handle data. }
+
+codeblock(lang: "tinoc") {!
+struct <identifier> {
+	<field> <type>;
+	...
+	
+	fn <identifier>(self ^<type-of-struct>, ...) <type> {...}
+	static fn <identifier>() <type> {...}
+	static fn <identifier>(<param> <type>, ...) <type> {...}
+}
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+#import std.io;
+
+// simple struct with method
+struct Point {
+    x f32;
+    y f32;
+
+    fn translate(self ^Point, dx f32, dy f32) void {
+        self^.x += dx;
+        self^.y += dy;
+    }
+
+    fn length(self ^Point) f32 {
+        return sqrt(self^.x * self^.x + self^.y * self^.y);
+    }
+}
+
+// generic struct with method
+struct Pair:T {
+    first T;
+    second T;
+
+    fn swap(self ^Pair:T) void {
+        var tmp T = self^.first;
+        self^.first = self^.second;
+        self^.second = tmp;
+    }
+}
+
+// multi-param generic struct
+struct Map:(K, V) {
+    key K;
+    value V;
+}
+
+fn main() void {
+    var p Point = Point { .x = 1.0, .y = 2.0 };
+    p.translate(0.5, 1.5);
+
+    var pair Pair:i32 = Pair:i32 { .first = 10, .second = 20 };
+    pair.swap();
+    io.println("{any}", p);
+}
+!}
+
+hr {}
+
+h(1, id: "enum") { Enum }
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+#import std.{io, collection.*};
+
+enum Direction {
+	North, East, South, West,
+}
+
+// enum with data and method
+enum Shape {
+    Circle(f32),       // radius
+    Rect(f32, f32),    // width, height
+    Point,
+
+    fn area(self ^Shape) f32 {
+        // match on self variant
+    }
+}
+
+enum Literal {
+	String(hstr),
+	Integer(usize),
+	// ...
+	// also can make methods and static methods same as struct
+}
+
+enum Something:T {
+	First,
+	Second(T),
+}
+
+fn main() void {
+	const direction1 = Direction.North;
+	io.println("{any}", direction1);
+	const literal1 = Literal.String(hstr.from("String Literal"));
+	io.println("{any}", literal1); // prints: String("String Literal")
+	
+	var s Shape = Shape.Circle(5.0);
+    var a f32 = s.area();
+}
+!}
+
+hr {}
+
+h(1, id: "union") { Union }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+Syntax:
+    union <Name> {
+        <field_name> <type>;
+        ...
+        fn <method_name>(self ^<Name>, <param_name> <type>, ...) <return_type> { ... }
+    }
+    --> simple union with methods.
+
+    union <Name>:<T> {
+        <field_name> <type>;
+        ...
+        fn <method_name>(self ^<Name>:<T>, <param_name> <type>, ...) <return_type> { ... }
+    }
+    --> generic union with methods.
+    union <Name>:(<T>, <U>, ...) {
+        <field_name> <type>;
+        ...
+    }
+    --> multi-param generic union.
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+// simple union with method
+union Data {
+    as_int i32;
+    as_float f32;
+    as_bytes [4]u8;
+
+    fn zero(self ^Data) void {
+        self^.as_int = 0;
+    }
+}
+
+// generic union with method
+union Either:T {
+    value T;
+    raw u64;
+
+    fn clear(self ^Either:T) void {
+        self^.raw = 0;
+    }
+}
+
+// multi-param generic union
+union OneOf:(A, B) {
+    a A;
+    b B;
+}
+
+fn main() void {
+    var d Data;
+    d.as_int = 42;
+    d.zero();
+    // d.as_float now reads the same memory as f32
+}
+!}
+
+hr {}
+
+h(1, id: "switch") { Switch }
+
+p { b{Tinoc} uses code{switch} for matching on integer or enum values. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+Syntax:
+    switch <expression> {
+        <value> => { ... }
+        <value> => { ... }
+        _ => { ... }
+    }
+    --> switch with default.
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+enum TokenKind {
+    Int,
+    Ident,
+    Plus,
+    Eof,
+}
+
+fn main() void {
+    var tok TokenKind = TokenKind.Plus;
+
+    switch tok {
+        TokenKind.Int   => { /* handle int */ }
+        TokenKind.Ident => { /* handle ident */ }
+        TokenKind.Plus  => { /* handle plus */ }
+        _               => { /* default */ }
+    }
+
+    var x i32 = 2;
+
+    switch x {
+        1 => { /* one */ }
+        2 => { /* two */ }
+        _ => { /* anything else */ }
+    }
+}
+!}
+
+p { b{i{Notes:}} }
+
+list {
+    item { No parentheses around the expression. }
+    item { code{_} is the default case. }
+    item { No fallthrough; each arm is independent. }
+    item { Braces are required per arm. }
+}
+
+hr {}
+
+h(1, id: "if-else") { If / Else }
+
+p { b{Tinoc} uses code{if} and code{else} for conditional branching. No parentheses around the condition. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+    if <condition> { ... }
+    --> simple if.
+
+    if <condition> { ... } else { ... }
+    --> if / else.
+
+    if <condition> { ... } else if <condition> { ... } else { ... }
+    --> if / else if chain.
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+    var x i32 = 10;
+
+    if x > 0 {
+        // positive
+    }
+
+    if x > 0 {
+        // positive
+    } else {
+        // zero or negative
+    }
+
+    if x > 0 {
+        // positive
+    } else if x == 0 {
+        // zero
+    } else {
+        // negative
+    }
+}
+!}
+
+p { b{i{Notes:}} }
+
+list {
+    item { No parentheses around the condition. }
+    item { Braces are required; no single-line braceless form. }
+}
+
+hr {}
+
+h(1, id: "for") { For }
+
+p { b{Tinoc} uses code{for} with a range and a capture binding for iteration. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+Syntax:
+    for <start>..<end> |<i>| { ... }
+    --> iterate over a range, capturing index.
+
+    for <collection> |<item>| { ... }
+    --> iterate over a collection.
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+    // range loop — 0 to 9
+    for 0..10 |i| {
+        // i goes 0, 1, 2, ... 9
+    }
+
+    // range with step is done via while if needed
+    var i i32 = 0;
+    while i < 10 {
+        i += 2;
+    }
+
+    // iterate over a slice
+    var nums [5]i32 = [1, 2, 3, 4, 5];
+    for nums |n| {
+        // n is each element
+    }
+}
+!}
+
+p { b{i{Notes:}} }
+
+list {
+    item { No parentheses around the range or collection. }
+    item { code{|i|} captures the loop variable, its not a closure, just binding syntax. }
+    item { Range code{0..10} is exclusive on the right, iterates 0 through 9. }
+    item { code{break} exits the loop, code{continue} skips to the next iteration. }
+}
+
+hr {}
+
+h(1, id: "while") { While }
+
+p { b{Tinoc} uses code{while} for condition-based loops. code{while true} covers the infinite loop / do-while pattern. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+Syntax:
+    while <condition> { ... }
+    --> loops while condition is true.
+
+    while true { ... }
+    --> infinite loop.
+!}
+
+p { b{i{Example:}} }
+
+codeblock(lang: "tinoc") {!
+fn main() void {
+    var i i32 = 0;
+
+    // normal while
+    while i < 10 {
+        i += 1;
+    }
+
+    // infinite loop — break to exit
+    while true {
+        if i == 20 {
+            break;
+        }
+        i += 1;
+    }
+
+    // do-while equivalent — run body first, check at end
+    while true {
+        i += 1;
+        if i >= 5 {
+            break;
+        }
+    }
+}
+!}
+
+p { b{i{Notes:}} }
+
+list {
+    item { No parentheses around the condition. }
+    item { Braces are required. }
+    item { code{while true} replaces both infinite loops and do-while patterns from C. }
+    item { code{break} exits the loop, code{continue} skips to the next iteration. }
+}
+
+hr {}
+
+h(1, id: "modules") { Modules }
+
+p { b{Tinoc} uses code{#import} for module resolution. The code{#} prefix marks module and preprocessor directives. }
+
+p { b{i{Syntax:}} }
+
+codeblock(lang: "tinoc") {!
+Syntax:
+    #import <module.path>;
+    --> import a specific module.
+
+    #import <module.path>.*;
+    --> import all exports from a module.
+!}
+
+p { b{i{Example:}} }
+
+p { code{util.tnc}: }
+
+codeblock(lang: "tinoc") {!
+pub fn add(a i32, b i32) i32 {
+	return a + b;
+}
+!}
+
+p { code{main.tnc}: }
+
+codeblock(lang: "tinoc") {!
+#import std.io;
+#import util;
+#import std.collections.*;
+
+fn main() void {
+    // std.io symbols accessed via module name
+    io.println("Hello, Tinoc");
+
+    // std.collections.* symbols available directly
+    var v vec:i32;
+    
+    const result = util.add(125, 2022);
+    io.println("{any}",result);
+}
+!}
+
+p { b{i{Notes:}} }
+
+list {
+    item { code{#import} replaces C code{#include}; it uses semantic module resolution, not file text insertion. }
+    item { code{.*} wildcard imports all public exports from a module into the current scope. }
+    item { code{pub} keyword is used to declare a function/struct/enum/union/const etc. public for import. }
+    item { Without code{.*}, symbols are accessed via the last path segment (e.g. code{std.io} → code{io.println}). }
+}
+
+p { .tnc is extension and Tinoc is lang name. }

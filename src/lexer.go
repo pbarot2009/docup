@@ -356,6 +356,33 @@ func (l *Lexer) ConsumeRawByte(expected byte, what string) error {
 	return nil
 }
 
+// ReadBalancedBraces reads raw content up to the '}' that balances the
+// '{' already consumed by the caller (depth starts at 1), tracking
+// nesting depth so inner "{"/"}" pairs — e.g. a struct definition inside
+// an inline code{...} span — don't prematurely end the read. The closing
+// '}' itself is NOT consumed; the caller does that afterward. Strings are
+// not given special treatment here: this is for raw code snippets, where
+// brace characters inside string literals are rare and, if present,
+// still balance correctly in the overwhelmingly common case of
+// brace-structured code (C-like blocks, JSON, etc).
+func (l *Lexer) ReadBalancedBraces() string {
+	var buf bytes.Buffer
+	depth := 1
+	for l.pos < len(l.src) {
+		c := l.peek()
+		if c == '{' {
+			depth++
+		} else if c == '}' {
+			depth--
+			if depth == 0 {
+				break
+			}
+		}
+		buf.WriteByte(l.advance())
+	}
+	return buf.String()
+}
+
 // ReadTextRun reads plain text content inside a p/h block up to (but not
 // including) the next inline-start marker (b{, i{, code{, strike{,
 // link()) or a closing }.

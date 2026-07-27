@@ -20,11 +20,15 @@ body {
   color: #24292f;
   background: #ffffff;
 }
+* {
+  box-sizing: border-box;
+}
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.25;
   margin-top: 1.6em;
   margin-bottom: 0.6em;
+  overflow-wrap: break-word;
 }
 h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
 h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
@@ -32,10 +36,17 @@ h3 { font-size: 1.25em; }
 h4 { font-size: 1.1em; }
 h5 { font-size: 1em; }
 h6 { font-size: 0.9em; color: #57606a; }
-p { margin: 0.8em 0; }
+p {
+  margin: 0.8em 0;
+  overflow-wrap: break-word;
+}
 strong { font-weight: 600; }
 em { font-style: italic; }
-a { color: #0969da; text-decoration: none; }
+a {
+  color: #0969da;
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
 a:hover { text-decoration: underline; }
 code {
   background: #f6f8fa;
@@ -43,6 +54,7 @@ code {
   border-radius: 4px;
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
   font-size: 0.9em;
+  overflow-wrap: break-word;
 }
 hr {
   border: none;
@@ -53,7 +65,10 @@ ul, ol {
   margin: 0.8em 0;
   padding-left: 1.6em;
 }
-li { margin: 0.25em 0; }
+li {
+  margin: 0.25em 0;
+  overflow-wrap: break-word;
+}
 li.task-item { list-style: none; margin-left: -1.6em; }
 li.task-item input[type="checkbox"] {
   margin-right: 0.5em;
@@ -63,6 +78,7 @@ blockquote {
   padding: 0 1em;
   color: #57606a;
   border-left: 0.25em solid #d0d7de;
+  overflow-wrap: break-word;
 }
 blockquote blockquote {
   margin: 0.6em 0;
@@ -72,19 +88,28 @@ img {
   height: auto;
   border-radius: 4px;
 }
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1em 0;
+  -webkit-overflow-scrolling: touch;
+}
 table {
   border-collapse: collapse;
   width: 100%;
-  margin: 1em 0;
+  min-width: max-content;
+  margin: 0;
 }
 th, td {
   border: 1px solid #d0d7de;
   padding: 0.5em 0.9em;
   text-align: left;
+  overflow-wrap: break-word;
 }
 th {
   background: #f6f8fa;
   font-weight: 600;
+  white-space: nowrap;
 }
 s { color: #57606a; }
 .codeblock {
@@ -96,12 +121,15 @@ s { color: #57606a; }
 .codeblock-header {
   display: flex;
   justify-content: space-between;
+  gap: 0.75em;
   padding: 0.4em 0.9em;
   background: #f6f8fa;
   border-bottom: 1px solid #eaecef;
   font-size: 0.8em;
   color: #57606a;
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 .codeblock pre {
   margin: 0;
@@ -114,12 +142,25 @@ s { color: #57606a; }
   padding: 0;
   font-size: 0.9em;
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-wrap: normal;
+  white-space: pre;
 }
 .tok-keyword { color: #cf222e; font-weight: 600; }
 .tok-type    { color: #953800; }
 .tok-string  { color: #0a3069; }
 .tok-comment { color: #6e7781; font-style: italic; }
 .tok-number  { color: #0550ae; }
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 1rem 3rem;
+    font-size: 15px;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.35em; }
+  h3 { font-size: 1.15em; }
+  th, td { padding: 0.4em 0.6em; }
+}
 `
 
 // googleFontsLink loads Google Sans Flex (body text) and Google Sans Code
@@ -291,6 +332,7 @@ func renderItem(w *strings.Builder, item *ItemNode) {
 }
 
 func renderTable(w *strings.Builder, t *TableNode) {
+	w.WriteString(`<div class="table-wrap">` + "\n")
 	w.WriteString("<table>\n")
 	for _, row := range t.Rows {
 		w.WriteString("  <tr>\n")
@@ -306,6 +348,7 @@ func renderTable(w *strings.Builder, t *TableNode) {
 		w.WriteString("  </tr>\n")
 	}
 	w.WriteString("</table>\n")
+	w.WriteString("</div>\n")
 }
 
 func renderInlines(w *strings.Builder, children []Node) {
