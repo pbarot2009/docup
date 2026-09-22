@@ -1,4 +1,4 @@
-h(2, id: "footnotes") { Footnotes }
+h(2, id: "footnotes") { 14. Footnotes }
 
 p { A definition is a top-level block. A reference is an inline. }
 
@@ -10,7 +10,7 @@ footnote(id: "required-title") { Title is required when meta is present. }
 
 p { The definition needs a non-empty code{id} attribute. The body is prose. }
 
-p { The reference is code{fn(id)} or code{fn("id")}. The identifier form allows letters, digits, underscore, and hyphen. }
+p { The reference is code{fn(id)} or a quoted string inside the parentheses. The identifier form allows letters, digits, underscore, and hyphen. }
 
 p { Checks: }
 
@@ -20,6 +20,6 @@ list {
   item { Definitions with no references still appear in the footnotes section. }
 }
 
-p { Numbering follows first-reference order in the document after includes are merged. Output ids are code{fn-<id>} and code{fnref-<id>}. }
+p { Numbering follows first-reference order in the document after includes are merged. Definitions that were never referenced are appended after that list. Output ids are code{fn-} plus the id, and code{fnref-} plus the id. }
 
-p { This page uses three definitions. The first two are referenced from earlier sections.fn(include-meta) }
+p { This page uses four definitions. Earlier sections reference the first three.fn(include-meta) }

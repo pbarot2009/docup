@@ -1,4 +1,4 @@
-h(2, id: "lists") { Lists }
+h(2, id: "lists") { 7. Lists }
 
 p { A list contains code{item} and code{task} children only. Zero items is a semantic error. }
 
@@ -16,7 +16,7 @@ list(ordered: true) {
 
 p { code{ordered: true} emits code{<ol>}. Anything else, including omitting the attribute, emits code{<ul>}. }
 
-h(3, id: "tasks") { Tasks }
+h(3, id: "tasks") { 7.1 Tasks }
 
 codeblock(lang: "text") {!
 list {
@@ -27,14 +27,12 @@ list {
 
 p { code{done} is a boolean. Missing code{done} is treated as false. The checkbox is rendered disabled. }
 
-p { Live example: }
-
 list {
   task(done: true) { Write the grammar down }
   task(done: false) { Add a new block type }
 }
 
-h(3, id: "nested-lists") { Nested lists }
+h(3, id: "nested-lists") { 7.2 Nested lists }
 
 p { A list may appear inside an item. It must be the last child of that item.fn(item-nest) }
 
@@ -50,8 +48,6 @@ list {
   item { Sibling of the parent }
 }
 !}
-
-p { Live example: }
 
 list {
   item {
@@ -71,7 +67,7 @@ list(ordered: true) {
   item { Generate }
 }
 
-h(2, id: "quotes") { Quotes }
+h(2, id: "quotes") { 8. Quotes }
 
 p { A block quote. Body is prose and, optionally, one nested quote at the end. }
 
@@ -83,8 +79,6 @@ quote {
   }
 }
 !}
-
-p { Live example: }
 
 quote {
   A quote is a block, not an inline. Consecutive text inside it becomes one paragraph in HTML.

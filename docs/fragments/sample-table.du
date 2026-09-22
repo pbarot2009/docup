@@ -9,7 +9,7 @@ table {
   row {
     cell { Ident }
     cell { letters, digits, underscore }
-    cell { block names, attribute keys, code{true}/code{false} }
+    cell { block names, attribute keys, code{true} / code{false} }
   }
   row {
     cell { String }

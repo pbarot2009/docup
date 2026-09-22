@@ -1,4 +1,4 @@
-h(2, id: "includes") { Includes }
+h(2, id: "includes") { 15. Includes }
 
 p { Splice another .du file into the current document. Two spellings: }
 
@@ -21,8 +21,8 @@ list(ordered: true) {
   item { Pop the child from the stack so the same file may be included from a different branch. }
 }
 
-p { An empty path is a semantic error if the statement survives until analysis. In practice a missing file fails earlier. }
+p { An empty path is a semantic error if the statement survives until analysis. A missing file fails earlier, during resolution. }
 
 p { Watch mode adds every successfully resolved include to the watch set. }
 
-p { This book is one HTML file built from several .du files. index.du holds meta, the title, the toc, the includes, and the footnote definitions. }
+p { This document is one HTML file built from several .du files. index.du holds meta, the banner, the title, the toc, the includes, and the footnote definitions. }

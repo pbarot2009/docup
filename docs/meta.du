@@ -1,4 +1,4 @@
-h(2, id: "meta") { meta }
+h(2, id: "meta") { 4. meta }
 
 p { Optional. At most one per document. If present it must contain title.fn(required-title) }
 
@@ -30,11 +30,11 @@ table {
   }
   row {
     cell { lang }
-    cell { code{lang} attribute on code{<html>}. Default code{en}. }
+    cell { code{lang} on code{<html>}. Default code{en}. }
   }
   row {
     cell { theme }
-    cell { code{data-theme} on code{<html>}. Use code{light} or code{dark} to lock the palette. If omitted, CSS follows prefers-color-scheme. }
+    cell { code{data-theme} on code{<html>}. Use code{light} or code{dark} to lock the palette. }
   }
   row {
     cell { author, version }
@@ -54,11 +54,11 @@ table {
   }
   row {
     cell { image }
-    cell { og:image and twitter:image. }
+    cell { og:image and twitter:image. This is not the content image block. }
   }
   row {
     cell { stylesheet }
-    cell { Extra code{<link rel="stylesheet">} in head. }
+    cell { Extra code{<link rel="stylesheet">} in head. Separate from code{--style}. }
   }
 }
 

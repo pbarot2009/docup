@@ -1,4 +1,4 @@
-h(2, id: "tables") { Tables }
+h(2, id: "tables") { 11. Tables }
 
 p { A table is rows. A row is cells. A cell body is prose. }
 
@@ -31,14 +31,14 @@ p { code{row(header: true)} emits code{<th>} instead of code{<td>}. Table-level 
 
 include "fragments/sample-table.du"
 
-h(2, id: "images") { Images }
+h(2, id: "images") { 12. Images }
 
 p { No body. First argument is the source URL or path. Optional code{alt} is a string. Other named attributes after that are parsed and ignored. }
 
 codeblock(lang: "text") {!
-image("images/logo.svg", alt: "DocUP")
+image("images/banner.png", alt: "DocUP")
 !}
 
-p { An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input. }
+p { An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input. Relative paths in the compiled HTML are resolved by the browser against the HTML file. }
 
-image("images/logo.svg", alt: "DocUP")
+p { The banner at the top of this page is that block. }

@@ -6,10 +6,12 @@
   <title>DocUP Documentation</title>
   <meta name="author" content="DocUP">
   <meta name="version" content="0.2.0">
-  <meta name="description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
-  <meta property="og:description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
-  <meta name="twitter:description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
+  <meta name="description" content="Compiler and language reference for DocUP.">
+  <meta property="og:description" content="Compiler and language reference for DocUP.">
+  <meta name="twitter:description" content="Compiler and language reference for DocUP.">
   <meta name="keywords" content="docup, markup, html, compiler, .du">
+  <meta property="og:image" content="images/banner.png">
+  <meta name="twitter:image" content="images/banner.png">
   <meta property="og:title" content="DocUP Documentation">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
@@ -396,64 +398,71 @@ s { color: var(--text-muted); }
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 </head>
 <body>
+<img src="images/banner.png" alt="DocUP">
 <h1 id="docup">DocUP</h1>
-<p>DocUP is a compiler. It reads a <strong>.du</strong> file and writes a single HTML5 document. The format is block-based: every top-level construct is a named block with optional attributes and a body. This book is written in that format.</p>
-<p>Compiler version: <code>0.2.0</code>.</p>
+<p>DocUP is a compiler. It reads a <strong>.du</strong> file and writes a single HTML5 document. The format is block-based: every top-level construct is a named block with optional attributes and a body. This document is written in that format.</p>
+<p>Compiler version <code>0.2.0</code>.</p>
 <nav class="toc" aria-label="Table of contents">
   <div class="toc-title">Table of Contents</div>
   <ul>
     <li class="toc-level-1"><a href="#docup">DocUP</a></li>
-    <li class="toc-level-2"><a href="#what-it-does">What it does</a></li>
-    <li class="toc-level-3"><a href="#pipeline">Pipeline</a></li>
-    <li class="toc-level-3"><a href="#what-this-book-covers">What this book covers</a></li>
-    <li class="toc-level-2"><a href="#cli">Command line</a></li>
-    <li class="toc-level-3"><a href="#flags">Flags</a></li>
-    <li class="toc-level-3"><a href="#build">build</a></li>
-    <li class="toc-level-3"><a href="#watch">watch</a></li>
-    <li class="toc-level-2"><a href="#source-layout">Source layout</a></li>
-    <li class="toc-level-3"><a href="#comments">Comments</a></li>
-    <li class="toc-level-3"><a href="#strings-and-numbers">Strings and numbers</a></li>
-    <li class="toc-level-3"><a href="#whitespace">Whitespace in prose</a></li>
-    <li class="toc-level-3"><a href="#raw-scopes">Raw scopes</a></li>
-    <li class="toc-level-3"><a href="#attributes">Attribute lists</a></li>
-    <li class="toc-level-2"><a href="#meta">meta</a></li>
-    <li class="toc-level-2"><a href="#blocks">Blocks</a></li>
-    <li class="toc-level-3"><a href="#heading">h</a></li>
-    <li class="toc-level-3"><a href="#paragraph">p</a></li>
-    <li class="toc-level-3"><a href="#hr">hr</a></li>
-    <li class="toc-level-3"><a href="#toc-block">toc</a></li>
-    <li class="toc-level-3"><a href="#raw">raw</a></li>
-    <li class="toc-level-2"><a href="#inlines">Inlines</a></li>
-    <li class="toc-level-3"><a href="#emphasis">Emphasis</a></li>
-    <li class="toc-level-3"><a href="#inline-code">Inline code</a></li>
-    <li class="toc-level-3"><a href="#links">Links</a></li>
-    <li class="toc-level-3"><a href="#inline-math-ref">Inline math and footnotes</a></li>
-    <li class="toc-level-2"><a href="#lists">Lists</a></li>
-    <li class="toc-level-3"><a href="#tasks">Tasks</a></li>
-    <li class="toc-level-3"><a href="#nested-lists">Nested lists</a></li>
-    <li class="toc-level-2"><a href="#quotes">Quotes</a></li>
-    <li class="toc-level-2"><a href="#codeblock">codeblock</a></li>
-    <li class="toc-level-2"><a href="#math">Math</a></li>
-    <li class="toc-level-3"><a href="#math-block">Display</a></li>
-    <li class="toc-level-3"><a href="#math-inline">Inline</a></li>
-    <li class="toc-level-2"><a href="#tables">Tables</a></li>
-    <li class="toc-level-2"><a href="#images">Images</a></li>
-    <li class="toc-level-2"><a href="#callouts">Callouts</a></li>
-    <li class="toc-level-2"><a href="#footnotes">Footnotes</a></li>
-    <li class="toc-level-2"><a href="#includes">Includes</a></li>
-    <li class="toc-level-2"><a href="#semantics">Semantic checks</a></li>
-    <li class="toc-level-3"><a href="#diagnostics">Diagnostics</a></li>
-    <li class="toc-level-2"><a href="#minimal-example">Minimal document</a></li>
-    <li class="toc-level-2"><a href="#full-example">Features used in this book</a></li>
-    <li class="toc-level-2"><a href="#limits">Limits</a></li>
-    <li class="toc-level-6"><a href="#end">End of reference</a></li>
-    <li class="toc-level-2"><a href="#build-these-pages">Building these pages</a></li>
+    <li class="toc-level-2"><a href="#overview">1. Overview</a></li>
+    <li class="toc-level-3"><a href="#pipeline">1.1 Pipeline</a></li>
+    <li class="toc-level-3"><a href="#scope">1.2 Scope</a></li>
+    <li class="toc-level-3"><a href="#generated-page">1.3 Generated page</a></li>
+    <li class="toc-level-2"><a href="#cli">2. Command line</a></li>
+    <li class="toc-level-3"><a href="#flags">2.1 Flags</a></li>
+    <li class="toc-level-3"><a href="#build">2.2 build</a></li>
+    <li class="toc-level-3"><a href="#watch">2.3 watch</a></li>
+    <li class="toc-level-3"><a href="#dev-server">2.4 Dev server</a></li>
+    <li class="toc-level-2"><a href="#source-layout">3. Source layout</a></li>
+    <li class="toc-level-3"><a href="#comments">3.1 Comments</a></li>
+    <li class="toc-level-3"><a href="#strings-and-numbers">3.2 Strings and numbers</a></li>
+    <li class="toc-level-3"><a href="#identifiers">3.3 Identifiers</a></li>
+    <li class="toc-level-3"><a href="#whitespace">3.4 Whitespace</a></li>
+    <li class="toc-level-3"><a href="#raw-scopes">3.5 Raw scopes</a></li>
+    <li class="toc-level-3"><a href="#attributes">3.6 Attribute lists</a></li>
+    <li class="toc-level-2"><a href="#meta">4. meta</a></li>
+    <li class="toc-level-2"><a href="#blocks">5. Blocks</a></li>
+    <li class="toc-level-3"><a href="#heading">5.1 h</a></li>
+    <li class="toc-level-3"><a href="#paragraph">5.2 p</a></li>
+    <li class="toc-level-3"><a href="#hr">5.3 hr</a></li>
+    <li class="toc-level-3"><a href="#toc-block">5.4 toc</a></li>
+    <li class="toc-level-3"><a href="#raw">5.5 raw</a></li>
+    <li class="toc-level-2"><a href="#inlines">6. Inlines</a></li>
+    <li class="toc-level-3"><a href="#emphasis">6.1 Emphasis</a></li>
+    <li class="toc-level-3"><a href="#inline-code">6.2 Inline code</a></li>
+    <li class="toc-level-3"><a href="#links">6.3 Links</a></li>
+    <li class="toc-level-3"><a href="#inline-math-ref">6.4 Inline math and footnote refs</a></li>
+    <li class="toc-level-2"><a href="#lists">7. Lists</a></li>
+    <li class="toc-level-3"><a href="#tasks">7.1 Tasks</a></li>
+    <li class="toc-level-3"><a href="#nested-lists">7.2 Nested lists</a></li>
+    <li class="toc-level-2"><a href="#quotes">8. Quotes</a></li>
+    <li class="toc-level-2"><a href="#codeblock">9. codeblock</a></li>
+    <li class="toc-level-2"><a href="#math">10. Math</a></li>
+    <li class="toc-level-3"><a href="#math-block">10.1 Display</a></li>
+    <li class="toc-level-3"><a href="#math-inline">10.2 Inline</a></li>
+    <li class="toc-level-2"><a href="#tables">11. Tables</a></li>
+    <li class="toc-level-2"><a href="#images">12. Images</a></li>
+    <li class="toc-level-2"><a href="#callouts">13. Callouts</a></li>
+    <li class="toc-level-2"><a href="#footnotes">14. Footnotes</a></li>
+    <li class="toc-level-2"><a href="#includes">15. Includes</a></li>
+    <li class="toc-level-2"><a href="#semantics">16. Semantic checks</a></li>
+    <li class="toc-level-3"><a href="#diagnostics">16.1 Diagnostics</a></li>
+    <li class="toc-level-2"><a href="#examples">17. Examples</a></li>
+    <li class="toc-level-3"><a href="#minimal-example">17.1 Minimal document</a></li>
+    <li class="toc-level-3"><a href="#full-example">17.2 Features in this document</a></li>
+    <li class="toc-level-3"><a href="#limits">17.3 Limits</a></li>
+    <li class="toc-level-3"><a href="#build-these-pages">17.4 Building these pages</a></li>
+    <li class="toc-level-4"><a href="#heading-levels">Heading levels</a></li>
+    <li class="toc-level-5"><a href="#heading-level-5">Level 5</a></li>
+    <li class="toc-level-6"><a href="#heading-level-6">Level 6</a></li>
   </ul>
 </nav>
-<h2 id="what-it-does">What it does</h2>
+<h2 id="overview">1. Overview</h2>
 <p>A .du file is source. The compiler lexes it, parses it into an AST, checks semantic rules, then emits HTML. Watch mode rebuilds on change and serves the result on localhost.</p>
-<p>Output is a complete page: doctype, metadata, CSS, optional KaTeX, and the body. You can inject extra CSS with <code>--style</code> or with a stylesheet field in meta.</p>
-<h3 id="pipeline">Pipeline</h3>
+<p>Extra CSS can be injected with <code>--style</code> or with a stylesheet field in meta. Those two paths are not the same. See section 1.3.</p>
+<h3 id="pipeline">1.1 Pipeline</h3>
 <ol>
   <li>Read the input file.</li>
   <li>Lex and parse into a document node.</li>
@@ -461,9 +470,28 @@ s { color: var(--text-muted); }
   <li>Run semantic checks.</li>
   <li>Generate HTML and write the output file.</li>
 </ol>
-<h3 id="what-this-book-covers">What this book covers</h3>
-<p>Syntax for every block and inline the compiler accepts, the CLI, include resolution, and the checks that run after parse. Features that exist only as ignored attribute keys are not documented as if they did something.</p>
-<h2 id="cli">Command line</h2>
+<h3 id="scope">1.2 Scope</h3>
+<p>This document covers every block and inline the compiler accepts, the CLI, include resolution, and the checks that run after parse. Keys that are parsed and then ignored are named as ignored. They are not described as features.</p>
+<h3 id="generated-page">1.3 Generated page</h3>
+<p>The output is a complete HTML5 document. The generator always writes:</p>
+<ul>
+  <li><code>&lt;!DOCTYPE html&gt;</code> and <code>&lt;html lang=&quot;...&quot;&gt;</code></li>
+  <li>charset and viewport meta tags</li>
+  <li>title, Open Graph, and Twitter tags derived from meta</li>
+  <li><code>&lt;meta name=&quot;generator&quot; content=&quot;DocUP v0.2.0&quot;&gt;</code></li>
+  <li>Google Fonts links for the bundled page font</li>
+  <li>the built-in page CSS</li>
+  <li>a copy-to-clipboard script for code blocks</li>
+</ul>
+<p>Added only when needed:</p>
+<ul>
+  <li>KaTeX CSS and scripts, if the document contains any math node</li>
+  <li>a <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> from meta field <code>stylesheet</code></li>
+  <li>a <code>&lt;style id=&quot;docup-custom-css&quot;&gt;</code> block from <code>--style</code></li>
+  <li><code>data-theme</code> on <code>&lt;html&gt;</code>, from meta field <code>theme</code></li>
+</ul>
+<p>If <code>theme</code> is omitted, the built-in CSS follows the browser <code>prefers-color-scheme</code> setting. Values <code>light</code> and <code>dark</code> lock the palette.</p>
+<h2 id="cli">2. Command line</h2>
 <p>The binary is named <code>docup</code>. Commands:</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -475,8 +503,9 @@ s { color: var(--text-muted); }
   </div>
   <pre><code class="language-text line-numbers"><span class="code-line">docup build &lt;input.du&gt; [flags]</span><span class="code-line">docup watch &lt;input.du&gt; [flags]</span><span class="code-line">docup version</span><span class="code-line">docup help</span></code></pre>
 </div>
-<p><code>docup -v</code> and <code>docup --version</code> print the same version string as <code>docup version</code>. <code>docup -h</code> and <code>docup --help</code> print usage. Any other command name is an error.</p>
-<h3 id="flags">Flags</h3>
+<p><code>docup -v</code> and <code>docup --version</code> print the same string as <code>docup version</code>. <code>docup -h</code> and <code>docup --help</code> print usage. Any other command name is an error.</p>
+<p>Color in the terminal is on when stdout is a terminal and <code>NO_COLOR</code> is unset. Otherwise ANSI codes are omitted.</p>
+<h3 id="flags">2.1 Flags</h3>
 <div class="table-wrap">
 <table>
   <tr>
@@ -485,15 +514,15 @@ s { color: var(--text-muted); }
   </tr>
   <tr>
     <td><code>-o</code>, <code>--output</code></td>
-    <td>Output HTML path. Default is the input path with the extension changed to .html.</td>
+    <td>Output HTML path. Default is the input path with the extension changed to .html. If the input has no extension, <code>.html</code> is appended.</td>
   </tr>
   <tr>
     <td><code>-s</code>, <code>--style</code></td>
-    <td>Path to a CSS file. Its contents are copied into a style tag in the output.</td>
+    <td>Path to a CSS file. Contents are copied into <code>&lt;style id=&quot;docup-custom-css&quot;&gt;</code>.</td>
   </tr>
   <tr>
     <td><code>-p</code>, <code>--port</code></td>
-    <td>Port for the watch-mode server. Default 8080. Must be a valid u16.</td>
+    <td>Port for the watch-mode server. Default 8080. Must parse as a u16.</td>
   </tr>
   <tr>
     <td><code>-V</code>, <code>--verbose</code></td>
@@ -506,7 +535,7 @@ s { color: var(--text-muted); }
 </table>
 </div>
 <p><code>--verbose</code> and <code>--quiet</code> together are an error. A flag that expects a value and does not get one is an error. Unknown flags are an error. Only one input path is accepted.</p>
-<h3 id="build">build</h3>
+<h3 id="build">2.2 build</h3>
 <p>Compiles once and writes the HTML file. A missing or unreadable input file is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If the input does not use a .du extension, the compiler prints a warning and continues.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -520,9 +549,9 @@ s { color: var(--text-muted); }
 docup build report.du -o dist/index.html -s style.css
 docup build report.du --verbose</code></pre>
 </div>
-<h3 id="watch">watch</h3>
-<p>Compiles once, writes the output file, then binds <code>127.0.0.1:&lt;port&gt;</code>. It polls watched files every 250 ms. On change it rebuilds. A failed rebuild leaves the last good (or last error placeholder) page in place and keeps watching.</p>
-<p>The served HTML has a small EventSource script injected before <code>&lt;/body&gt;</code>. The server also exposes <code>/docup-events</code> and static files from the input file&#39;s directory.</p>
+<h3 id="watch">2.3 watch</h3>
+<p>Compiles once, writes the output file, then binds <code>127.0.0.1:&lt;port&gt;</code>. It polls watched files every 250 ms. On change it rebuilds. A failed rebuild leaves the last page in place and keeps watching.</p>
+<p>If the first compile fails, the server still starts. The page body is a short HTML error placeholder until a later compile succeeds.</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -535,7 +564,30 @@ docup build report.du --verbose</code></pre>
 docup watch report.du --port <span class="tok-number">3000</span></code></pre>
 </div>
 <p>Watched paths are the root source file, every successfully resolved include, and the <code>--style</code> file if one was given.</p>
-<h2 id="source-layout">Source layout</h2>
+<h3 id="dev-server">2.4 Dev server</h3>
+<p>The watch server accepts GET only. Other methods return 405.</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Path</th>
+    <th>Response</th>
+  </tr>
+  <tr>
+    <td><code>/</code>, <code>/index.html</code></td>
+    <td>Current compiled HTML, with a live-reload EventSource script inserted before <code>&lt;/body&gt;</code>.</td>
+  </tr>
+  <tr>
+    <td><code>/docup-events</code></td>
+    <td>Server-sent events. A rebuild writes <code>data: reload</code>.</td>
+  </tr>
+  <tr>
+    <td>any other path</td>
+    <td>File under the input file&#39;s directory, if it exists. Otherwise 404.</td>
+  </tr>
+</table>
+</div>
+<p>Asset Content-Type is chosen from the file extension: html, css, js, json, png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf. Anything else is <code>application/octet-stream</code>.</p>
+<h2 id="source-layout">3. Source layout</h2>
 <p>A document is a sequence of top-level blocks. The first token of each block is an identifier: the block type. After the last block the file ends. Anything else at top level is a parse error.</p>
 <p>Allowed top-level names:</p>
 <ul>
@@ -555,7 +607,7 @@ docup watch report.du --port <span class="tok-number">3000</span></code></pre>
   <li><code>footnote</code></li>
   <li><code>include</code></li>
 </ul>
-<h3 id="comments">Comments</h3>
+<h3 id="comments">3.1 Comments</h3>
 <p>Line comments start with <code>//</code> and run to the end of the line. Block comments are <code>/* ... */</code> and may span lines. An unclosed block comment is a lex error. Comments are skipped in the token stream. They are not skipped inside raw scopes, inline code, or inline math.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -569,14 +621,19 @@ docup watch report.du --port <span class="tok-number">3000</span></code></pre>
 
 p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
 </div>
-<h3 id="strings-and-numbers">Strings and numbers</h3>
+<h3 id="strings-and-numbers">3.2 Strings and numbers</h3>
 <p>String literals use double quotes. The only escape is a backslash before a quote: <code>\&quot;</code> inserts a quote. An unclosed string is a lex error.</p>
 <p>Bare integers are tokens. Heading level is the only place the grammar requires a number.</p>
-<h3 id="whitespace">Whitespace in prose</h3>
-<p>Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a single space. Leading and trailing spaces on a body are trimmed. Line breaks in source do not become line breaks in HTML unless you use a codeblock, raw block, or explicit HTML.</p>
-<h3 id="raw-scopes">Raw scopes</h3>
-<p><code>codeblock</code>, <code>raw</code>, and <code>math</code> take a body that starts with brace-bang and ends at the first bang-brace in the file from that point. The body is not tokenized. A leading all-whitespace line is dropped. Trailing spaces and newlines are dropped.</p>
-<h3 id="attributes">Attribute lists</h3>
+<h3 id="identifiers">3.3 Identifiers</h3>
+<p>An identifier starts with an ASCII letter or underscore. Later characters may be letters, digits, or underscore.</p>
+<p>In two raw contexts the scanner also accepts hyphen: footnote ids written without quotes, and attribute names inside link parentheses. Quoted footnote ids may contain any string bytes.</p>
+<h3 id="whitespace">3.4 Whitespace</h3>
+<p>Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a single space. Leading and trailing spaces on a body are trimmed. Line breaks in source do not become line breaks in HTML unless you use a codeblock, a raw block, or explicit HTML.</p>
+<h3 id="raw-scopes">3.5 Raw scopes</h3>
+<p><code>codeblock</code>, <code>raw</code>, and <code>math</code> take a body that starts with brace-bang and ends at the first bang-brace from that point. The body is not tokenized.</p>
+<p>If the first line after the opener is only spaces, tabs, or CR, that line is dropped. Trailing spaces and newlines are dropped. Empty content after that trim is a semantic error.</p>
+<p>Because the closer is the first bang-brace, a raw scope used as an example inside another raw scope cannot contain that closer.</p>
+<h3 id="attributes">3.6 Attribute lists</h3>
 <p>Many blocks take a parenthesized list after the name:</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -588,9 +645,10 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
   </div>
   <pre><code class="language-text">name(key: <span class="tok-string">&quot;value&quot;</span>, flag: true, <span class="tok-string">&quot;positional&quot;</span>)</code></pre>
 </div>
-<p>A named field is an identifier, a colon, then a string or the identifiers <code>true</code> / <code>false</code>. A bare string is a positional argument. Entries may be separated by commas. An empty <code>()</code> is valid where the list is optional.</p>
-<p>Which keys are read depends on the block. Unknown keys are stored or dropped; they do not fail the parse.</p>
-<h2 id="meta">meta</h2>
+<p>A named field is an identifier, a colon, then a string or the identifiers <code>true</code> / <code>false</code>. A string <code>&quot;true&quot;</code> is also accepted where the generator compares against the text <code>true</code>.</p>
+<p>A bare string is a positional argument. Entries may be separated by commas. An empty <code>()</code> is valid where the list is optional.</p>
+<p>Which keys are read depends on the block. Unknown keys do not fail the parse. Heading attributes after the level are name/string pairs only; booleans are not accepted there.</p>
+<h2 id="meta">4. meta</h2>
 <p>Optional. At most one per document. If present it must contain title.<sup class="footnote-ref"><a href="#fn-required-title" id="fnref-required-title">[1]</a></sup></p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -626,11 +684,11 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
   </tr>
   <tr>
     <td>lang</td>
-    <td><code>lang</code> attribute on <code>&lt;html&gt;</code>. Default <code>en</code>.</td>
+    <td><code>lang</code> on <code>&lt;html&gt;</code>. Default <code>en</code>.</td>
   </tr>
   <tr>
     <td>theme</td>
-    <td><code>data-theme</code> on <code>&lt;html&gt;</code>. Use <code>light</code> or <code>dark</code> to lock the palette. If omitted, CSS follows prefers-color-scheme.</td>
+    <td><code>data-theme</code> on <code>&lt;html&gt;</code>. Use <code>light</code> or <code>dark</code> to lock the palette.</td>
   </tr>
   <tr>
     <td>author, version</td>
@@ -650,17 +708,17 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
   </tr>
   <tr>
     <td>image</td>
-    <td>og:image and twitter:image.</td>
+    <td>og:image and twitter:image. This is not the content image block.</td>
   </tr>
   <tr>
     <td>stylesheet</td>
-    <td>Extra <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> in head.</td>
+    <td>Extra <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> in head. Separate from <code>--style</code>.</td>
   </tr>
 </table>
 </div>
 <p>Values are strings. A second meta block is a parse error. Other keys are kept in the AST and ignored by the generator.</p>
-<h2 id="blocks">Blocks</h2>
-<h3 id="heading">h</h3>
+<h2 id="blocks">5. Blocks</h2>
+<h3 id="heading">5.1 h</h3>
 <p>Heading. Level is a number in parentheses and must be 1 through 6. The body is prose.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -673,8 +731,9 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
   <pre><code class="language-text">h(<span class="tok-number">1</span>) { Title }
 h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&quot;</span>, class: <span class="tok-string">&quot;section&quot;</span>) { Install }</code></pre>
 </div>
-<p>Optional attributes after the level are name/string pairs. The generator writes <code>id</code> and <code>class</code>. If you omit <code>id</code>, the generator builds one from the heading text (lowercase, ASCII letters and digits, hyphens). Duplicate slugs get a numeric suffix.</p>
-<h3 id="paragraph">p</h3>
+<p>Optional attributes after the level are name/string pairs. The generator writes <code>id</code> and <code>class</code>. Other keys are stored and not written.</p>
+<p>If you omit <code>id</code>, the generator builds one from the heading text: ASCII letters and digits kept in lowercase, spaces / hyphens / underscores turned into a single hyphen, other characters dropped, trailing hyphens stripped. An empty result becomes <code>section</code>. Duplicate slugs get a numeric suffix.</p>
+<h3 id="paragraph">5.2 p</h3>
 <p>A paragraph. Body is prose: text plus inline elements.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -686,7 +745,7 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
   </div>
   <pre><code class="language-text">p { One paragraph. Use another p block for the next one. }</code></pre>
 </div>
-<h3 id="hr">hr</h3>
+<h3 id="hr">5.3 hr</h3>
 <p>Horizontal rule. Empty body.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -698,7 +757,7 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
   </div>
   <pre><code class="language-text">hr {}</code></pre>
 </div>
-<h3 id="toc-block">toc</h3>
+<h3 id="toc-block">5.4 toc</h3>
 <p>Table of contents. Empty body. The generator fills it from every heading in the finished document, after includes are resolved. Headings are listed in source order with links to their ids. If there are no headings, the block emits nothing.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -710,9 +769,8 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
   </div>
   <pre><code class="language-text">toc {}</code></pre>
 </div>
-<h3 id="raw">raw</h3>
-<p>Unescaped HTML. The body is a raw scope opened by brace-bang and closed by bang-brace. A leading blank line of only spaces is stripped. Trailing whitespace is stripped. Empty content after that trim is a semantic error.</p>
-<p>Header line:</p>
+<h3 id="raw">5.5 raw</h3>
+<p>Unescaped HTML. Header name <code>raw</code>, then a raw scope (section 3.5).</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -723,11 +781,11 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
   </div>
   <pre><code class="language-text">raw</code></pre>
 </div>
-<p>Then a raw scope whose body is HTML. Nothing inside that scope is lexed as DocUP. Braces and comments are literal. A raw scope ends at the first bang-brace, so a sample inside another raw scope cannot contain that closer.</p>
-<h2 id="inlines">Inlines</h2>
+<p>Follow that header with a raw scope. Nothing inside the scope is lexed as DocUP.</p>
+<h2 id="inlines">6. Inlines</h2>
 <p>Inlines appear in prose bodies: headings, paragraphs, callouts, table cells, footnote definitions, and the text parts of list items and quotes.</p>
 <p>Brace forms: <code>b</code>, <code>i</code>, <code>strike</code>, <code>code</code>, <code>m</code>. Parenthesis forms: <code>link</code>, <code>fn</code>.</p>
-<h3 id="emphasis">Emphasis</h3>
+<h3 id="emphasis">6.1 Emphasis</h3>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -738,10 +796,10 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
   </div>
   <pre><code class="language-text">p { b{bold} i{italic} strike{struck} }</code></pre>
 </div>
-<p>These nest. Depth is capped at 64; deeper input is a parse error.</p>
+<p>These nest. Depth is capped at 64 and is shared with nested lists and quotes.<sup class="footnote-ref"><a href="#fn-shared-depth" id="fnref-shared-depth">[2]</a></sup></p>
 <p>Rendered: <strong>bold</strong> <em>italic</em> <s>struck</s>. Combined: <strong><em>bold italic</em></strong>.</p>
-<h3 id="inline-code">Inline code</h3>
-<p><code>code{...}</code> reads bytes until the matching closing brace. Nested braces are counted. There are no inlines inside it.</p>
+<h3 id="inline-code">6.2 Inline code</h3>
+<p><code>code{...}</code> reads bytes until the matching closing brace. Nested braces are counted. There are no inlines inside it. HTML special characters in the body are escaped in output.</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -750,10 +808,9 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-text">p { Use code{h(<span class="tok-number">1</span>) { Title }} at the top of a page. }</code></pre>
+  <pre><code class="language-text">p { Use code{list} as a top-level block. }</code></pre>
 </div>
-<p>HTML special characters in the body are escaped in output.</p>
-<h3 id="links">Links</h3>
+<h3 id="links">6.3 Links</h3>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -766,10 +823,10 @@ h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&
 </div>
 <p>The URL is a string inside parentheses. The visible text is the brace body. An empty URL is a semantic error. Extra comma-separated string attributes after the URL are parsed and discarded.</p>
 <p>Example: <a href="https://example.com">example.com</a>.</p>
-<h3 id="inline-math-ref">Inline math and footnotes</h3>
-<p>Inline math uses <code>m{...}</code> and is described with math blocks. Footnote references use <code>fn(id)</code> and are described with footnote blocks.</p>
+<h3 id="inline-math-ref">6.4 Inline math and footnote refs</h3>
+<p>Inline math uses <code>m{...}</code> and is described in section 10.2. Footnote references use <code>fn(id)</code> and are described in section 14.</p>
 <p>An identifier that looks like an inline but is not one of the names above is ordinary text.</p>
-<h2 id="lists">Lists</h2>
+<h2 id="lists">7. Lists</h2>
 <p>A list contains <code>item</code> and <code>task</code> children only. Zero items is a semantic error.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -790,7 +847,7 @@ list(ordered: true) {
 }</code></pre>
 </div>
 <p><code>ordered: true</code> emits <code>&lt;ol&gt;</code>. Anything else, including omitting the attribute, emits <code>&lt;ul&gt;</code>.</p>
-<h3 id="tasks">Tasks</h3>
+<h3 id="tasks">7.1 Tasks</h3>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -805,13 +862,12 @@ list(ordered: true) {
 }</code></pre>
 </div>
 <p><code>done</code> is a boolean. Missing <code>done</code> is treated as false. The checkbox is rendered disabled.</p>
-<p>Live example:</p>
 <ul>
   <li class="task-item"><input type="checkbox" disabled checked> Write the grammar down</li>
   <li class="task-item"><input type="checkbox" disabled> Add a new block type</li>
 </ul>
-<h3 id="nested-lists">Nested lists</h3>
-<p>A list may appear inside an item. It must be the last child of that item.<sup class="footnote-ref"><a href="#fn-item-nest" id="fnref-item-nest">[2]</a></sup></p>
+<h3 id="nested-lists">7.2 Nested lists</h3>
+<p>A list may appear inside an item. It must be the last child of that item.<sup class="footnote-ref"><a href="#fn-item-nest" id="fnref-item-nest">[3]</a></sup></p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -831,7 +887,6 @@ list(ordered: true) {
   item { Sibling of the parent }
 }</code></pre>
 </div>
-<p>Live example:</p>
 <ul>
   <li>Block types<ul>
   <li>Prose: h, p, quote, callout</li>
@@ -846,7 +901,7 @@ list(ordered: true) {
   <li>Analyze</li>
   <li>Generate</li>
 </ol>
-<h2 id="quotes">Quotes</h2>
+<h2 id="quotes">8. Quotes</h2>
 <p>A block quote. Body is prose and, optionally, one nested quote at the end.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -863,15 +918,14 @@ list(ordered: true) {
   }
 }</code></pre>
 </div>
-<p>Live example:</p>
 <blockquote>
   <p>A quote is a block, not an inline. Consecutive text inside it becomes one paragraph in HTML.</p>
   <blockquote>
   <p>The inner quote closes the outer body. Do not put text after it.</p>
   </blockquote>
 </blockquote>
-<h2 id="codeblock">codeblock</h2>
-<p>Fenced source. The body is a raw scope opened by brace-bang and closed by bang-brace.</p>
+<h2 id="codeblock">9. codeblock</h2>
+<p>Fenced source. After the attribute list, the body is a raw scope (section 3.5).</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -882,7 +936,7 @@ list(ordered: true) {
   </div>
   <pre><code class="language-text">codeblock(lang: <span class="tok-string">&quot;rust&quot;</span>, file: <span class="tok-string">&quot;main.rs&quot;</span>, line_numbers: true, highlight: <span class="tok-string">&quot;1,3-5&quot;</span>)</code></pre>
 </div>
-<p>Follow the attribute list with a raw scope. The live block below is the same construct.</p>
+<p>Follow the attribute list with a raw scope. The live block in section 9 is the same construct.</p>
 <p>Attributes:</p>
 <div class="table-wrap">
 <table>
@@ -894,7 +948,7 @@ list(ordered: true) {
   <tr>
     <td>lang</td>
     <td>string</td>
-    <td>Language label and highlight grammar. Empty means no language class.</td>
+    <td>Language label, <code>language-*</code> class, and highlight grammar. Empty means no language class.</td>
   </tr>
   <tr>
     <td>file</td>
@@ -909,12 +963,11 @@ list(ordered: true) {
   <tr>
     <td>highlight</td>
     <td>string</td>
-    <td>Line numbers to mark. Comma-separated items, each a number or an inclusive range <code>start-end</code>.</td>
+    <td>Line numbers to mark. Comma-separated items, each a number or an inclusive range written start-hyphen-end.</td>
   </tr>
 </table>
 </div>
 <p>Content empty after trim is a semantic error. The output header always includes a Copy button.</p>
-<p>Live example:</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span>parse_heading.rs</span>
@@ -925,15 +978,15 @@ list(ordered: true) {
   </div>
   <pre><code class="language-rust line-numbers"><span class="code-line highlighted-line"><span class="tok-keyword">fn</span> parse_heading(&amp;<span class="tok-keyword">mut</span> <span class="tok-keyword">self</span>) -&gt; <span class="tok-type">Result</span>&lt;HeadingNode, ParseError&gt; {</span><span class="code-line">    <span class="tok-keyword">self</span>.next()?;</span><span class="code-line">    <span class="tok-keyword">self</span>.expect(TokenType::LParen, <span class="tok-string">&quot;&#39;(&#39; after h&quot;</span>)?;</span><span class="code-line highlighted-line">    <span class="tok-keyword">let</span> level_tok = <span class="tok-keyword">self</span>.expect(TokenType::Number, <span class="tok-string">&quot;heading level&quot;</span>)?;</span><span class="code-line highlighted-line">    <span class="tok-keyword">let</span> level: <span class="tok-type">usize</span> = level_tok.value.parse().map_err(|_| {</span><span class="code-line highlighted-line">        <span class="tok-keyword">self</span>.errorf(format!(<span class="tok-string">&quot;invalid heading level {:?}&quot;</span>, level_tok.value))</span><span class="code-line">    })?;</span><span class="code-line">    <span class="tok-comment">// ...</span></span><span class="code-line">}</span></code></pre>
 </div>
-<h2 id="math">Math</h2>
+<h2 id="math">10. Math</h2>
 <p>Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags only if the document contains at least one math node.</p>
-<h3 id="math-block">Display</h3>
+<h3 id="math-block">10.1 Display</h3>
 <p>Header line is <code>math</code>, then a raw scope of LaTeX. Empty content is a semantic error. Output is wrapped as display math.</p>
 <div class="math-block">\[
 \int_{0}^{1} x \, dx = \frac{1}{2}
 \]</div>
-<h3 id="math-inline">Inline</h3>
-<p><code>m{...}</code> is a raw brace body, same rules as inline code.</p>
+<h3 id="math-inline">10.2 Inline</h3>
+<p><code>m{...}</code> is a raw brace body, same rules as inline code. No nested inlines inside it.</p>
 <div class="codeblock">
   <div class="codeblock-header">
     <span></span>
@@ -945,7 +998,7 @@ list(ordered: true) {
   <pre><code class="language-text">p { The area is m{\frac{<span class="tok-number">1</span>}{<span class="tok-number">2</span>}}. }</code></pre>
 </div>
 <p>The area is <span class="math-inline">\(\frac{1}{2}\)</span>. Einstein: <span class="math-inline">\(E = mc^2\)</span>.</p>
-<h2 id="tables">Tables</h2>
+<h2 id="tables">11. Tables</h2>
 <p>A table is rows. A row is cells. A cell body is prose.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -988,7 +1041,7 @@ list(ordered: true) {
   <tr>
     <td>Ident</td>
     <td>letters, digits, underscore</td>
-    <td>block names, attribute keys, <code>true</code>/<code>false</code></td>
+    <td>block names, attribute keys, <code>true</code> / <code>false</code></td>
   </tr>
   <tr>
     <td>String</td>
@@ -1007,7 +1060,7 @@ list(ordered: true) {
   </tr>
 </table>
 </div>
-<h2 id="images">Images</h2>
+<h2 id="images">12. Images</h2>
 <p>No body. First argument is the source URL or path. Optional <code>alt</code> is a string. Other named attributes after that are parsed and ignored.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -1017,11 +1070,11 @@ list(ordered: true) {
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-text">image(<span class="tok-string">&quot;images/logo.svg&quot;</span>, alt: <span class="tok-string">&quot;DocUP&quot;</span>)</code></pre>
+  <pre><code class="language-text">image(<span class="tok-string">&quot;images/banner.png&quot;</span>, alt: <span class="tok-string">&quot;DocUP&quot;</span>)</code></pre>
 </div>
-<p>An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input.</p>
-<img src="images/logo.svg" alt="DocUP">
-<h2 id="callouts">Callouts</h2>
+<p>An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input. Relative paths in the compiled HTML are resolved by the browser against the HTML file.</p>
+<p>The banner at the top of this page is that block.</p>
+<h2 id="callouts">13. Callouts</h2>
 <p>Admonition block. Body is prose.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -1076,7 +1129,7 @@ callout(type: <span class="tok-string">&quot;warning&quot;</span>) { Check the h
   <div class="callout-title">Danger</div>
   <div class="callout-body">include cycles and missing include files fail before semantic analysis. The error is reported against the include statement.</div>
 </div>
-<h2 id="footnotes">Footnotes</h2>
+<h2 id="footnotes">14. Footnotes</h2>
 <p>A definition is a top-level block. A reference is an inline.</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -1091,16 +1144,16 @@ callout(type: <span class="tok-string">&quot;warning&quot;</span>) { Check the h
 footnote(id: <span class="tok-string">&quot;required-title&quot;</span>) { Title is required when meta is present. }</code></pre>
 </div>
 <p>The definition needs a non-empty <code>id</code> attribute. The body is prose.</p>
-<p>The reference is <code>fn(id)</code> or <code>fn(&quot;id&quot;)</code>. The identifier form allows letters, digits, underscore, and hyphen.</p>
+<p>The reference is <code>fn(id)</code> or a quoted string inside the parentheses. The identifier form allows letters, digits, underscore, and hyphen.</p>
 <p>Checks:</p>
 <ul>
   <li>Duplicate definition ids are a semantic error.</li>
   <li>A reference whose id has no definition is a semantic error.</li>
   <li>Definitions with no references still appear in the footnotes section.</li>
 </ul>
-<p>Numbering follows first-reference order in the document after includes are merged. Output ids are <code>fn-&lt;id&gt;</code> and <code>fnref-&lt;id&gt;</code>.</p>
-<p>This page uses three definitions. The first two are referenced from earlier sections.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[3]</a></sup></p>
-<h2 id="includes">Includes</h2>
+<p>Numbering follows first-reference order in the document after includes are merged. Definitions that were never referenced are appended after that list. Output ids are <code>fn-</code> plus the id, and <code>fnref-</code> plus the id.</p>
+<p>This page uses four definitions. Earlier sections reference the first three.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[4]</a></sup></p>
+<h2 id="includes">15. Includes</h2>
 <p>Splice another .du file into the current document. Two spellings:</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -1121,13 +1174,13 @@ include(<span class="tok-string">&quot;path/to/file.du&quot;</span>)</code></pre
   <li>Reject the path if it is already on the current include stack (cycle).</li>
   <li>Read, lex, parse the child.</li>
   <li>Resolve includes inside the child.</li>
-  <li>Append the child&#39;s blocks to the parent. Child meta is discarded.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[3]</a></sup></li>
+  <li>Append the child&#39;s blocks to the parent. Child meta is discarded.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[4]</a></sup></li>
   <li>Pop the child from the stack so the same file may be included from a different branch.</li>
 </ol>
-<p>An empty path is a semantic error if the statement survives until analysis. In practice a missing file fails earlier.</p>
+<p>An empty path is a semantic error if the statement survives until analysis. A missing file fails earlier, during resolution.</p>
 <p>Watch mode adds every successfully resolved include to the watch set.</p>
-<p>This book is one HTML file built from several .du files. index.du holds meta, the title, the toc, the includes, and the footnote definitions.</p>
-<h2 id="semantics">Semantic checks</h2>
+<p>This document is one HTML file built from several .du files. index.du holds meta, the banner, the title, the toc, the includes, and the footnote definitions.</p>
+<h2 id="semantics">16. Semantic checks</h2>
 <p>Analysis runs on the document after includes are expanded. The first violation stops the build.</p>
 <div class="table-wrap">
 <table>
@@ -1181,10 +1234,11 @@ include(<span class="tok-string">&quot;path/to/file.du&quot;</span>)</code></pre
   </tr>
 </table>
 </div>
-<p>Parse errors are separate: unknown block names, missing braces, bad callout types, unclosed raw scopes, unclosed strings, unclosed comments, inline or list nesting past 64, text after a nested list or nested quote.</p>
-<h3 id="diagnostics">Diagnostics</h3>
-<p>Errors print the message, then <code>path:line:col</code>, then the source line and a caret. Line and column are 1-based.</p>
-<h2 id="minimal-example">Minimal document</h2>
+<p>Parse errors are separate: unknown block names, missing braces, bad callout types, unclosed raw scopes, unclosed strings, unclosed comments, nesting past 64, text after a nested list or nested quote.</p>
+<h3 id="diagnostics">16.1 Diagnostics</h3>
+<p>Errors print the message, then <code>path:line:col</code>, then the source line and a caret. Line and column are 1-based. File errors use distinct text for not found and permission denied.</p>
+<h2 id="examples">17. Examples</h2>
+<h3 id="minimal-example">17.1 Minimal document</h3>
 <div class="codeblock">
   <div class="codeblock-header">
     <span>hello.du</span>
@@ -1195,8 +1249,7 @@ include(<span class="tok-string">&quot;path/to/file.du&quot;</span>)</code></pre
   </div>
   <pre><code class="language-text line-numbers"><span class="code-line highlighted-line">meta {</span><span class="code-line highlighted-line">  title: <span class="tok-string">&quot;Hello&quot;</span></span><span class="code-line highlighted-line">}</span><span class="code-line"></span><span class="code-line">h(<span class="tok-number">1</span>) { Hello }</span><span class="code-line"></span><span class="code-line">p { First paragraph. b{Bold}, i{italic}, code{code}. }</span><span class="code-line"></span><span class="code-line">list {</span><span class="code-line">  item { An item }</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">hr {}</span></code></pre>
 </div>
-<h2 id="full-example">Features used in this book</h2>
-<p>This document uses every block and inline the compiler implements:</p>
+<h3 id="full-example">17.2 Features in this document</h3>
 <ul>
   <li>meta, including title and the optional fields the generator reads</li>
   <li>headings with explicit ids and one class</li>
@@ -1205,31 +1258,30 @@ include(<span class="tok-string">&quot;path/to/file.du&quot;</span>)</code></pre
   <li>lists, ordered lists, tasks, nested lists</li>
   <li>quotes and a nested quote</li>
   <li>tables, including a header row and an included fragment</li>
-  <li>images</li>
+  <li>the banner image</li>
   <li>callouts of all four kinds</li>
   <li>codeblock with lang, file, line numbers, and highlight ranges</li>
   <li>raw HTML</li>
   <li>display math and inline math</li>
   <li>footnote references and definitions</li>
   <li>include, both from the root file and from a child file</li>
-  <li>line comments in the files that need them</li>
+  <li>line comments</li>
 </ul>
 <aside class="callout callout-note">
   <div class="callout-title">Raw</div>
   <div class="callout-body">This aside was emitted by a raw block. It is not parsed as DocUP.</div>
 </aside>
-<h2 id="limits">Limits</h2>
+<h3 id="limits">17.3 Limits</h3>
 <ul>
   <li>One meta block.</li>
   <li>Include cycles are rejected.</li>
-  <li>Inline, list, and quote nesting stop at 64.</li>
+  <li>Inline, list, and quote nesting share a cap of 64.</li>
   <li>Nested list or quote must be the last child of its parent body.</li>
-  <li>No block inside a paragraph. A list inside <code>p { ... }</code> is plain text.</li>
+  <li>No block inside a paragraph. A list inside a p body is plain text.</li>
   <li>Child-file meta is not merged.</li>
+  <li>A raw scope ends at the first bang-brace.</li>
 </ul>
-<h6 id="end">End of reference</h6>
-<p>Compiler version <code>0.2.0</code>.</p>
-<h2 id="build-these-pages">Building these pages</h2>
+<h3 id="build-these-pages">17.4 Building these pages</h3>
 <p>The root file is <code>index.du</code>. From the docs directory:</p>
 <div class="codeblock">
   <div class="codeblock-header">
@@ -1244,10 +1296,17 @@ docup build index.du -o index.html
 docup watch index.du --port <span class="tok-number">8080</span></code></pre>
 </div>
 <p>Output defaults to <code>index.html</code> next to the input.</p>
+<h4 id="heading-levels">Heading levels</h4>
+<p>Levels 1 through 6 are valid. This section is level 4.</p>
+<h5 id="heading-level-5">Level 5</h5>
+<p>Level 5.</p>
+<h6 id="heading-level-6">Level 6</h6>
+<p>Level 6. Compiler version <code>0.2.0</code>.</p>
 <section class="footnotes" aria-label="Footnotes">
   <hr>
   <ol>
     <li id="fn-required-title">If a document contains a meta block, that block must include a title field. A document with no meta block is valid; the generated page title then defaults to &quot;DocUP Document&quot;. <a href="#fnref-required-title" class="footnote-back" aria-label="Back to reference">↩</a></li>
+    <li id="fn-shared-depth">Inlines, nested lists, and nested quotes share one depth counter. The cap is 64 for the combination, not 64 of each. <a href="#fnref-shared-depth" class="footnote-back" aria-label="Back to reference">↩</a></li>
     <li id="fn-item-nest">After a nested list is parsed inside an item, the item must close. Text after that nested list is a parse error. The same rule applies to a nested quote inside a quote. <a href="#fnref-item-nest" class="footnote-back" aria-label="Back to reference">↩</a></li>
     <li id="fn-include-meta">An included file may contain its own meta block. The compiler parses it, then drops it. Only the included file&#39;s blocks are spliced into the parent. <a href="#fnref-include-meta" class="footnote-back" aria-label="Back to reference">↩</a></li>
   </ol>

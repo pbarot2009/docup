@@ -1,30 +1,28 @@
-h(2, id: "inlines") { Inlines }
+h(2, id: "inlines") { 6. Inlines }
 
 p { Inlines appear in prose bodies: headings, paragraphs, callouts, table cells, footnote definitions, and the text parts of list items and quotes. }
 
 p { Brace forms: code{b}, code{i}, code{strike}, code{code}, code{m}. Parenthesis forms: code{link}, code{fn}. }
 
-h(3, id: "emphasis") { Emphasis }
+h(3, id: "emphasis") { 6.1 Emphasis }
 
 codeblock(lang: "text") {!
 p { b{bold} i{italic} strike{struck} }
 !}
 
-p { These nest. Depth is capped at 64; deeper input is a parse error. }
+p { These nest. Depth is capped at 64 and is shared with nested lists and quotes.fn(shared-depth) }
 
 p { Rendered: b{bold} i{italic} strike{struck}. Combined: b{i{bold italic}}. }
 
-h(3, id: "inline-code") { Inline code }
+h(3, id: "inline-code") { 6.2 Inline code }
 
-p { code{code{...}} reads bytes until the matching closing brace. Nested braces are counted. There are no inlines inside it. }
+p { code{code{...}} reads bytes until the matching closing brace. Nested braces are counted. There are no inlines inside it. HTML special characters in the body are escaped in output. }
 
 codeblock(lang: "text") {!
-p { Use code{h(1) { Title }} at the top of a page. }
+p { Use code{list} as a top-level block. }
 !}
 
-p { HTML special characters in the body are escaped in output. }
-
-h(3, id: "links") { Links }
+h(3, id: "links") { 6.3 Links }
 
 codeblock(lang: "text") {!
 p { See link("https://example.com") { the site }. }
@@ -34,8 +32,8 @@ p { The URL is a string inside parentheses. The visible text is the brace body. 
 
 p { Example: link("https://example.com") { example.com }. }
 
-h(3, id: "inline-math-ref") { Inline math and footnotes }
+h(3, id: "inline-math-ref") { 6.4 Inline math and footnote refs }
 
-p { Inline math uses code{m{...}} and is described with math blocks. Footnote references use code{fn(id)} and are described with footnote blocks. }
+p { Inline math uses code{m{...}} and is described in section 10.2. Footnote references use code{fn(id)} and are described in section 14. }
 
 p { An identifier that looks like an inline but is not one of the names above is ordinary text. }

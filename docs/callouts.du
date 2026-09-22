@@ -1,4 +1,4 @@
-h(2, id: "callouts") { Callouts }
+h(2, id: "callouts") { 13. Callouts }
 
 p { Admonition block. Body is prose. }
 
