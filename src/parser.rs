@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode,
+    BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode, FootnoteDefNode,
     HRNode, HeadingNode, ImageNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode,
-    MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TableNode,
+    MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TOCNode,
+    TableNode, trim_inline_edges,
 };
 use crate::errors::{LexError, ParseError};
 use crate::lexer::{Lexer, Token, TokenType};
@@ -55,7 +56,7 @@ impl<'a> Parser<'a> {
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math), got {:?}",
+                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote), got {:?}",
                     self.cur.value
                 )));
             }
@@ -109,6 +110,14 @@ impl<'a> Parser<'a> {
                 "math" => {
                     let math = self.parse_math()?;
                     doc.blocks.push(BlockNode::Math(math));
+                }
+                "toc" => {
+                    let toc = self.parse_toc()?;
+                    doc.blocks.push(BlockNode::TOC(toc));
+                }
+                "footnote" => {
+                    let footnote = self.parse_footnote()?;
+                    doc.blocks.push(BlockNode::Footnote(footnote));
                 }
                 _ => {
                     return Err(self.errorf(format!("unknown block type {:?}", self.cur.value)));
@@ -305,6 +314,39 @@ impl<'a> Parser<'a> {
         })
     }
 
+    fn parse_toc(&mut self) -> Result<TOCNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'toc'
+        self.expect(TokenType::LBrace, "'{' after toc")?;
+        self.expect(TokenType::RBrace, "'}' to close toc{}")?;
+        Ok(TOCNode { line, col })
+    }
+
+    fn parse_footnote(&mut self) -> Result<FootnoteDefNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'footnote'
+        let (attrs, _) = self.parse_attrs()?;
+        let id = match attrs.get("id") {
+            Some(id) if !id.trim().is_empty() => id.clone(),
+            _ => return Err(self.errorf("footnote missing 'id' attribute")),
+        };
+        if self.cur.token_type != TokenType::LBrace {
+            return Err(self.errorf(format!(
+                "expected '{{' after footnote, got {:?}",
+                self.cur.value
+            )));
+        }
+        let children = self.parse_prose_block()?;
+        Ok(FootnoteDefNode {
+            line,
+            col,
+            id,
+            children,
+        })
+    }
+
     fn parse_prose_block(&mut self) -> Result<Vec<InlineNode>, ParseError> {
         let children = self.parse_prose_until_rbrace()?;
         self.next()?; // resync token stream past '}'
@@ -362,6 +404,10 @@ impl<'a> Parser<'a> {
 
         if ident == "link" {
             return self.parse_link_raw(line, col);
+        }
+
+        if ident == "fn" {
+            return self.parse_fn_raw(line, col);
         }
 
         self.lex.consume_ident_only(ident);
@@ -430,6 +476,28 @@ impl<'a> Parser<'a> {
         ))
     }
 
+    fn parse_fn_raw(&mut self, line: usize, col: usize) -> Result<InlineNode, ParseError> {
+        self.lex.consume_ident_only("fn");
+        self.lex.consume_raw_byte(b'(', "'(' after fn")?;
+        self.lex.skip_raw_spaces();
+        let id = if self.lex.peek_char() == b'"' {
+            self.lex.read_raw_string()?
+        } else {
+            let ident = self.lex.read_raw_ident();
+            if ident.is_empty() {
+                return Err(ParseError::new(
+                    self.lex.line,
+                    self.lex.col,
+                    "expected footnote identifier in fn(...)",
+                ));
+            }
+            ident
+        };
+        self.lex.skip_raw_spaces();
+        self.lex.consume_raw_byte(b')', "')' to close fn(...)")?;
+        Ok(InlineNode::new(line, col, InlineKind::FootnoteRef(id)))
+    }
+
     fn parse_code_block(&mut self) -> Result<CodeBlockNode, ParseError> {
         let line = self.cur.line;
         let col = self.cur.col;
@@ -443,12 +511,24 @@ impl<'a> Parser<'a> {
         }
         let (raw, _, _) = self.lex.read_raw_until_bang_brace()?;
         self.next()?;
+        let language = attrs.remove("lang").unwrap_or_default();
+        let file = attrs.remove("file").unwrap_or_default();
+        let line_numbers = attrs
+            .get("line_numbers")
+            .map(|v| v == "true")
+            .unwrap_or(false);
+        let highlight_lines = attrs
+            .get("highlight")
+            .map(|s| parse_line_ranges(s))
+            .unwrap_or_default();
         Ok(CodeBlockNode {
             line,
             col,
-            language: attrs.remove("lang").unwrap_or_default(),
-            file: attrs.remove("file").unwrap_or_default(),
+            language,
+            file,
             raw_code: raw,
+            line_numbers,
+            highlight_lines,
         })
     }
 
@@ -767,6 +847,28 @@ impl<'a> Parser<'a> {
             children,
         })
     }
+}
+
+fn parse_line_ranges(s: &str) -> Vec<usize> {
+    let mut lines = Vec::new();
+    for part in s.split(',') {
+        let part = part.trim();
+        if let Some((start_s, end_s)) = part.split_once('-') {
+            if let (Ok(start), Ok(end)) = (
+                start_s.trim().parse::<usize>(),
+                end_s.trim().parse::<usize>(),
+            ) {
+                for l in start..=end {
+                    lines.push(l);
+                }
+            }
+        } else if let Ok(num) = part.parse::<usize>() {
+            lines.push(num);
+        }
+    }
+    lines.sort_unstable();
+    lines.dedup();
+    lines
 }
 
 fn trim_item_children_boundary(children: &mut [ItemChild]) {

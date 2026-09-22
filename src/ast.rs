@@ -91,6 +91,22 @@ pub struct MathBlockNode {
     pub latex: String,
 }
 
+/// Table of contents placeholder block: `toc {}`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TOCNode {
+    pub line: usize,
+    pub col: usize,
+}
+
+/// Footnote definition block: `footnote(id: "note1") { ... }`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FootnoteDefNode {
+    pub line: usize,
+    pub col: usize,
+    pub id: String,
+    pub children: Vec<InlineNode>,
+}
+
 /// Enumeration of all top-level block constructs supported in DocUP[span_3](start_span)[span_3](end_span).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BlockNode {
@@ -105,6 +121,8 @@ pub enum BlockNode {
     Callout(CalloutNode),
     Raw(RawNode),
     Math(MathBlockNode),
+    TOC(TOCNode),
+    Footnote(FootnoteDefNode),
 }
 
 impl BlockNode {
@@ -121,6 +139,8 @@ impl BlockNode {
             BlockNode::Callout(_) => "Callout",
             BlockNode::Raw(_) => "Raw",
             BlockNode::Math(_) => "Math",
+            BlockNode::TOC(_) => "TOC",
+            BlockNode::Footnote(_) => "Footnote",
         }
     }
 }
@@ -150,7 +170,7 @@ pub struct HRNode {
     pub col: usize,
 }
 
-/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs") {! ... !}`[span_7](start_span)[span_7](end_span).
+/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {! ... !}`[span_7](start_span)[span_7](end_span).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CodeBlockNode {
     pub line: usize,
@@ -158,6 +178,8 @@ pub struct CodeBlockNode {
     pub language: String,
     pub file: String,
     pub raw_code: String,
+    pub line_numbers: bool,
+    pub highlight_lines: Vec<usize>,
 }
 
 /// Ordered or unordered list: `list { ... }` or `list(ordered: true) { ... }`[span_8](start_span)[span_8](end_span).
@@ -248,6 +270,7 @@ pub enum InlineKind {
     },
     Strike(Vec<InlineNode>),
     Math(String),
+    FootnoteRef(String),
 }
 
 /// An inline syntax tree element with position tracking[span_16](start_span)[span_16](end_span).
@@ -280,6 +303,7 @@ impl InlineNode {
             InlineKind::Link { .. } => "Link",
             InlineKind::Strike(_) => "Strike",
             InlineKind::Math(_) => "Math",
+            InlineKind::FootnoteRef(_) => "FootnoteRef",
         }
     }
 

@@ -1,11 +1,13 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::ast::{
-    trim_inline_edges, BlockNode, CalloutKind, CodeBlockNode, DocumentNode, InlineKind, InlineNode,
-    ItemChild, ItemNode, ListNode, QuoteChild, TableNode,
+    BlockNode, CalloutKind, CodeBlockNode, DocumentNode, FootnoteDefNode, InlineKind, InlineNode,
+    ItemChild, ItemNode, ListNode, QuoteChild, TableNode, trim_inline_edges,
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
 
-/// PAGE_CSS provides modern, readable styling with automatic dark-mode support via
-/// CSS custom properties and `@media (prefers-color-scheme: dark)`[span_1](start_span)[span_1](end_span).
+/// PAGE_CSS provides modern, responsive styling with automatic dark-mode support,
+/// callout admonitions, table of contents hierarchy, codeblock line numbering, and footnotes[span_1](start_span)[span_1](end_span).
 pub const PAGE_CSS: &str = r#"
 :root {
   --bg: #ffffff;
@@ -106,6 +108,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.6em;
   overflow-wrap: break-word;
   color: var(--text);
+  scroll-margin-top: 1em;
 }
 h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
 h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
@@ -195,6 +198,44 @@ img {
   text-align: center;
   overflow-x: auto;
 }
+.toc {
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.toc-title {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: var(--text);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.toc li {
+  margin: 0.35em 0;
+  font-size: 0.95em;
+}
+.toc li a {
+  color: var(--text);
+}
+.toc li a:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+.toc li.toc-level-1 { font-weight: 600; }
+.toc li.toc-level-2 { padding-left: 1.2em; }
+.toc li.toc-level-3 { padding-left: 2.4em; }
+.toc li.toc-level-4 { padding-left: 3.6em; }
+.toc li.toc-level-5 { padding-left: 4.8em; }
+.toc li.toc-level-6 { padding-left: 6em; }
+
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -219,8 +260,9 @@ th {
   white-space: nowrap;
 }
 s { color: var(--text-muted); }
+
 .codeblock {
-  margin: 1em 0;
+  margin: 1.2em 0;
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
@@ -228,6 +270,7 @@ s { color: var(--text-muted); }
 .codeblock-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 0.75em;
   padding: 0.4em 0.9em;
   background: var(--code-bg);
@@ -235,8 +278,27 @@ s { color: var(--text-muted); }
   font-size: 0.8em;
   color: var(--text-muted);
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
-  overflow-x: auto;
-  white-space: nowrap;
+}
+.codeblock-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+.codeblock-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  color: var(--text-muted);
+  padding: 0.15em 0.55em;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.codeblock-copy-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--border);
 }
 .codeblock pre {
   margin: 0;
@@ -252,6 +314,53 @@ s { color: var(--text-muted); }
   overflow-wrap: normal;
   white-space: pre;
 }
+.code-line {
+  display: block;
+  min-height: 1.4em;
+}
+.code-line.highlighted-line {
+  background: rgba(88, 166, 255, 0.15);
+  margin: 0 -1em;
+  padding: 0 1em;
+}
+.line-numbers .code-line {
+  counter-increment: line;
+}
+.line-numbers .code-line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.2em;
+  padding-right: 0.8em;
+  margin-right: 0.8em;
+  color: var(--text-muted);
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid var(--border);
+}
+
+.footnote-ref {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: super;
+  padding-left: 0.1em;
+}
+.footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+.footnotes ol {
+  padding-left: 1.4em;
+}
+.footnotes li {
+  margin: 0.5em 0;
+}
+.footnote-back {
+  margin-left: 0.4em;
+  text-decoration: none;
+}
+
 .tok-keyword { color: var(--tok-keyword); font-weight: 600; }
 .tok-type    { color: var(--tok-type); }
 .tok-string  { color: var(--tok-string); }
@@ -281,14 +390,44 @@ pub const KATEX_HEAD: &str = r#"  <link rel="stylesheet" href="https://cdn.jsdel
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 "#;
 
-/// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span),
-/// incorporating OpenGraph/Twitter social cards, theme configurations,
-/// optional external stylesheets, custom CLI CSS, and conditional KaTeX scripts.
-pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
-    let mut body = String::new();
-    for block in &doc.blocks {
-        render_block(&mut body, block);
+pub const COPY_SCRIPT: &str = r#"  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.codeblock').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = orig; }, 2000);
+      });
     }
+  </script>
+"#;
+
+struct HeadingMeta {
+    level: usize,
+    id: String,
+    title: String,
+}
+
+/// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span),
+/// incorporating OpenGraph/Twitter cards, TOC generation, codeblock copy scripts,
+/// and bidirectional footnotes.
+pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
+    let heading_metas = collect_headings(doc);
+    let (footnote_numbers, footnote_order) = collect_footnotes(doc);
+
+    let mut body = String::new();
+    let mut heading_idx = 0;
+    for block in &doc.blocks {
+        render_block(
+            &mut body,
+            block,
+            &heading_metas,
+            &mut heading_idx,
+            &footnote_numbers,
+        );
+    }
+
+    render_footnotes_section(&mut body, doc, &footnote_numbers, &footnote_order);
 
     let mut title = "DocUP Document".to_string();
     let mut lang = "en".to_string();
@@ -307,7 +446,6 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
             theme_attr = format!(" data-theme=\"{}\"", escape_html(theme.trim()));
         }
 
-        // Standard metadata tags
         for key in ["author", "version"] {
             if let Some(v) = meta.fields.get(key) {
                 meta_tags.push_str(&format!(
@@ -318,7 +456,6 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
             }
         }
 
-        // Extended description & keywords
         if let Some(desc) = meta.fields.get("description") {
             let escaped_desc = escape_html(desc);
             meta_tags.push_str(&format!(
@@ -338,7 +475,6 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
             ));
         }
 
-        // Canonical URL & Social Cards (OpenGraph / Twitter)
         if let Some(canonical) = meta.fields.get("canonical") {
             let escaped_canonical = escape_html(canonical);
             meta_tags.push_str(&format!(
@@ -358,7 +494,6 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
             ));
         }
 
-        // Linked custom stylesheet via meta block: `stylesheet: "path/to/style.css"`
         if let Some(sheet) = meta.fields.get("stylesheet") {
             stylesheet_link = format!(
                 "  <link rel=\"stylesheet\" href=\"{}\">\n",
@@ -398,38 +533,210 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
   <style>{PAGE_CSS}</style>
 {katex_tags}{stylesheet_link}{custom_style_tag}</head>
 <body>
-{body}</body>
+{body}{COPY_SCRIPT}</body>
 </html>
 "#
     )
 }
 
-fn render_block(w: &mut String, block: &BlockNode) {
+fn collect_headings(doc: &DocumentNode) -> Vec<HeadingMeta> {
+    let mut metas = Vec::new();
+    let mut used_ids = HashSet::new();
+
+    for block in &doc.blocks {
+        if let BlockNode::Heading(h) = block {
+            let title = inlines_to_plain_text(&h.children);
+            let base_id = if let Some(id) = h.attrs.get("id") {
+                id.clone()
+            } else {
+                slugify(&title)
+            };
+            let unique_id = unique_slug(&base_id, &mut used_ids);
+            metas.push(HeadingMeta {
+                level: h.level,
+                id: unique_id,
+                title,
+            });
+        }
+    }
+    metas
+}
+
+fn slugify(s: &str) -> String {
+    let mut slug = String::new();
+    let mut prev_dash = false;
+    for c in s.chars() {
+        if c.is_ascii_alphanumeric() {
+            slug.push(c.to_ascii_lowercase());
+            prev_dash = false;
+        } else if (c == ' ' || c == '-' || c == '_') && !prev_dash && !slug.is_empty() {
+            slug.push('-');
+            prev_dash = true;
+        }
+    }
+    slug.trim_end_matches('-').to_string()
+}
+
+fn unique_slug(base: &str, used: &mut HashSet<String>) -> String {
+    let base = if base.is_empty() { "section" } else { base };
+    if used.insert(base.to_string()) {
+        return base.to_string();
+    }
+    let mut count = 1;
+    loop {
+        let candidate = format!("{base}-{count}");
+        if used.insert(candidate.clone()) {
+            return candidate;
+        }
+        count += 1;
+    }
+}
+
+fn inlines_to_plain_text(inlines: &[InlineNode]) -> String {
+    let mut out = String::new();
+    for inline in inlines {
+        match &inline.kind {
+            InlineKind::Text(s) | InlineKind::Code(s) | InlineKind::Math(s) => out.push_str(s),
+            InlineKind::Bold(children)
+            | InlineKind::Italic(children)
+            | InlineKind::Strike(children)
+            | InlineKind::Link { children, .. } => out.push_str(&inlines_to_plain_text(children)),
+            InlineKind::FootnoteRef(_) => {}
+        }
+    }
+    out
+}
+
+fn collect_footnotes(doc: &DocumentNode) -> (HashMap<String, usize>, Vec<String>) {
+    let mut map = HashMap::new();
+    let mut order = Vec::new();
+    for block in &doc.blocks {
+        collect_block_footnotes(block, &mut map, &mut order);
+    }
+    (map, order)
+}
+
+fn collect_block_footnotes(
+    block: &BlockNode,
+    map: &mut HashMap<String, usize>,
+    order: &mut Vec<String>,
+) {
+    match block {
+        BlockNode::Heading(h) => collect_inlines_footnotes(&h.children, map, order),
+        BlockNode::Paragraph(p) => collect_inlines_footnotes(&p.children, map, order),
+        BlockNode::Callout(c) => collect_inlines_footnotes(&c.children, map, order),
+        BlockNode::Table(t) => {
+            for row in &t.rows {
+                for cell in &row.cells {
+                    collect_inlines_footnotes(&cell.children, map, order);
+                }
+            }
+        }
+        BlockNode::List(l) => {
+            for item in &l.items {
+                for child in &item.children {
+                    match child {
+                        ItemChild::Inline(i) => collect_inline_footnotes(i, map, order),
+                        ItemChild::List(nested) => {
+                            collect_block_footnotes(&BlockNode::List(nested.clone()), map, order)
+                        }
+                    }
+                }
+            }
+        }
+        BlockNode::Quote(q) => {
+            for child in &q.children {
+                match child {
+                    QuoteChild::Inline(i) => collect_inline_footnotes(i, map, order),
+                    QuoteChild::Quote(nested) => {
+                        collect_block_footnotes(&BlockNode::Quote(nested.clone()), map, order)
+                    }
+                }
+            }
+        }
+        BlockNode::CodeBlock(_)
+        | BlockNode::HR(_)
+        | BlockNode::Image(_)
+        | BlockNode::Raw(_)
+        | BlockNode::Math(_)
+        | BlockNode::TOC(_)
+        | BlockNode::Footnote(_) => {}
+    }
+}
+
+fn collect_inlines_footnotes(
+    inlines: &[InlineNode],
+    map: &mut HashMap<String, usize>,
+    order: &mut Vec<String>,
+) {
+    for inline in inlines {
+        collect_inline_footnotes(inline, map, order);
+    }
+}
+
+fn collect_inline_footnotes(
+    inline: &InlineNode,
+    map: &mut HashMap<String, usize>,
+    order: &mut Vec<String>,
+) {
+    match &inline.kind {
+        InlineKind::FootnoteRef(id) => {
+            if !map.contains_key(id) {
+                let num = map.len() + 1;
+                map.insert(id.clone(), num);
+                order.push(id.clone());
+            }
+        }
+        InlineKind::Bold(children)
+        | InlineKind::Italic(children)
+        | InlineKind::Strike(children)
+        | InlineKind::Link { children, .. } => {
+            collect_inlines_footnotes(children, map, order);
+        }
+        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::Math(_) => {}
+    }
+}
+
+fn render_block(
+    w: &mut String,
+    block: &BlockNode,
+    heading_metas: &[HeadingMeta],
+    heading_idx: &mut usize,
+    footnote_numbers: &HashMap<String, usize>,
+) {
     match block {
         BlockNode::Heading(b) => {
-            let id_attr = match b.attrs.get("id") {
-                Some(id) => format!(" id=\"{}\"", escape_html(id)),
-                None => String::new(),
+            let id = if *heading_idx < heading_metas.len() {
+                &heading_metas[*heading_idx].id
+            } else {
+                "section"
             };
+            *heading_idx += 1;
+
             let class_attr = match b.attrs.get("class") {
                 Some(class) => format!(" class=\"{}\"", escape_html(class)),
                 None => String::new(),
             };
-            w.push_str(&format!("<h{}{}{}>", b.level, id_attr, class_attr));
-            render_inlines(w, &b.children);
+            w.push_str(&format!(
+                "<h{} id=\"{}\"{}>",
+                b.level,
+                escape_html(id),
+                class_attr
+            ));
+            render_inlines(w, &b.children, footnote_numbers);
             w.push_str(&format!("</h{}>\n", b.level));
         }
         BlockNode::Paragraph(b) => {
             w.push_str("<p>");
-            render_inlines(w, &b.children);
+            render_inlines(w, &b.children, footnote_numbers);
             w.push_str("</p>\n");
         }
         BlockNode::CodeBlock(b) => render_code_block(w, b),
         BlockNode::HR(_) => w.push_str("<hr>\n"),
-        BlockNode::List(b) => render_list(w, b),
+        BlockNode::List(b) => render_list(w, b, footnote_numbers),
         BlockNode::Quote(b) => {
             w.push_str("<blockquote>\n");
-            render_quote_body(w, &b.children);
+            render_quote_body(w, &b.children, footnote_numbers);
             w.push_str("</blockquote>\n");
         }
         BlockNode::Image(b) => {
@@ -439,7 +746,7 @@ fn render_block(w: &mut String, block: &BlockNode) {
                 escape_html(&b.alt)
             ));
         }
-        BlockNode::Table(b) => render_table(w, b),
+        BlockNode::Table(b) => render_table(w, b, footnote_numbers),
         BlockNode::Callout(c) => {
             let kind_str = c.kind.as_str();
             let title = match c.kind {
@@ -451,7 +758,7 @@ fn render_block(w: &mut String, block: &BlockNode) {
             w.push_str(&format!("<div class=\"callout callout-{kind_str}\">\n"));
             w.push_str(&format!("  <div class=\"callout-title\">{title}</div>\n"));
             w.push_str("  <div class=\"callout-body\">");
-            render_inlines(w, &c.children);
+            render_inlines(w, &c.children, footnote_numbers);
             w.push_str("</div>\n</div>\n");
         }
         BlockNode::Raw(r) => {
@@ -463,18 +770,45 @@ fn render_block(w: &mut String, block: &BlockNode) {
             escape_html_into(&m.latex, w);
             w.push_str("\n\\]</div>\n");
         }
+        BlockNode::TOC(_) => render_toc(w, heading_metas),
+        BlockNode::Footnote(_) => {}
     }
 }
 
-fn render_quote_body(w: &mut String, children: &[QuoteChild]) {
+fn render_toc(w: &mut String, headings: &[HeadingMeta]) {
+    if headings.is_empty() {
+        return;
+    }
+    w.push_str("<nav class=\"toc\" aria-label=\"Table of contents\">\n");
+    w.push_str("  <div class=\"toc-title\">Table of Contents</div>\n");
+    w.push_str("  <ul>\n");
+    for h in headings {
+        w.push_str(&format!(
+            "    <li class=\"toc-level-{}\"><a href=\"#{}\">{}</a></li>\n",
+            h.level,
+            escape_html(&h.id),
+            escape_html(&h.title)
+        ));
+    }
+    w.push_str("  </ul>\n");
+    w.push_str("</nav>\n");
+}
+
+fn render_quote_body(
+    w: &mut String,
+    children: &[QuoteChild],
+    footnote_numbers: &HashMap<String, usize>,
+) {
     let mut pending: Vec<InlineNode> = Vec::new();
-    let flush = |w: &mut String, pending: &mut Vec<InlineNode>| {
+    let flush = |w: &mut String,
+                 pending: &mut Vec<InlineNode>,
+                 footnote_numbers: &HashMap<String, usize>| {
         if pending.is_empty() {
             return;
         }
         trim_inline_edges(pending);
         w.push_str("  <p>");
-        render_inlines(w, pending);
+        render_inlines(w, pending, footnote_numbers);
         w.push_str("</p>\n");
         pending.clear();
     };
@@ -482,9 +816,9 @@ fn render_quote_body(w: &mut String, children: &[QuoteChild]) {
     for c in children {
         match c {
             QuoteChild::Quote(nested) => {
-                flush(w, &mut pending);
+                flush(w, &mut pending, footnote_numbers);
                 w.push_str("  <blockquote>\n");
-                render_quote_body(w, &nested.children);
+                render_quote_body(w, &nested.children, footnote_numbers);
                 w.push_str("  </blockquote>\n");
             }
             QuoteChild::Inline(inline) => {
@@ -492,19 +826,19 @@ fn render_quote_body(w: &mut String, children: &[QuoteChild]) {
             }
         }
     }
-    flush(w, &mut pending);
+    flush(w, &mut pending, footnote_numbers);
 }
 
-fn render_list(w: &mut String, l: &ListNode) {
+fn render_list(w: &mut String, l: &ListNode, footnote_numbers: &HashMap<String, usize>) {
     let tag = if l.ordered { "ol" } else { "ul" };
     w.push_str(&format!("<{tag}>\n"));
     for item in &l.items {
-        render_item(w, item);
+        render_item(w, item, footnote_numbers);
     }
     w.push_str(&format!("</{tag}>\n"));
 }
 
-fn render_item(w: &mut String, item: &ItemNode) {
+fn render_item(w: &mut String, item: &ItemNode, footnote_numbers: &HashMap<String, usize>) {
     if let Some(done) = item.done {
         let checked = if done { " checked" } else { "" };
         w.push_str(&format!(
@@ -519,20 +853,20 @@ fn render_item(w: &mut String, item: &ItemNode) {
         match c {
             ItemChild::List(nested) => {
                 trim_inline_edges(&mut inline);
-                render_inlines(w, &inline);
+                render_inlines(w, &inline, footnote_numbers);
                 inline.clear();
-                render_list(w, nested);
+                render_list(w, nested, footnote_numbers);
             }
             ItemChild::Inline(node) => {
                 inline.push(node.clone());
             }
         }
     }
-    render_inlines(w, &inline);
+    render_inlines(w, &inline, footnote_numbers);
     w.push_str("</li>\n");
 }
 
-fn render_table(w: &mut String, t: &TableNode) {
+fn render_table(w: &mut String, t: &TableNode, footnote_numbers: &HashMap<String, usize>) {
     w.push_str("<div class=\"table-wrap\">\n");
     w.push_str("<table>\n");
     for row in &t.rows {
@@ -540,7 +874,7 @@ fn render_table(w: &mut String, t: &TableNode) {
         let cell_tag = if row.header { "th" } else { "td" };
         for cell in &row.cells {
             w.push_str(&format!("    <{cell_tag}>"));
-            render_inlines(w, &cell.children);
+            render_inlines(w, &cell.children, footnote_numbers);
             w.push_str(&format!("</{cell_tag}>\n"));
         }
         w.push_str("  </tr>\n");
@@ -549,7 +883,11 @@ fn render_table(w: &mut String, t: &TableNode) {
     w.push_str("</div>\n");
 }
 
-fn render_inlines(w: &mut String, children: &[InlineNode]) {
+fn render_inlines(
+    w: &mut String,
+    children: &[InlineNode],
+    footnote_numbers: &HashMap<String, usize>,
+) {
     for inline in children {
         match &inline.kind {
             InlineKind::Text(val) => {
@@ -557,17 +895,17 @@ fn render_inlines(w: &mut String, children: &[InlineNode]) {
             }
             InlineKind::Bold(inner) => {
                 w.push_str("<strong>");
-                render_inlines(w, inner);
+                render_inlines(w, inner, footnote_numbers);
                 w.push_str("</strong>");
             }
             InlineKind::Italic(inner) => {
                 w.push_str("<em>");
-                render_inlines(w, inner);
+                render_inlines(w, inner, footnote_numbers);
                 w.push_str("</em>");
             }
             InlineKind::Strike(inner) => {
                 w.push_str("<s>");
-                render_inlines(w, inner);
+                render_inlines(w, inner, footnote_numbers);
                 w.push_str("</s>");
             }
             InlineKind::Code(val) => {
@@ -577,7 +915,7 @@ fn render_inlines(w: &mut String, children: &[InlineNode]) {
             }
             InlineKind::Link { url, children } => {
                 w.push_str(&format!("<a href=\"{}\">", escape_html(url)));
-                render_inlines(w, children);
+                render_inlines(w, children, footnote_numbers);
                 w.push_str("</a>");
             }
             InlineKind::Math(val) => {
@@ -585,36 +923,165 @@ fn render_inlines(w: &mut String, children: &[InlineNode]) {
                 escape_html_into(val, w);
                 w.push_str("\\)</span>");
             }
+            InlineKind::FootnoteRef(id) => {
+                let num = footnote_numbers.get(id).copied().unwrap_or(1);
+                let escaped_id = escape_html(id);
+                w.push_str(&format!(
+                    "<sup class=\"footnote-ref\"><a href=\"#fn-{escaped_id}\" id=\"fnref-{escaped_id}\">[{num}]</a></sup>"
+                ));
+            }
         }
     }
 }
 
 fn render_code_block(w: &mut String, b: &CodeBlockNode) {
     w.push_str("<div class=\"codeblock\">\n");
-    if !b.file.is_empty() || !b.language.is_empty() {
-        w.push_str("  <div class=\"codeblock-header\">\n");
-        if !b.file.is_empty() {
-            w.push_str(&format!("    <span>{}</span>\n", escape_html(&b.file)));
-        } else {
-            w.push_str("    <span></span>\n");
-        }
-        if !b.language.is_empty() {
-            w.push_str(&format!("    <span>{}</span>\n", escape_html(&b.language)));
-        }
-        w.push_str("  </div>\n");
+    w.push_str("  <div class=\"codeblock-header\">\n");
+    if !b.file.is_empty() {
+        w.push_str(&format!("    <span>{}</span>\n", escape_html(&b.file)));
+    } else {
+        w.push_str("    <span></span>\n");
     }
-    let lang_class = if !b.language.is_empty() {
-        format!(" language-{}", escape_html(&b.language))
+    w.push_str("    <div class=\"codeblock-actions\">\n");
+    if !b.language.is_empty() {
+        w.push_str(&format!(
+            "      <span>{}</span>\n",
+            escape_html(&b.language)
+        ));
+    }
+    w.push_str("      <button type=\"button\" class=\"codeblock-copy-btn\" onclick=\"copyCode(this)\" title=\"Copy code\">Copy</button>\n");
+    w.push_str("    </div>\n");
+    w.push_str("  </div>\n");
+
+    let mut classes = Vec::new();
+    if !b.language.is_empty() {
+        classes.push(format!("language-{}", escape_html(&b.language)));
+    }
+    if b.line_numbers {
+        classes.push("line-numbers".to_string());
+    }
+    let class_attr = if !classes.is_empty() {
+        format!(" class=\"{}\"", classes.join(" "))
     } else {
         String::new()
     };
+
     let highlighted = highlight_code(&b.raw_code, &b.language);
+    let wrapped = wrap_code_lines(&highlighted, b.line_numbers, &b.highlight_lines);
     w.push_str(&format!(
-        "  <pre><code class=\"{}\">{}</code></pre>\n",
-        lang_class.trim_start(),
-        highlighted
+        "  <pre><code{class_attr}>{wrapped}</code></pre>\n"
     ));
     w.push_str("</div>\n");
+}
+
+fn wrap_code_lines(highlighted: &str, line_numbers: bool, highlight_lines: &[usize]) -> String {
+    if !line_numbers && highlight_lines.is_empty() {
+        return highlighted.to_string();
+    }
+    let mut out = String::with_capacity(highlighted.len() * 2);
+    let lines: Vec<&str> = highlighted.split('\n').collect();
+    let mut open_tags: Vec<String> = Vec::new();
+
+    for (idx, line) in lines.iter().enumerate() {
+        let line_num = idx + 1;
+        let is_highlighted = highlight_lines.contains(&line_num);
+        let hl_class = if is_highlighted {
+            " highlighted-line"
+        } else {
+            ""
+        };
+
+        out.push_str("<span class=\"code-line");
+        out.push_str(hl_class);
+        out.push_str("\">");
+
+        for tag in &open_tags {
+            out.push_str(tag);
+        }
+
+        let mut i = 0;
+        let bytes = line.as_bytes();
+        while i < bytes.len() {
+            if bytes[i] == b'<' {
+                if i + 1 < bytes.len() && bytes[i + 1] == b'/' {
+                    if let Some(close_end) = line[i..].find('>') {
+                        open_tags.pop();
+                        i += close_end + 1;
+                        continue;
+                    }
+                } else if line[i..].starts_with("<span") {
+                    if let Some(open_end) = line[i..].find('>') {
+                        let tag = &line[i..i + open_end + 1];
+                        open_tags.push(tag.to_string());
+                        i += open_end + 1;
+                        continue;
+                    }
+                }
+            }
+            i += 1;
+        }
+
+        out.push_str(line);
+
+        for _ in 0..open_tags.len() {
+            out.push_str("</span>");
+        }
+
+        out.push_str("</span>");
+        if idx + 1 < lines.len() {
+            out.push('\n');
+        }
+    }
+    out
+}
+
+fn render_footnotes_section(
+    w: &mut String,
+    doc: &DocumentNode,
+    footnote_numbers: &HashMap<String, usize>,
+    footnote_order: &[String],
+) {
+    let mut defs: HashMap<String, &FootnoteDefNode> = HashMap::new();
+    for block in &doc.blocks {
+        if let BlockNode::Footnote(f) = block {
+            defs.insert(f.id.clone(), f);
+        }
+    }
+
+    if defs.is_empty() {
+        return;
+    }
+
+    w.push_str("<section class=\"footnotes\" aria-label=\"Footnotes\">\n");
+    w.push_str("  <hr>\n");
+    w.push_str("  <ol>\n");
+
+    let mut rendered_ids = HashSet::new();
+    for id in footnote_order {
+        if let Some(def) = defs.get(id) {
+            rendered_ids.insert(id.clone());
+            let escaped_id = escape_html(id);
+            w.push_str(&format!("    <li id=\"fn-{escaped_id}\">"));
+            render_inlines(w, &def.children, footnote_numbers);
+            w.push_str(&format!(
+                " <a href=\"#fnref-{escaped_id}\" class=\"footnote-back\" aria-label=\"Back to reference\">↩</a></li>\n"
+            ));
+        }
+    }
+
+    for (id, def) in &defs {
+        if !rendered_ids.contains(id) {
+            let escaped_id = escape_html(id);
+            w.push_str(&format!("    <li id=\"fn-{escaped_id}\">"));
+            render_inlines(w, &def.children, footnote_numbers);
+            w.push_str(&format!(
+                " <a href=\"#fnref-{escaped_id}\" class=\"footnote-back\" aria-label=\"Back to reference\">↩</a></li>\n"
+            ));
+        }
+    }
+
+    w.push_str("  </ol>\n");
+    w.push_str("</section>\n");
 }
 
 fn doc_has_math(doc: &DocumentNode) -> bool {
@@ -627,15 +1094,18 @@ fn block_has_math(block: &BlockNode) -> bool {
         BlockNode::Heading(h) => inlines_have_math(&h.children),
         BlockNode::Paragraph(p) => inlines_have_math(&p.children),
         BlockNode::Callout(c) => inlines_have_math(&c.children),
+        BlockNode::Footnote(f) => inlines_have_math(&f.children),
         BlockNode::Table(t) => t
             .rows
             .iter()
             .any(|r| r.cells.iter().any(|c| inlines_have_math(&c.children))),
         BlockNode::List(l) => list_has_math(l),
         BlockNode::Quote(q) => quote_has_math(&q.children),
-        BlockNode::CodeBlock(_) | BlockNode::HR(_) | BlockNode::Image(_) | BlockNode::Raw(_) => {
-            false
-        }
+        BlockNode::CodeBlock(_)
+        | BlockNode::HR(_)
+        | BlockNode::Image(_)
+        | BlockNode::Raw(_)
+        | BlockNode::TOC(_) => false,
     }
 }
 
@@ -688,6 +1158,6 @@ fn inline_has_math(inline: &InlineNode) -> bool {
         | InlineKind::Italic(children)
         | InlineKind::Strike(children)
         | InlineKind::Link { children, .. } => inlines_have_math(children),
-        InlineKind::Text(_) | InlineKind::Code(_) => false,
+        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::FootnoteRef(_) => false,
     }
 }
