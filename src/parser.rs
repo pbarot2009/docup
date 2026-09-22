@@ -2,15 +2,15 @@ use std::collections::HashMap;
 
 use crate::ast::{
     BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode, FootnoteDefNode,
-    HRNode, HeadingNode, ImageNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode,
-    MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TOCNode,
-    TableNode, trim_inline_edges,
+    HRNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode,
+    ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode,
+    TOCNode, TableNode, trim_inline_edges,
 };
 use crate::errors::{LexError, ParseError};
 use crate::lexer::{Lexer, Token, TokenType};
 
 /// max_inline_depth bounds nested inline elements (e.g. b{i{b{...}}}) to prevent
-/// adversarial or deeply nested input from overflowing the stack[span_1](start_span)[span_1](end_span).
+/// adversarial or deeply nested input from overflowing the stack.
 const MAX_INLINE_DEPTH: usize = 64;
 
 impl From<LexError> for ParseError {
@@ -50,13 +50,13 @@ impl<'a> Parser<'a> {
         Ok(tok)
     }
 
-    /// ParseDocument parses the complete token stream into a DocumentNode[span_2](start_span)[span_2](end_span).
+    /// ParseDocument parses the complete token stream into a DocumentNode.
     pub fn parse_document(&mut self) -> Result<DocumentNode, ParseError> {
         let mut doc = DocumentNode::new();
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote), got {:?}",
+                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include), got {:?}",
                     self.cur.value
                 )));
             }
@@ -119,12 +119,38 @@ impl<'a> Parser<'a> {
                     let footnote = self.parse_footnote()?;
                     doc.blocks.push(BlockNode::Footnote(footnote));
                 }
+                "include" => {
+                    let include = self.parse_include()?;
+                    doc.blocks.push(BlockNode::Include(include));
+                }
                 _ => {
                     return Err(self.errorf(format!("unknown block type {:?}", self.cur.value)));
                 }
             }
         }
         Ok(doc)
+    }
+
+    fn parse_include(&mut self) -> Result<IncludeNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'include'
+        let path = if self.cur.token_type == TokenType::LParen {
+            self.next()?;
+            let p = self.expect(TokenType::String, "include file path")?.value;
+            self.expect(TokenType::RParen, "')' to close include(...)")?;
+            p
+        } else if self.cur.token_type == TokenType::String {
+            let p = self.cur.value.clone();
+            self.next()?;
+            p
+        } else {
+            return Err(self.errorf(format!(
+                "expected file path string after include, got {:?}",
+                self.cur.value
+            )));
+        };
+        Ok(IncludeNode { line, col, path })
     }
 
     fn parse_meta(&mut self) -> Result<MetaNode, ParseError> {
@@ -147,7 +173,7 @@ impl<'a> Parser<'a> {
         Ok(MetaNode::new(line, col, fields))
     }
 
-    /// parse_attrs parses an optional attribute list: `(key: "val", "posArg", flag: true)`[span_3](start_span)[span_3](end_span)
+    /// parse_attrs parses an optional attribute list: `(key: "val", "posArg", flag: true)`
     fn parse_attrs(&mut self) -> Result<(HashMap<String, String>, Vec<String>), ParseError> {
         let mut attrs = HashMap::new();
         let mut positional = Vec::new();

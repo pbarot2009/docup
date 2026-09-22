@@ -7,7 +7,7 @@ use crate::ast::{
 use crate::errors::SemaError;
 
 /// Analyze validates the document AST and returns a SemaError on the first
-/// semantic violation found[span_1](start_span)[span_1](end_span).
+/// semantic violation found.
 pub fn analyze(doc: &DocumentNode) -> Result<(), SemaError> {
     if let Some(ref meta) = doc.meta {
         check_meta_fields(meta)?;
@@ -106,6 +106,16 @@ fn analyze_block(
         }
         BlockNode::TOC(_) => Ok(()),
         BlockNode::Footnote(f) => analyze_inlines(&f.children, footnote_defs),
+        BlockNode::Include(inc) => {
+            if inc.path.trim().is_empty() {
+                return Err(SemaError::new(
+                    inc.line,
+                    inc.col,
+                    "include statement has empty path",
+                ));
+            }
+            Ok(())
+        }
     }
 }
 

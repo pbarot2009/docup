@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-/// Root AST node representing a fully parsed .du document[span_1](start_span)[span_1](end_span).
+/// Root AST node representing a fully parsed .du document.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DocumentNode {
     pub meta: Option<MetaNode>,
@@ -22,7 +22,7 @@ impl Default for DocumentNode {
     }
 }
 
-/// Metadata block at the start of a document: `meta { key: "value", ... }`[span_2](start_span)[span_2](end_span).
+/// Metadata block at the start of a document: `meta { key: "value", ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MetaNode {
     pub line: usize,
@@ -107,7 +107,15 @@ pub struct FootnoteDefNode {
     pub children: Vec<InlineNode>,
 }
 
-/// Enumeration of all top-level block constructs supported in DocUP[span_3](start_span)[span_3](end_span).
+/// Modular document include statement: `include "path/to/file.du"`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IncludeNode {
+    pub line: usize,
+    pub col: usize,
+    pub path: String,
+}
+
+/// Enumeration of all top-level block constructs supported in DocUP.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BlockNode {
     Heading(HeadingNode),
@@ -123,6 +131,7 @@ pub enum BlockNode {
     Math(MathBlockNode),
     TOC(TOCNode),
     Footnote(FootnoteDefNode),
+    Include(IncludeNode),
 }
 
 impl BlockNode {
@@ -141,11 +150,12 @@ impl BlockNode {
             BlockNode::Math(_) => "Math",
             BlockNode::TOC(_) => "TOC",
             BlockNode::Footnote(_) => "Footnote",
+            BlockNode::Include(_) => "Include",
         }
     }
 }
 
-/// Heading block: `h(1) { ... }` or `h(2, id: "sub", class: "sec") { ... }`[span_4](start_span)[span_4](end_span).
+/// Heading block: `h(1) { ... }` or `h(2, id: "sub", class: "sec") { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HeadingNode {
     pub line: usize,
@@ -155,7 +165,7 @@ pub struct HeadingNode {
     pub children: Vec<InlineNode>,
 }
 
-/// Paragraph block: `p { ... }`[span_5](start_span)[span_5](end_span).
+/// Paragraph block: `p { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParagraphNode {
     pub line: usize,
@@ -163,14 +173,14 @@ pub struct ParagraphNode {
     pub children: Vec<InlineNode>,
 }
 
-/// Horizontal rule: `hr {}`[span_6](start_span)[span_6](end_span).
+/// Horizontal rule: `hr {}`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HRNode {
     pub line: usize,
     pub col: usize,
 }
 
-/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {! ... !}`[span_7](start_span)[span_7](end_span).
+/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {! ... !}`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CodeBlockNode {
     pub line: usize,
@@ -182,7 +192,7 @@ pub struct CodeBlockNode {
     pub highlight_lines: Vec<usize>,
 }
 
-/// Ordered or unordered list: `list { ... }` or `list(ordered: true) { ... }`[span_8](start_span)[span_8](end_span).
+/// Ordered or unordered list: `list { ... }` or `list(ordered: true) { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListNode {
     pub line: usize,
@@ -191,12 +201,12 @@ pub struct ListNode {
     pub items: Vec<ItemNode>,
 }
 
-/// List item node: `item { ... }` or `task(done: true/false) { ... }`[span_9](start_span)[span_9](end_span).
+/// List item node: `item { ... }` or `task(done: true/false) { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ItemNode {
     pub line: usize,
     pub col: usize,
-    /// `None` for regular items, `Some(true/false)` for task list checkboxes[span_10](start_span)[span_10](end_span).
+    /// `None` for regular items, `Some(true/false)` for task list checkboxes.
     pub done: Option<bool>,
     pub children: Vec<ItemChild>,
 }
@@ -208,7 +218,7 @@ pub enum ItemChild {
     List(ListNode),
 }
 
-/// Blockquote block: `quote { ... }`[span_11](start_span)[span_11](end_span).
+/// Blockquote block: `quote { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QuoteNode {
     pub line: usize,
@@ -223,7 +233,7 @@ pub enum QuoteChild {
     Quote(QuoteNode),
 }
 
-/// Image block: `image("url", alt: "alt text")`[span_12](start_span)[span_12](end_span).
+/// Image block: `image("url", alt: "alt text")`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ImageNode {
     pub line: usize,
@@ -232,7 +242,7 @@ pub struct ImageNode {
     pub alt: String,
 }
 
-/// Table block: `table { row { cell { ... } } }`[span_13](start_span)[span_13](end_span).
+/// Table block: `table { row { cell { ... } } }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TableNode {
     pub line: usize,
@@ -240,7 +250,7 @@ pub struct TableNode {
     pub rows: Vec<RowNode>,
 }
 
-/// Table row node: `row { ... }` or `row(header: true) { ... }`[span_14](start_span)[span_14](end_span).
+/// Table row node: `row { ... }` or `row(header: true) { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RowNode {
     pub line: usize,
@@ -249,7 +259,7 @@ pub struct RowNode {
     pub cells: Vec<CellNode>,
 }
 
-/// Individual table cell: `cell { ... }`[span_15](start_span)[span_15](end_span).
+/// Individual table cell: `cell { ... }`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CellNode {
     pub line: usize,
@@ -273,7 +283,7 @@ pub enum InlineKind {
     FootnoteRef(String),
 }
 
-/// An inline syntax tree element with position tracking[span_16](start_span)[span_16](end_span).
+/// An inline syntax tree element with position tracking.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InlineNode {
     pub line: usize,

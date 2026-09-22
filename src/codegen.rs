@@ -660,7 +660,7 @@ fn collect_block_footnotes(
         | BlockNode::Raw(_)
         | BlockNode::Math(_)
         | BlockNode::TOC(_)
-        | BlockNode::Footnote(_) => {}
+        | BlockNode::Footnote(_) | BlockNode::Include(_) => {}
     }
 }
 
@@ -771,7 +771,7 @@ fn render_block(
             w.push_str("\n\\]</div>\n");
         }
         BlockNode::TOC(_) => render_toc(w, heading_metas),
-        BlockNode::Footnote(_) => {}
+        BlockNode::Footnote(_) | BlockNode::Include(_) => {}
     }
 }
 
@@ -1105,7 +1105,7 @@ fn block_has_math(block: &BlockNode) -> bool {
         | BlockNode::HR(_)
         | BlockNode::Image(_)
         | BlockNode::Raw(_)
-        | BlockNode::TOC(_) => false,
+        | BlockNode::TOC(_) | BlockNode::Include(_) => false,
     }
 }
 
