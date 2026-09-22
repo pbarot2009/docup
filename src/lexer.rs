@@ -434,11 +434,14 @@ fn is_brace_inline_keyword(s: &str) -> bool {
 
 fn trim_raw_block(raw: &str) -> String {
     let mut s = raw;
-    if let Some(stripped) = s.strip_prefix('\r') {
-        s = stripped;
-    }
-    if let Some(stripped) = s.strip_prefix('\n') {
-        s = stripped;
+    if let Some(idx) = s.find('\n') {
+        let prefix = &s[..idx];
+        if prefix
+            .bytes()
+            .all(|b| b == b' ' || b == b'\t' || b == b'\r')
+        {
+            s = &s[idx + 1..];
+        }
     }
     s.trim_end_matches([' ', '\t', '\r', '\n']).to_string()
 }

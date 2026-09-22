@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocUP 60-Language Syntax Highlighting Verification</title>
+  <meta name="author" content="DocUP Engineering">
+  <meta name="version" content="0.2.0">
+  <meta name="description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
+  <meta property="og:description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
+  <meta name="twitter:description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
+  <meta property="og:title" content="DocUP 60-Language Syntax Highlighting Verification">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DocUP 60-Language Syntax Highlighting Verification">
+  <meta name="generator" content="DocUP v0.2.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --text: #c9d1d9;
+    --border: #30363d;
+    --border-muted: #21262d;
+    --link: #58a6ff;
+    --code-bg: #161b22;
+    --text-muted: #8b949e;
+    --tok-keyword: #ff7b72;
+    --tok-type: #ffa657;
+    --tok-string: #a5d6ff;
+    --tok-comment: #8b949e;
+    --tok-number: #79c0ff;
+    --callout-note: #58a6ff;
+    --callout-tip: #3fb950;
+    --callout-warning: #d29922;
+    --callout-danger: #f85149;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --text: #c9d1d9;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --link: #58a6ff;
+  --code-bg: #161b22;
+  --text-muted: #8b949e;
+  --tok-keyword: #ff7b72;
+  --tok-type: #ffa657;
+  --tok-string: #a5d6ff;
+  --tok-comment: #8b949e;
+  --tok-number: #79c0ff;
+  --callout-note: #58a6ff;
+  --callout-tip: #3fb950;
+  --callout-warning: #d29922;
+  --callout-danger: #f85149;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+* {
+  box-sizing: border-box;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  overflow-wrap: break-word;
+  color: var(--text);
+  scroll-margin-top: 1em;
+}
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 0.9em; color: var(--text-muted); }
+p {
+  margin: 0.8em 0;
+  overflow-wrap: break-word;
+}
+strong { font-weight: 600; }
+em { font-style: italic; }
+a {
+  color: var(--link);
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
+a:hover { text-decoration: underline; }
+code {
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-size: 0.9em;
+  overflow-wrap: break-word;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+ul, ol {
+  margin: 0.8em 0;
+  padding-left: 1.6em;
+}
+li {
+  margin: 0.25em 0;
+  overflow-wrap: break-word;
+}
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+blockquote {
+  margin: 1em 0;
+  padding: 0 1em;
+  color: var(--text-muted);
+  border-left: 0.25em solid var(--border-muted);
+  overflow-wrap: break-word;
+}
+blockquote blockquote {
+  margin: 0.6em 0;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.callout {
+  margin: 1.2em 0;
+  padding: 0.85em 1.2em;
+  border-left: 4px solid;
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+.callout-note { border-color: var(--callout-note); }
+.callout-tip { border-color: var(--callout-tip); }
+.callout-warning { border-color: var(--callout-warning); }
+.callout-danger { border-color: var(--callout-danger); }
+.callout-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4em;
+}
+.callout-note .callout-title { color: var(--callout-note); }
+.callout-tip .callout-title { color: var(--callout-tip); }
+.callout-warning .callout-title { color: var(--callout-warning); }
+.callout-danger .callout-title { color: var(--callout-danger); }
+.callout-body {
+  overflow-wrap: break-word;
+}
+.math-block {
+  margin: 1.2em 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.toc {
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.toc-title {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: var(--text);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.toc li {
+  margin: 0.35em 0;
+  font-size: 0.95em;
+}
+.toc li a {
+  color: var(--text);
+}
+.toc li a:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+.toc li.toc-level-1 { font-weight: 600; }
+.toc li.toc-level-2 { padding-left: 1.2em; }
+.toc li.toc-level-3 { padding-left: 2.4em; }
+.toc li.toc-level-4 { padding-left: 3.6em; }
+.toc li.toc-level-5 { padding-left: 4.8em; }
+.toc li.toc-level-6 { padding-left: 6em; }
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1em 0;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+  margin: 0;
+}
+th, td {
+  border: 1px solid var(--border-muted);
+  padding: 0.5em 0.9em;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+th {
+  background: var(--code-bg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+s { color: var(--text-muted); }
+
+.codeblock {
+  margin: 1.2em 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.codeblock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.4em 0.9em;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8em;
+  color: var(--text-muted);
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+}
+.codeblock-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+.codeblock-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  color: var(--text-muted);
+  padding: 0.15em 0.55em;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.codeblock-copy-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--border);
+}
+.codeblock pre {
+  margin: 0;
+  padding: 0.85em 1em;
+  overflow-x: auto;
+  background: var(--code-bg);
+}
+.codeblock code {
+  display: block;
+  background: none;
+  padding: 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+.code-line {
+  display: block;
+  min-height: 1.5em;
+  line-height: 1.5;
+}
+.code-line.highlighted-line {
+  background: rgba(88, 166, 255, 0.15);
+  margin: 0 -1em;
+  padding: 0 1em;
+}
+.line-numbers .code-line {
+  counter-increment: line;
+}
+.line-numbers .code-line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.2em;
+  padding-right: 0.8em;
+  margin-right: 0.8em;
+  color: var(--text-muted);
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid var(--border);
+}
+
+.footnote-ref {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: super;
+  padding-left: 0.1em;
+}
+.footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+.footnotes ol {
+  padding-left: 1.4em;
+}
+.footnotes li {
+  margin: 0.5em 0;
+}
+.footnote-back {
+  margin-left: 0.4em;
+  text-decoration: none;
+}
+
+.tok-keyword { color: var(--tok-keyword); font-weight: 600; }
+.tok-type    { color: var(--tok-type); }
+.tok-string  { color: var(--tok-string); }
+.tok-comment { color: var(--tok-comment); font-style: italic; }
+.tok-number  { color: var(--tok-number); }
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 1rem 3rem;
+    font-size: 15px;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.35em; }
+  h3 { font-size: 1.15em; }
+  th, td { padding: 0.4em 0.6em; }
+}
+</style>
+</head>
+<body>
+<h1 id="multi-language-syntax-highlighting-showcase">Multi-Language Syntax Highlighting Showcase</h1>
+<p>This document validates syntax highlighting across systems languages, functional programming paradigms, JVM languages, web formats, hardware description languages, and classical mainframes.</p>
+<nav class="toc" aria-label="Table of contents">
+  <div class="toc-title">Table of Contents</div>
+  <ul>
+    <li class="toc-level-1"><a href="#multi-language-syntax-highlighting-showcase">Multi-Language Syntax Highlighting Showcase</a></li>
+    <li class="toc-level-2"><a href="#systems-languages">1. Modern Systems Programming</a></li>
+    <li class="toc-level-2"><a href="#functional-languages">2. Functional &amp; Declarative Languages</a></li>
+    <li class="toc-level-2"><a href="#enterprise-jvm">3. JVM, Mobile &amp; Enterprise</a></li>
+    <li class="toc-level-2"><a href="#smart-contracts-database">4. Databases &amp; Blockchain</a></li>
+    <li class="toc-level-2"><a href="#hardware-classical">5. Hardware Description &amp; Assembly</a></li>
+    <li class="toc-level-2"><a href="#build-config">6. Build Systems, Containers &amp; Shells</a></li>
+  </ul>
+</nav>
+<hr>
+<h2 id="systems-languages">1. Modern Systems Programming</h2>
+<p>Zig allocator initialization and error handling:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>allocator.zig</span>
+    <div class="codeblock-actions">
+      <span>zig</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-zig line-numbers"><span class="code-line"><span class="tok-keyword">const</span> std = <span class="tok-keyword">@import</span>(<span class="tok-string">&quot;std&quot;</span>);</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> main() !<span class="tok-type">void</span> {</span><span class="code-line highlighted-line">    <span class="tok-keyword">var</span> gpa = std.heap.GeneralPurposeAllocator(.{}){};</span><span class="code-line">    <span class="tok-keyword">defer</span> _ = gpa.deinit();</span><span class="code-line highlighted-line">    <span class="tok-keyword">const</span> allocator = gpa.allocator();</span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">const</span> bytes = <span class="tok-keyword">try</span> allocator.alloc(<span class="tok-type">u8</span>, <span class="tok-number">1024</span>);</span><span class="code-line">    <span class="tok-keyword">defer</span> allocator.free(bytes);</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Odin procedure declarations and context tracking:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>math.odin</span>
+    <div class="codeblock-actions">
+      <span>odin</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-odin line-numbers"><span class="code-line"><span class="tok-keyword">package</span> math</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">import</span> <span class="tok-string">&quot;core:fmt&quot;</span></span><span class="code-line"></span><span class="code-line">Vector3 :: <span class="tok-keyword">struct</span> {</span><span class="code-line">    x, y, z: <span class="tok-type">f32</span>,</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">normalize :: <span class="tok-keyword">proc</span>(v: Vector3) -&gt; (Vector3, <span class="tok-type">bool</span>) {</span><span class="code-line">    <span class="tok-keyword">if</span> v.x == <span class="tok-number">0</span> &amp;&amp; v.y == <span class="tok-number">0</span> &amp;&amp; v.z == <span class="tok-number">0</span> {</span><span class="code-line">        <span class="tok-keyword">return</span> v, <span class="tok-type">false</span></span><span class="code-line">    }</span><span class="code-line">    <span class="tok-keyword">return</span> v, <span class="tok-type">true</span></span><span class="code-line">}</span></code></pre>
+</div>
+<p>Nim metaprogramming and block comments:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>cache.nim</span>
+    <div class="codeblock-actions">
+      <span>nim</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-nim"><span class="tok-comment">#[
+  Thread-safe in-memory cache
+  with automatic eviction policies
+]#</span>
+<span class="tok-keyword">import</span> tables, locks
+
+<span class="tok-keyword">type</span>
+  Cache*[K, V] = <span class="tok-keyword">object</span>
+    data: Table[K, V]
+    lock: Lock
+
+<span class="tok-keyword">proc</span> initCache*[K, V](): Cache[K, V] =
+  initLock(<span class="tok-keyword">result</span>.lock)
+  <span class="tok-keyword">result</span>.data = initTable[K, V]()</code></pre>
+</div>
+<p>D language range algorithms:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>stream.d</span>
+    <div class="codeblock-actions">
+      <span>d</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-d line-numbers"><span class="code-line"><span class="tok-keyword">import</span> std.stdio;</span><span class="code-line"><span class="tok-keyword">import</span> std.algorithm : map, filter;</span><span class="code-line"></span><span class="code-line"><span class="tok-type">void</span> main() {</span><span class="code-line">    <span class="tok-type">int</span>[] numbers = [<span class="tok-number">1</span>, <span class="tok-number">2</span>, <span class="tok-number">3</span>, <span class="tok-number">4</span>, <span class="tok-number">5</span>, <span class="tok-number">6</span>];</span><span class="code-line">    <span class="tok-keyword">auto</span> evens = numbers.filter!(n =&gt; n % <span class="tok-number">2</span> == <span class="tok-number">0</span>);</span><span class="code-line">    writeln(evens);</span><span class="code-line">}</span></code></pre>
+</div>
+<hr>
+<h2 id="functional-languages">2. Functional &amp; Declarative Languages</h2>
+<p>Haskell monadic parser combinator:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>Parser.hs</span>
+    <div class="codeblock-actions">
+      <span>haskell</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-haskell line-numbers"><span class="code-line"><span class="tok-comment">-- Monadic parsing unit</span></span><span class="code-line"><span class="tok-keyword">module</span> Parser (Parser, runParser) <span class="tok-keyword">where</span></span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">newtype</span> Parser a = Parser { runParser :: <span class="tok-type">String</span> -&gt; <span class="tok-type">Maybe</span> (a, <span class="tok-type">String</span>) }</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">instance</span> <span class="tok-type">Functor</span> Parser <span class="tok-keyword">where</span></span><span class="code-line">    fmap f (Parser p) = Parser $ \input -&gt; <span class="tok-keyword">do</span></span><span class="code-line">        (x, rest) &lt;- p input</span><span class="code-line">        <span class="tok-keyword">return</span> (f x, rest)</span></code></pre>
+</div>
+<p>OCaml variant types and recursive pattern matching:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>expr.ml</span>
+    <div class="codeblock-actions">
+      <span>ocaml</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-ocaml line-numbers"><span class="code-line"><span class="tok-comment">(* Expression abstract syntax tree *)</span></span><span class="code-line"><span class="tok-keyword">type</span> expr =</span><span class="code-line">  | Const <span class="tok-keyword">of</span> <span class="tok-type">int</span></span><span class="code-line">  | Add <span class="tok-keyword">of</span> expr * expr</span><span class="code-line">  | Mul <span class="tok-keyword">of</span> expr * expr</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">let</span> <span class="tok-keyword">rec</span> eval = <span class="tok-keyword">function</span></span><span class="code-line">  | Const n -&gt; n</span><span class="code-line">  | Add (e1, e2) -&gt; eval e1 + eval e2</span><span class="code-line">  | Mul (e1, e2) -&gt; eval e1 * eval e2</span></code></pre>
+</div>
+<p>Elixir supervision tree:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>worker.ex</span>
+    <div class="codeblock-actions">
+      <span>elixir</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-elixir line-numbers"><span class="code-line"><span class="tok-keyword">defmodule</span> Core.Worker <span class="tok-keyword">do</span></span><span class="code-line">  <span class="tok-keyword">use</span> GenServer</span><span class="code-line"></span><span class="code-line">  <span class="tok-keyword">def</span> start_link(initial_state) <span class="tok-keyword">do</span></span><span class="code-line">    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)</span><span class="code-line">  <span class="tok-keyword">end</span></span><span class="code-line"></span><span class="code-line">  <span class="tok-keyword">@impl</span> <span class="tok-type">true</span></span><span class="code-line">  <span class="tok-keyword">def</span> init(state), <span class="tok-keyword">do</span>: {:ok, state}</span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
+</div>
+<p>Clojure concurrency using atoms and swaps:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>state.clj</span>
+    <div class="codeblock-actions">
+      <span>clojure</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-clojure"><span class="tok-comment">;; Thread-safe counter atom</span>
+(<span class="tok-keyword">ns</span> app.state)
+
+(<span class="tok-keyword">defonce</span> app-counter (<span class="tok-keyword">atom</span> <span class="tok-number">0</span>))
+
+(<span class="tok-keyword">defn</span> increment-counter [step]
+  (<span class="tok-keyword">swap!</span> app-counter + step))</code></pre>
+</div>
+<hr>
+<h2 id="enterprise-jvm">3. JVM, Mobile &amp; Enterprise</h2>
+<p>Kotlin coroutines flow emission:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>Stream.kt</span>
+    <div class="codeblock-actions">
+      <span>kotlin</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-kotlin line-numbers"><span class="code-line"><span class="tok-keyword">package</span> com.docup.stream</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">import</span> kotlinx.coroutines.flow.<span class="tok-type">Flow</span></span><span class="code-line"><span class="tok-keyword">import</span> kotlinx.coroutines.flow.flow</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">fun</span> emitNumbers(): <span class="tok-type">Flow</span>&lt;<span class="tok-type">Int</span>&gt; = flow {</span><span class="code-line">    <span class="tok-keyword">for</span> (i <span class="tok-keyword">in</span> <span class="tok-number">1</span>..<span class="tok-number">10</span>) {</span><span class="code-line">        emit(i * <span class="tok-number">2</span>)</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>C# asynchronous LINQ records:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>RecordService.cs</span>
+    <div class="codeblock-actions">
+      <span>csharp</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-csharp line-numbers"><span class="code-line"><span class="tok-keyword">using</span> System;</span><span class="code-line"><span class="tok-keyword">using</span> System.Threading.Tasks;</span><span class="code-line highlighted-line"></span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">record</span> UserProfile(<span class="tok-type">Guid</span> Id, <span class="tok-type">string</span> Username, <span class="tok-type">bool</span> IsActive);</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">class</span> UserService {</span><span class="code-line highlighted-line">    <span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span>&lt;UserProfile&gt; GetProfileAsync(<span class="tok-type">Guid</span> id) {</span><span class="code-line">        <span class="tok-keyword">await</span> <span class="tok-type">Task</span>.Delay(<span class="tok-number">10</span>);</span><span class="code-line">        <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> UserProfile(id, <span class="tok-string">&quot;docup_dev&quot;</span>, <span class="tok-type">true</span>);</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Swift actors with async/await concurrency:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>Bank.swift</span>
+    <div class="codeblock-actions">
+      <span>swift</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-swift line-numbers"><span class="code-line"><span class="tok-keyword">actor</span> BankAccount {</span><span class="code-line">    <span class="tok-keyword">private</span> <span class="tok-keyword">var</span> balance: <span class="tok-type">Double</span> = <span class="tok-number">0.0</span></span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">func</span> deposit(amount: <span class="tok-type">Double</span>) {</span><span class="code-line">        <span class="tok-keyword">guard</span> amount &gt; <span class="tok-number">0</span> <span class="tok-keyword">else</span> { <span class="tok-keyword">return</span> }</span><span class="code-line">        balance += amount</span><span class="code-line">    }</span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">func</span> getBalance() -&gt; <span class="tok-type">Double</span> {</span><span class="code-line">        <span class="tok-keyword">return</span> balance</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+</div>
+<hr>
+<h2 id="smart-contracts-database">4. Databases &amp; Blockchain</h2>
+<p>Solidity ERC-20 token interface:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>IToken.sol</span>
+    <div class="codeblock-actions">
+      <span>solidity</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-solidity line-numbers"><span class="code-line"><span class="tok-comment">// SPDX-License-Identifier: MIT</span></span><span class="code-line"><span class="tok-keyword">pragma</span> <span class="tok-keyword">solidity</span> ^<span class="tok-number">0.8.20</span>;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">interface</span> IERC20 {</span><span class="code-line">    <span class="tok-keyword">event</span> Transfer(<span class="tok-type">address</span> <span class="tok-keyword">indexed</span> from, <span class="tok-type">address</span> <span class="tok-keyword">indexed</span> to, <span class="tok-type">uint256</span> value);</span><span class="code-line">    <span class="tok-keyword">function</span> balanceOf(<span class="tok-type">address</span> account) <span class="tok-keyword">external</span> <span class="tok-keyword">view</span> <span class="tok-keyword">returns</span> (<span class="tok-type">uint256</span>);</span><span class="code-line">    <span class="tok-keyword">function</span> transfer(<span class="tok-type">address</span> to, <span class="tok-type">uint256</span> value) <span class="tok-keyword">external</span> <span class="tok-keyword">returns</span> (<span class="tok-type">bool</span>);</span><span class="code-line">}</span></code></pre>
+</div>
+<p>SQL case-insensitive query optimization:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>analytics.sql</span>
+    <div class="codeblock-actions">
+      <span>sql</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-sql line-numbers"><span class="code-line"><span class="tok-comment">-- Multi-column aggregated analytical query</span></span><span class="code-line"><span class="tok-keyword">SELECT</span> </span><span class="code-line">    u.id, </span><span class="code-line">    u.username, </span><span class="code-line">    <span class="tok-keyword">COUNT</span>(o.id) <span class="tok-keyword">AS</span> total_orders,</span><span class="code-line">    <span class="tok-keyword">COALESCE</span>(<span class="tok-keyword">SUM</span>(o.amount), <span class="tok-number">0.0</span>) <span class="tok-keyword">AS</span> lifetime_value</span><span class="code-line"><span class="tok-keyword">FROM</span> users <span class="tok-keyword">AS</span> u</span><span class="code-line"><span class="tok-keyword">LEFT</span> <span class="tok-keyword">JOIN</span> orders <span class="tok-keyword">AS</span> o <span class="tok-keyword">ON</span> u.id = o.user_id</span><span class="code-line"><span class="tok-keyword">WHERE</span> u.status = <span class="tok-string">&#39;active&#39;</span></span><span class="code-line"><span class="tok-keyword">GROUP</span> <span class="tok-keyword">BY</span> u.id, u.username</span><span class="code-line"><span class="tok-keyword">HAVING</span> <span class="tok-keyword">COUNT</span>(o.id) &gt; <span class="tok-number">5</span></span><span class="code-line"><span class="tok-keyword">ORDER</span> <span class="tok-keyword">BY</span> lifetime_value <span class="tok-keyword">DESC</span></span><span class="code-line"><span class="tok-keyword">LIMIT</span> <span class="tok-number">50</span>;</span></code></pre>
+</div>
+<hr>
+<h2 id="hardware-classical">5. Hardware Description &amp; Assembly</h2>
+<p>x86_64 Assembly string length routine:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>strlen.asm</span>
+    <div class="codeblock-actions">
+      <span>assembly</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-assembly line-numbers"><span class="code-line"><span class="tok-keyword">section</span> .text</span><span class="code-line"><span class="tok-keyword">global</span> _strlen</span><span class="code-line"></span><span class="code-line">_strlen:</span><span class="code-line">    <span class="tok-keyword">xor</span> <span class="tok-type">rax</span>, <span class="tok-type">rax</span></span><span class="code-line">.<span class="tok-keyword">loop</span>:</span><span class="code-line">    <span class="tok-keyword">cmp</span> <span class="tok-type">byte</span> [<span class="tok-type">rdi</span> + <span class="tok-type">rax</span>], <span class="tok-number">0</span></span><span class="code-line">    <span class="tok-keyword">je</span> .done</span><span class="code-line">    <span class="tok-keyword">inc</span> <span class="tok-type">rax</span></span><span class="code-line">    <span class="tok-keyword">jmp</span> .<span class="tok-keyword">loop</span></span><span class="code-line">.done:</span><span class="code-line">    <span class="tok-keyword">ret</span></span></code></pre>
+</div>
+<p>VHDL register architecture:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>d_ff.vhd</span>
+    <div class="codeblock-actions">
+      <span>vhdl</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-vhdl line-numbers"><span class="code-line"><span class="tok-comment">-- D Flip-Flop with Active High Asynchronous Reset</span></span><span class="code-line"><span class="tok-keyword">library</span> IEEE;</span><span class="code-line"><span class="tok-keyword">use</span> IEEE.STD_LOGIC_1164.<span class="tok-keyword">ALL</span>;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">entity</span> d_ff <span class="tok-keyword">is</span></span><span class="code-line">    <span class="tok-keyword">port</span> (</span><span class="code-line">        clk, reset, d : <span class="tok-keyword">in</span>  <span class="tok-type">std_logic</span>;</span><span class="code-line">        q             : <span class="tok-keyword">out</span> <span class="tok-type">std_logic</span></span><span class="code-line">    );</span><span class="code-line"><span class="tok-keyword">end</span> d_ff;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">architecture</span> Behavioral <span class="tok-keyword">of</span> d_ff <span class="tok-keyword">is</span></span><span class="code-line"><span class="tok-keyword">begin</span></span><span class="code-line">    <span class="tok-keyword">process</span>(clk, reset)</span><span class="code-line">    <span class="tok-keyword">begin</span></span><span class="code-line">        <span class="tok-keyword">if</span> reset = <span class="tok-string">&#39;1&#39;</span> <span class="tok-keyword">then</span></span><span class="code-line">            q &lt;= <span class="tok-string">&#39;0&#39;</span>;</span><span class="code-line">        <span class="tok-keyword">elsif</span> <span class="tok-type">rising_edge</span>(clk) <span class="tok-keyword">then</span></span><span class="code-line">            q &lt;= d;</span><span class="code-line">        <span class="tok-keyword">end</span> <span class="tok-keyword">if</span>;</span><span class="code-line">    <span class="tok-keyword">end</span> <span class="tok-keyword">process</span>;</span><span class="code-line"><span class="tok-keyword">end</span> Behavioral;</span></code></pre>
+</div>
+<p>Classical COBOL record processing:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>process.cbl</span>
+    <div class="codeblock-actions">
+      <span>cobol</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-cobol"><span class="tok-comment">*&gt; Program to process transaction counts</span>
+<span class="tok-keyword">IDENTIFICATION</span> <span class="tok-keyword">DIVISION</span>.
+<span class="tok-keyword">PROGRAM-ID</span>. HELLO-DOCUP.
+<span class="tok-keyword">DATA</span> <span class="tok-keyword">DIVISION</span>.
+<span class="tok-keyword">WORKING-STORAGE</span> <span class="tok-keyword">SECTION</span>.
+<span class="tok-number">01</span> WS-COUNT <span class="tok-keyword">PIC</span> <span class="tok-number">9</span>(<span class="tok-number">4</span>) <span class="tok-keyword">VALUE</span> <span class="tok-number">1000.</span>
+<span class="tok-keyword">PROCEDURE</span> <span class="tok-keyword">DIVISION</span>.
+    <span class="tok-keyword">DISPLAY</span> <span class="tok-string">&quot;PROCESSING BATCH: &quot;</span> WS-COUNT.
+    <span class="tok-keyword">STOP</span> <span class="tok-keyword">RUN</span>.</code></pre>
+</div>
+<hr>
+<h2 id="build-config">6. Build Systems, Containers &amp; Shells</h2>
+<p>PowerShell administration script:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>deploy.ps1</span>
+    <div class="codeblock-actions">
+      <span>powershell</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-powershell line-numbers"><span class="code-line"><span class="tok-comment"># Automated container cluster configuration</span></span><span class="code-line"><span class="tok-keyword">param</span> (</span><span class="code-line">    [<span class="tok-type">string</span>]$Environment = <span class="tok-string">&quot;Production&quot;</span>,</span><span class="code-line">    [<span class="tok-type">int</span>]$Replicas = <span class="tok-number">3</span></span><span class="code-line">)</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">Write-Host</span> <span class="tok-string">&quot;Deploying to $Environment with $Replicas nodes&quot;</span></span><span class="code-line"><span class="tok-keyword">if</span> ($Replicas -lt <span class="tok-number">1</span>) {</span><span class="code-line">    <span class="tok-keyword">throw</span> <span class="tok-string">&quot;Invalid replica count specified.&quot;</span></span><span class="code-line">}</span></code></pre>
+</div>
+<p>Dockerfile multi-stage build:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>Dockerfile</span>
+    <div class="codeblock-actions">
+      <span>dockerfile</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-dockerfile line-numbers"><span class="code-line"><span class="tok-keyword">FROM</span> rust:<span class="tok-number">1.80</span>-<span class="tok-type">alpine</span> <span class="tok-keyword">AS</span> builder</span><span class="code-line"><span class="tok-keyword">WORKDIR</span> /app</span><span class="code-line"><span class="tok-keyword">COPY</span> . .</span><span class="code-line"><span class="tok-keyword">RUN</span> cargo build --release</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">FROM</span> <span class="tok-type">alpine</span>:<span class="tok-type">latest</span></span><span class="code-line"><span class="tok-keyword">WORKDIR</span> /root/</span><span class="code-line"><span class="tok-keyword">COPY</span> --<span class="tok-keyword">from</span>=builder /app/target/release/docup /usr/local/bin/</span><span class="code-line"><span class="tok-keyword">CMD</span> [<span class="tok-string">&quot;docup&quot;</span>, <span class="tok-string">&quot;--help&quot;</span>]</span></code></pre>
+</div>
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.codeblock').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = orig; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

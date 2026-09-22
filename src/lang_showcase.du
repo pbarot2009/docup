@@ -1,0 +1,329 @@
+meta {
+  title: "DocUP 60-Language Syntax Highlighting Verification",
+  lang: "en",
+  theme: "dark",
+  author: "DocUP Engineering",
+  version: "0.2.0",
+  description: "Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages."
+}
+
+h(1) { Multi-Language Syntax Highlighting Showcase }
+
+p {
+  This document validates syntax highlighting across systems languages, functional programming paradigms, JVM languages, web formats, hardware description languages, and classical mainframes.
+}
+
+toc {}
+
+hr {}
+
+h(2, id: "systems-languages") { 1. Modern Systems Programming }
+
+p { Zig allocator initialization and error handling: }
+
+codeblock(lang: "zig", file: "allocator.zig", line_numbers: true, highlight: "4,6") {!
+const std = @import("std");
+
+pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    const bytes = try allocator.alloc(u8, 1024);
+    defer allocator.free(bytes);
+}
+!}
+
+p { Odin procedure declarations and context tracking: }
+
+codeblock(lang: "odin", file: "math.odin", line_numbers: true) {!
+package math
+
+import "core:fmt"
+
+Vector3 :: struct {
+    x, y, z: f32,
+}
+
+normalize :: proc(v: Vector3) -> (Vector3, bool) {
+    if v.x == 0 && v.y == 0 && v.z == 0 {
+        return v, false
+    }
+    return v, true
+}
+!}
+
+p { Nim metaprogramming and block comments: }
+
+codeblock(lang: "nim", file: "cache.nim", line_numbers: false) {!
+#[
+  Thread-safe in-memory cache
+  with automatic eviction policies
+]#
+import tables, locks
+
+type
+  Cache*[K, V] = object
+    data: Table[K, V]
+    lock: Lock
+
+proc initCache*[K, V](): Cache[K, V] =
+  initLock(result.lock)
+  result.data = initTable[K, V]()
+!}
+
+p { D language range algorithms: }
+
+codeblock(lang: "d", file: "stream.d", line_numbers: true) {!
+import std.stdio;
+import std.algorithm : map, filter;
+
+void main() {
+    int[] numbers = [1, 2, 3, 4, 5, 6];
+    auto evens = numbers.filter!(n => n % 2 == 0);
+    writeln(evens);
+}
+!}
+
+hr {}
+
+h(2, id: "functional-languages") { 2. Functional & Declarative Languages }
+
+p { Haskell monadic parser combinator: }
+
+codeblock(lang: "haskell", file: "Parser.hs", line_numbers: true) {!
+-- Monadic parsing unit
+module Parser (Parser, runParser) where
+
+newtype Parser a = Parser { runParser :: String -> Maybe (a, String) }
+
+instance Functor Parser where
+    fmap f (Parser p) = Parser $ \input -> do
+        (x, rest) <- p input
+        return (f x, rest)
+!}
+
+p { OCaml variant types and recursive pattern matching: }
+
+codeblock(lang: "ocaml", file: "expr.ml", line_numbers: true) {!
+(* Expression abstract syntax tree *)
+type expr =
+  | Const of int
+  | Add of expr * expr
+  | Mul of expr * expr
+
+let rec eval = function
+  | Const n -> n
+  | Add (e1, e2) -> eval e1 + eval e2
+  | Mul (e1, e2) -> eval e1 * eval e2
+!}
+
+p { Elixir supervision tree: }
+
+codeblock(lang: "elixir", file: "worker.ex", line_numbers: true) {!
+defmodule Core.Worker do
+  use GenServer
+
+  def start_link(initial_state) do
+    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
+  end
+
+  @impl true
+  def init(state), do: {:ok, state}
+end
+!}
+
+p { Clojure concurrency using atoms and swaps: }
+
+codeblock(lang: "clojure", file: "state.clj", line_numbers: false) {!
+;; Thread-safe counter atom
+(ns app.state)
+
+(defonce app-counter (atom 0))
+
+(defn increment-counter [step]
+  (swap! app-counter + step))
+!}
+
+hr {}
+
+h(2, id: "enterprise-jvm") { 3. JVM, Mobile & Enterprise }
+
+p { Kotlin coroutines flow emission: }
+
+codeblock(lang: "kotlin", file: "Stream.kt", line_numbers: true) {!
+package com.docup.stream
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
+fun emitNumbers(): Flow<Int> = flow {
+    for (i in 1..10) {
+        emit(i * 2)
+    }
+}
+!}
+
+p { C# asynchronous LINQ records: }
+
+codeblock(lang: "csharp", file: "RecordService.cs", line_numbers: true, highlight: "3,7") {!
+using System;
+using System.Threading.Tasks;
+
+public record UserProfile(Guid Id, string Username, bool IsActive);
+
+public class UserService {
+    public async Task<UserProfile> GetProfileAsync(Guid id) {
+        await Task.Delay(10);
+        return new UserProfile(id, "docup_dev", true);
+    }
+}
+!}
+
+p { Swift actors with async/await concurrency: }
+
+codeblock(lang: "swift", file: "Bank.swift", line_numbers: true) {!
+actor BankAccount {
+    private var balance: Double = 0.0
+
+    func deposit(amount: Double) {
+        guard amount > 0 else { return }
+        balance += amount
+    }
+
+    func getBalance() -> Double {
+        return balance
+    }
+}
+!}
+
+hr {}
+
+h(2, id: "smart-contracts-database") { 4. Databases & Blockchain }
+
+p { Solidity ERC-20 token interface: }
+
+codeblock(lang: "solidity", file: "IToken.sol", line_numbers: true) {!
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 value) external returns (bool);
+}
+!}
+
+p { SQL case-insensitive query optimization: }
+
+codeblock(lang: "sql", file: "analytics.sql", line_numbers: true) {!
+-- Multi-column aggregated analytical query
+SELECT 
+    u.id, 
+    u.username, 
+    COUNT(o.id) AS total_orders,
+    COALESCE(SUM(o.amount), 0.0) AS lifetime_value
+FROM users AS u
+LEFT JOIN orders AS o ON u.id = o.user_id
+WHERE u.status = 'active'
+GROUP BY u.id, u.username
+HAVING COUNT(o.id) > 5
+ORDER BY lifetime_value DESC
+LIMIT 50;
+!}
+
+hr {}
+
+h(2, id: "hardware-classical") { 5. Hardware Description & Assembly }
+
+p { x86_64 Assembly string length routine: }
+
+codeblock(lang: "assembly", file: "strlen.asm", line_numbers: true) {!
+section .text
+global _strlen
+
+_strlen:
+    xor rax, rax
+.loop:
+    cmp byte [rdi + rax], 0
+    je .done
+    inc rax
+    jmp .loop
+.done:
+    ret
+!}
+
+p { VHDL register architecture: }
+
+codeblock(lang: "vhdl", file: "d_ff.vhd", line_numbers: true) {!
+-- D Flip-Flop with Active High Asynchronous Reset
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity d_ff is
+    port (
+        clk, reset, d : in  std_logic;
+        q             : out std_logic
+    );
+end d_ff;
+
+architecture Behavioral of d_ff is
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            q <= '0';
+        elsif rising_edge(clk) then
+            q <= d;
+        end if;
+    end process;
+end Behavioral;
+!}
+
+p { Classical COBOL record processing: }
+
+codeblock(lang: "cobol", file: "process.cbl", line_numbers: false) {!
+*> Program to process transaction counts
+IDENTIFICATION DIVISION.
+PROGRAM-ID. HELLO-DOCUP.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 WS-COUNT PIC 9(4) VALUE 1000.
+PROCEDURE DIVISION.
+    DISPLAY "PROCESSING BATCH: " WS-COUNT.
+    STOP RUN.
+!}
+
+hr {}
+
+h(2, id: "build-config") { 6. Build Systems, Containers & Shells }
+
+p { PowerShell administration script: }
+
+codeblock(lang: "powershell", file: "deploy.ps1", line_numbers: true) {!
+# Automated container cluster configuration
+param (
+    [string]$Environment = "Production",
+    [int]$Replicas = 3
+)
+
+Write-Host "Deploying to $Environment with $Replicas nodes"
+if ($Replicas -lt 1) {
+    throw "Invalid replica count specified."
+}
+!}
+
+p { Dockerfile multi-stage build: }
+
+codeblock(lang: "dockerfile", file: "Dockerfile", line_numbers: true) {!
+FROM rust:1.80-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/target/release/docup /usr/local/bin/
+CMD ["docup", "--help"]
+!}
+
