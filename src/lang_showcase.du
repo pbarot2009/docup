@@ -1,329 +1,602 @@
 meta {
-  title: "DocUP 60-Language Syntax Highlighting Verification",
+  title: "DocUP 65-Language Highlighting Verification",
   lang: "en",
   theme: "dark",
-  author: "DocUP Engineering",
-  version: "0.2.0",
-  description: "Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages."
+  author: "DocUP Engine",
+  version: "0.2.0"
 }
 
-h(1) { Multi-Language Syntax Highlighting Showcase }
+h(1) { Complete 65-Language Syntax Highlighting Test Suite }
 
 p {
-  This document validates syntax highlighting across systems languages, functional programming paradigms, JVM languages, web formats, hardware description languages, and classical mainframes.
+  This suite validates tokenization, keywords, types, strings, comments, and line numbering across all 65 supported languages.
 }
 
 toc {}
 
 hr {}
 
-h(2, id: "systems-languages") { 1. Modern Systems Programming }
+h(2) { 1. Systems & Low-Level }
 
-p { Zig allocator initialization and error handling: }
-
-codeblock(lang: "zig", file: "allocator.zig", line_numbers: true, highlight: "4,6") {!
+p { Zig }
+codeblock(lang: "zig", line_numbers: true) {!
+// Zig error-union and allocator
 const std = @import("std");
-
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
-    const bytes = try allocator.alloc(u8, 1024);
-    defer allocator.free(bytes);
+    const mem = try std.heap.page_allocator.alloc(u8, 64);
+    defer std.heap.page_allocator.free(mem);
 }
 !}
 
-p { Odin procedure declarations and context tracking: }
-
-codeblock(lang: "odin", file: "math.odin", line_numbers: true) {!
-package math
-
+p { Odin }
+codeblock(lang: "odin", line_numbers: true) {!
+// Odin procedure definition
+package main
 import "core:fmt"
-
-Vector3 :: struct {
-    x, y, z: f32,
-}
-
-normalize :: proc(v: Vector3) -> (Vector3, bool) {
-    if v.x == 0 && v.y == 0 && v.z == 0 {
-        return v, false
-    }
-    return v, true
-}
+Vector2 :: struct { x, y: f32 }
+main :: proc() { fmt.println("Odin ok", 42) }
 !}
 
-p { Nim metaprogramming and block comments: }
-
-codeblock(lang: "nim", file: "cache.nim", line_numbers: false) {!
-#[
-  Thread-safe in-memory cache
-  with automatic eviction policies
-]#
-import tables, locks
-
-type
-  Cache*[K, V] = object
-    data: Table[K, V]
-    lock: Lock
-
-proc initCache*[K, V](): Cache[K, V] =
-  initLock(result.lock)
-  result.data = initTable[K, V]()
+p { Nim }
+codeblock(lang: "nim", line_numbers: true) {!
+#[ Nim block comment ]#
+import std/strformat
+type State* = object
+  id: int
+proc run*(s: State): bool = true
 !}
 
-p { D language range algorithms: }
-
-codeblock(lang: "d", file: "stream.d", line_numbers: true) {!
+p { D }
+codeblock(lang: "d", line_numbers: true) {!
 import std.stdio;
-import std.algorithm : map, filter;
-
 void main() {
-    int[] numbers = [1, 2, 3, 4, 5, 6];
-    auto evens = numbers.filter!(n => n % 2 == 0);
-    writeln(evens);
+    string msg = `Raw string literal`;
+    writeln(msg, 1024);
+}
+!}
+
+p { Rust }
+codeblock(lang: "rust", line_numbers: true) {!
+// Rust pattern matching
+pub fn check(val: Option<i32>) -> Result<u64, &'static str> {
+    match val { Some(n) if n > 0 => Ok(n as u64), _ => Err("failed") }
+}
+!}
+
+p { C }
+codeblock(lang: "c", line_numbers: true) {!
+#include <stdbool.h>
+typedef unsigned long size_t;
+const int MAX_LIMIT = 512;
+bool init(char* buffer, size_t len);
+!}
+
+p { C++ }
+codeblock(lang: "cpp", line_numbers: true) {!
+#include <concepts>
+template<typename T>
+concept Numeric = std::is_integral_v<T>;
+auto add(Numeric auto a, Numeric auto b) -> decltype(a + b) { return a + b; }
+!}
+
+p { Go }
+codeblock(lang: "go", line_numbers: true) {!
+package main
+func Worker(done chan bool, tasks map[string]int) {
+    defer close(done)
+    for k, v := range tasks { println(k, v) }
 }
 !}
 
 hr {}
 
-h(2, id: "functional-languages") { 2. Functional & Declarative Languages }
+h(2) { 2. Functional & Declarative }
 
-p { Haskell monadic parser combinator: }
-
-codeblock(lang: "haskell", file: "Parser.hs", line_numbers: true) {!
--- Monadic parsing unit
-module Parser (Parser, runParser) where
-
-newtype Parser a = Parser { runParser :: String -> Maybe (a, String) }
-
-instance Functor Parser where
-    fmap f (Parser p) = Parser $ \input -> do
-        (x, rest) <- p input
-        return (f x, rest)
+p { Haskell }
+codeblock(lang: "haskell", line_numbers: true) {!
+-- Haskell type signature and monad
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (x:_) = Just x
 !}
 
-p { OCaml variant types and recursive pattern matching: }
-
-codeblock(lang: "ocaml", file: "expr.ml", line_numbers: true) {!
-(* Expression abstract syntax tree *)
-type expr =
-  | Const of int
-  | Add of expr * expr
-  | Mul of expr * expr
-
-let rec eval = function
-  | Const n -> n
-  | Add (e1, e2) -> eval e1 + eval e2
-  | Mul (e1, e2) -> eval e1 * eval e2
+p { OCaml }
+codeblock(lang: "ocaml", line_numbers: true) {!
+(* OCaml variant pattern *)
+type 'a tree = Leaf | Node of 'a * 'a tree * 'a tree
+let rec depth = function Leaf -> 0 | Node (_, l, r) -> 1 + max (depth l) (depth r)
 !}
 
-p { Elixir supervision tree: }
-
-codeblock(lang: "elixir", file: "worker.ex", line_numbers: true) {!
-defmodule Core.Worker do
-  use GenServer
-
-  def start_link(initial_state) do
-    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
-  end
-
+p { Elixir }
+codeblock(lang: "elixir", line_numbers: true) {!
+defmodule Calc do
   @impl true
-  def init(state), do: {:ok, state}
+  def run(val) when is_integer(val), do: {:ok, val * 2}
 end
 !}
 
-p { Clojure concurrency using atoms and swaps: }
+p { Erlang }
+codeblock(lang: "erlang", line_numbers: true) {!
+% Erlang actor loop
+loop() ->
+    receive {msg, From} -> From ! ok, loop(); stop -> ok end.
+!}
 
-codeblock(lang: "clojure", file: "state.clj", line_numbers: false) {!
-;; Thread-safe counter atom
-(ns app.state)
+p { Clojure }
+codeblock(lang: "clojure", line_numbers: true) {!
+;; Clojure thread-safe state
+(defn update-state [state-atom delta]
+  (swap! state-atom + delta))
+!}
 
-(defonce app-counter (atom 0))
+p { F# }
+codeblock(lang: "fsharp", line_numbers: true) {!
+// F# Async workflow
+let fetchAsync (url: string) : Async<string> = async {
+    return "response"
+}
+!}
 
-(defn increment-counter [step]
-  (swap! app-counter + step))
+p { Common Lisp }
+codeblock(lang: "lisp", line_numbers: true) {!
+;; Common Lisp defun
+(defun square (n)
+  (declare (type integer n))
+  (* n n))
+!}
+
+p { Scheme }
+codeblock(lang: "scheme", line_numbers: true) {!
+;; Scheme recursive factorial
+(define (fact n)
+  (if (<= n 1) 1 (* n (fact (- n 1)))))
+!}
+
+p { Elm }
+codeblock(lang: "elm", line_numbers: true) {!
+-- Elm model-view-update
+type Msg = Increment | Decrement
+update : Msg -> Int -> Int
+update msg model = case msg of Increment -> model + 1; Decrement -> model - 1
+!}
+
+p { PureScript }
+codeblock(lang: "purescript", line_numbers: true) {!
+-- PureScript effectful computation
+module Main where
+import Effect (Effect)
+main :: Effect Unit
+main = pure unit
+!}
+
+p { Standard ML }
+codeblock(lang: "sml", line_numbers: true) {!
+(* SML signature and structure *)
+signature QUEUE = sig type 'a queue val empty : 'a queue end;
+structure Q : QUEUE = struct type 'a queue = 'a list val empty = [] end;
 !}
 
 hr {}
 
-h(2, id: "enterprise-jvm") { 3. JVM, Mobile & Enterprise }
+h(2) { 3. JVM, Mobile & Enterprise }
 
-p { Kotlin coroutines flow emission: }
-
-codeblock(lang: "kotlin", file: "Stream.kt", line_numbers: true) {!
-package com.docup.stream
-
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-
-fun emitNumbers(): Flow<Int> = flow {
-    for (i in 1..10) {
-        emit(i * 2)
-    }
+p { Java }
+codeblock(lang: "java", line_numbers: true) {!
+package com.demo;
+public record Point(int x, int y) {
+    public static final Point ZERO = new Point(0, 0);
 }
 !}
 
-p { C# asynchronous LINQ records: }
+p { Kotlin }
+codeblock(lang: "kotlin", line_numbers: true) {!
+// Kotlin coroutine flow
+fun fetchEvents(): Flow<String> = flow {
+    emit("init")
+    delay(100L)
+}
+!}
 
-codeblock(lang: "csharp", file: "RecordService.cs", line_numbers: true, highlight: "3,7") {!
-using System;
+p { Scala }
+codeblock(lang: "scala", line_numbers: true) {!
+sealed trait Expr
+case class Number(n: Int) extends Expr
+case class Sum(e1: Expr, e2: Expr) extends Expr
+!}
+
+p { C# }
+codeblock(lang: "csharp", line_numbers: true) {!
 using System.Threading.Tasks;
+public record User(int Id, string Name);
+public async Task<User> FetchAsync() => await Task.FromResult(new User(1, "docup"));
+!}
 
-public record UserProfile(Guid Id, string Username, bool IsActive);
-
-public class UserService {
-    public async Task<UserProfile> GetProfileAsync(Guid id) {
-        await Task.Delay(10);
-        return new UserProfile(id, "docup_dev", true);
-    }
+p { Swift }
+codeblock(lang: "swift", line_numbers: true) {!
+actor BankStore {
+    private var balance: Double = 0.0
+    func deposit(amount: Double) { balance += amount }
 }
 !}
 
-p { Swift actors with async/await concurrency: }
-
-codeblock(lang: "swift", file: "Bank.swift", line_numbers: true) {!
-actor BankAccount {
-    private var balance: Double = 0.0
-
-    func deposit(amount: Double) {
-        guard amount > 0 else { return }
-        balance += amount
-    }
-
-    func getBalance() -> Double {
-        return balance
-    }
+p { Dart }
+codeblock(lang: "dart", line_numbers: true) {!
+Future<String> fetchData() async {
+    final result = await Future.delayed(Duration(seconds: 1), () => "payload");
+    return result;
 }
+!}
+
+p { Groovy }
+codeblock(lang: "groovy", line_numbers: true) {!
+def static calculate(int x, int y = 10) {
+    return (x * y) + 42
+}
+!}
+
+p { Apex }
+codeblock(lang: "apex", line_numbers: true) {!
+public with sharing class LeadProcessor {
+    public static void run(List<Lead> leads) { update leads; }
+}
+!}
+
+p { Visual Basic }
+codeblock(lang: "vb", line_numbers: true) {!
+' VB.NET Module
+Module App
+    Sub Main()
+        Dim active As Boolean = True
+    End Sub
+End Module
 !}
 
 hr {}
 
-h(2, id: "smart-contracts-database") { 4. Databases & Blockchain }
+h(2) { 4. Scripting & Dynamic Languages }
 
-p { Solidity ERC-20 token interface: }
+p { Python }
+codeblock(lang: "python", line_numbers: true) {!
+# Python async generator
+async def produce(n: int) -> list[int]:
+    return [i * 2 for i in range(n) if i % 2 == 0]
+!}
 
-codeblock(lang: "solidity", file: "IToken.sol", line_numbers: true) {!
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+p { Ruby }
+codeblock(lang: "ruby", line_numbers: true) {!
+# Ruby module definition
+module Cacheable
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+end
+!}
 
-interface IERC20 {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address to, uint256 value) external returns (bool);
+p { PHP }
+codeblock(lang: "php", line_numbers: true) {!
+<?php
+declare(strict_types=1);
+readonly class Config {
+    public function __construct(public string $dsn, public int$timeout = 30) {}
 }
 !}
 
-p { SQL case-insensitive query optimization: }
+p { Perl }
+codeblock(lang: "perl", line_numbers: true) {!
+# Perl package subroutine
+package Data::Handler;
+use strict;
+sub process { my ($self, $val) = @_; return$val // 0; }
+!}
 
-codeblock(lang: "sql", file: "analytics.sql", line_numbers: true) {!
--- Multi-column aggregated analytical query
-SELECT 
-    u.id, 
-    u.username, 
-    COUNT(o.id) AS total_orders,
-    COALESCE(SUM(o.amount), 0.0) AS lifetime_value
+p { Lua }
+codeblock(lang: "lua", line_numbers: true) {!
+-- Lua closure counter
+local function createCounter(start)
+    local val = start or 0
+    return function() val = val + 1; return val end
+end
+!}
+
+p { R }
+codeblock(lang: "r", line_numbers: true) {!
+# R statistical function
+calc_mean <- function(vec) {
+    if (length(vec) == 0) return(NA)
+    mean(vec, na.rm = TRUE)
+}
+!}
+
+p { Julia }
+codeblock(lang: "julia", line_numbers: true) {!
+# Julia parametric struct
+struct Point{T <: Real}
+    x::T
+    y::T
+end
+!}
+
+p { Crystal }
+codeblock(lang: "crystal", line_numbers: true) {!
+# Crystal typed class
+class Worker
+  property id : Int32
+  def initialize(@id : Int32) end
+end
+!}
+
+hr {}
+
+h(2) { 5. Web, Markup & Config }
+
+p { JavaScript }
+codeblock(lang: "javascript", line_numbers: true) {!
+const stream = await fetch("/api/data");
+const { results } = await stream.json();
+!}
+
+p { TypeScript }
+codeblock(lang: "typescript", line_numbers: true) {!
+interface Config<T extends object> {
+    readonly endpoint: string;
+    validate(input: unknown): input is T;
+}
+!}
+
+p { HTML }
+codeblock(lang: "html", line_numbers: true) {!
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"><title>DocUP</title></head>
+</html>
+!}
+
+p { XML }
+codeblock(lang: "xml", line_numbers: true) {!
+<!-- XML configuration -->
+<server port="8080" secure="true">
+  <host name="localhost" timeout="30"/>
+</server>
+!}
+
+p { CSS }
+codeblock(lang: "css", line_numbers: true) {!
+:root {
+  --theme-pad: 12px;
+  display: flex;
+  justify-content: center;
+}
+!}
+
+p { SCSS }
+codeblock(lang: "scss", line_numbers: true) {!
+$primary-color: #0969da;
+@mixin card($border: 1px) {
+  border: $border solid$primary-color;
+}
+!}
+
+p { JSON }
+codeblock(lang: "json", line_numbers: true) {!
+{
+  "name": "docup",
+  "enabled": true,
+  "count": 100,
+  "extra": null
+}
+!}
+
+p { YAML }
+codeblock(lang: "yaml", line_numbers: true) {!
+# YAML config
+server:
+  host: 127.0.0.1
+  ssl: yes
+  retries: 3
+!}
+
+p { TOML }
+codeblock(lang: "toml", line_numbers: true) {!
+# Cargo TOML
+[package]
+name = "docup"
+version = "0.2.0"
+line_numbers = true
+!}
+
+p { INI }
+codeblock(lang: "ini", line_numbers: true) {!
+; INI settings
+[database]
+host = 127.0.0.1
+port = 5432
+ssl = on
+!}
+
+p { GraphQL }
+codeblock(lang: "graphql", line_numbers: true) {!
+query GetUserData($userId: ID!) {
+  user(id: $userId) { id username role }
+}
+!}
+
+p { Markdown }
+codeblock(lang: "markdown", line_numbers: true) {!
+<!-- Markdown comment -->
+# Title of Page
+Here is a list of [links](https://example.com).
+!}
+
+hr {}
+
+h(2) { 6. Shell, Build & DevOps }
+
+p { Bash }
+codeblock(lang: "bash", line_numbers: true) {!
+#!/usr/bin/env bash
+set -e
+readonly TARGET_DIR="./dist"
+for file in "$TARGET_DIR"/*.tar.gz; do echo "Extracting $file"; done
+!}
+
+p { PowerShell }
+codeblock(lang: "powershell", line_numbers: true) {!
+<# PowerShell script #>
+param([string]$Env = "Production", [int]$Nodes = 5)
+Write-Host "Running in $Env with$Nodes nodes"
+!}
+
+p { Batch }
+codeblock(lang: "batch", line_numbers: true) {!
+:: Batch script setup
+@echo off
+set RUN_MODE=release
+if exist build\ rd /s /q build\
+!}
+
+p { Dockerfile }
+codeblock(lang: "dockerfile", line_numbers: true) {!
+FROM alpine:latest AS base
+WORKDIR /app
+COPY . .
+ENTRYPOINT ["/bin/sh"]
+!}
+
+p { Makefile }
+codeblock(lang: "makefile", line_numbers: true) {!
+# Makefile rule
+CC ?= clang
+build:
+	$(CC) -O2 -o bin/app src/main.c
+!}
+
+p { CMake }
+codeblock(lang: "cmake", line_numbers: true) {!
+# CMake build definition
+cmake_minimum_required(VERSION 3.20)
+project(DocUP LANGUAGES CXX)
+add_executable(docup src/main.cpp)
+!}
+
+p { Terraform / HCL }
+codeblock(lang: "terraform", line_numbers: true) {!
+# Terraform AWS provider
+provider "aws" { region = "us-east-1" }
+resource "aws_s3_bucket" "b" { bucket = "docup-storage" }
+!}
+
+hr {}
+
+h(2) { 7. Databases & Blockchain }
+
+p { SQL }
+codeblock(lang: "sql", line_numbers: true) {!
+-- SQL case-insensitive query
+SELECT u.id, COUNT(o.id) AS total
 FROM users AS u
 LEFT JOIN orders AS o ON u.id = o.user_id
 WHERE u.status = 'active'
-GROUP BY u.id, u.username
-HAVING COUNT(o.id) > 5
-ORDER BY lifetime_value DESC
-LIMIT 50;
+GROUP BY u.id
+LIMIT 20;
 !}
 
-hr {}
-
-h(2, id: "hardware-classical") { 5. Hardware Description & Assembly }
-
-p { x86_64 Assembly string length routine: }
-
-codeblock(lang: "assembly", file: "strlen.asm", line_numbers: true) {!
-section .text
-global _strlen
-
-_strlen:
-    xor rax, rax
-.loop:
-    cmp byte [rdi + rax], 0
-    je .done
-    inc rax
-    jmp .loop
-.done:
-    ret
-!}
-
-p { VHDL register architecture: }
-
-codeblock(lang: "vhdl", file: "d_ff.vhd", line_numbers: true) {!
--- D Flip-Flop with Active High Asynchronous Reset
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
-entity d_ff is
-    port (
-        clk, reset, d : in  std_logic;
-        q             : out std_logic
-    );
-end d_ff;
-
-architecture Behavioral of d_ff is
-begin
-    process(clk, reset)
-    begin
-        if reset = '1' then
-            q <= '0';
-        elsif rising_edge(clk) then
-            q <= d;
-        end if;
-    end process;
-end Behavioral;
-!}
-
-p { Classical COBOL record processing: }
-
-codeblock(lang: "cobol", file: "process.cbl", line_numbers: false) {!
-*> Program to process transaction counts
-IDENTIFICATION DIVISION.
-PROGRAM-ID. HELLO-DOCUP.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-01 WS-COUNT PIC 9(4) VALUE 1000.
-PROCEDURE DIVISION.
-    DISPLAY "PROCESSING BATCH: " WS-COUNT.
-    STOP RUN.
-!}
-
-hr {}
-
-h(2, id: "build-config") { 6. Build Systems, Containers & Shells }
-
-p { PowerShell administration script: }
-
-codeblock(lang: "powershell", file: "deploy.ps1", line_numbers: true) {!
-# Automated container cluster configuration
-param (
-    [string]$Environment = "Production",
-    [int]$Replicas = 3
-)
-
-Write-Host "Deploying to $Environment with $Replicas nodes"
-if ($Replicas -lt 1) {
-    throw "Invalid replica count specified."
+p { Solidity }
+codeblock(lang: "solidity", line_numbers: true) {!
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+contract Vault {
+    mapping(address => uint256) public balances;
+    function deposit() external payable { balances[msg.sender] += msg.value; }
 }
 !}
 
-p { Dockerfile multi-stage build: }
+hr {}
 
-codeblock(lang: "dockerfile", file: "Dockerfile", line_numbers: true) {!
-FROM rust:1.80-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
+h(2) { 8. Hardware Description & Assembly }
 
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/target/release/docup /usr/local/bin/
-CMD ["docup", "--help"]
+p { x86_64 / ARM Assembly }
+codeblock(lang: "assembly", line_numbers: true) {!
+; Assembly routine
+section .text
+global _start
+_start:
+    mov rax, 1
+    mov rdi, 0
+    syscall
 !}
 
+p { VHDL }
+codeblock(lang: "vhdl", line_numbers: true) {!
+-- VHDL Entity
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+entity mux is
+    port (sel: in std_logic; a, b: in std_logic; y: out std_logic);
+end mux;
+!}
+
+p { Verilog }
+codeblock(lang: "verilog", line_numbers: true) {!
+// Verilog module
+module counter(input wire clk, input wire rst, output reg [3:0] q);
+    always @(posedge clk or posedge rst)
+        if (rst) q <= 4'b0000; else q <= q + 1;
+endmodule
+!}
+
+p { SystemVerilog }
+codeblock(lang: "systemverilog", line_numbers: true) {!
+// SystemVerilog interface
+interface BusIf(input logic clk);
+    logic [31:0] data;
+    logic ready;
+    modport Master(input ready, output data);
+endinterface
+!}
+
+hr {}
+
+h(2) { 9. Classical & Scientific }
+
+p { COBOL }
+codeblock(lang: "cobol", line_numbers: true) {!
+*> COBOL display program
+IDENTIFICATION DIVISION.
+PROGRAM-ID. HELLO.
+PROCEDURE DIVISION.
+    DISPLAY "HELLO FROM COBOL".
+    STOP RUN.
+!}
+
+p { Fortran }
+codeblock(lang: "fortran", line_numbers: true) {!
+! Modern Fortran loop
+program test
+    implicit none
+    integer :: i, acc = 0
+    do i = 1, 10
+        acc = acc + i
+    end do
+end program test
+!}
+
+p { Pascal }
+codeblock(lang: "pascal", line_numbers: true) {!
+// Pascal program
+program Test;
+var n: integer;
+begin
+    n := 42;
+    writeln('Answer: ', n);
+end.
+!}
+
+p { Ada }
+codeblock(lang: "ada", line_numbers: true) {!
+-- Ada procedure
+with Ada.Text_IO;
+procedure Hello is
+begin
+    Ada.Text_IO.Put_Line("Hello, Ada 2022!");
+end Hello;
+!}

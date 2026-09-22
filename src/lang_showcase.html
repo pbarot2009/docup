@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DocUP 60-Language Syntax Highlighting Verification</title>
-  <meta name="author" content="DocUP Engineering">
+  <title>DocUP 65-Language Highlighting Verification</title>
+  <meta name="author" content="DocUP Engine">
   <meta name="version" content="0.2.0">
-  <meta name="description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
-  <meta property="og:description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
-  <meta name="twitter:description" content="Comprehensive multi-language verification suite exercising lexing, line numbering, token classes, and case insensitivity across 60+ programming languages.">
-  <meta property="og:title" content="DocUP 60-Language Syntax Highlighting Verification">
+  <meta property="og:title" content="DocUP 65-Language Highlighting Verification">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="DocUP 60-Language Syntax Highlighting Verification">
+  <meta name="twitter:title" content="DocUP 65-Language Highlighting Verification">
   <meta name="generator" content="DocUP v0.2.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -392,256 +389,755 @@ s { color: var(--text-muted); }
 </style>
 </head>
 <body>
-<h1 id="multi-language-syntax-highlighting-showcase">Multi-Language Syntax Highlighting Showcase</h1>
-<p>This document validates syntax highlighting across systems languages, functional programming paradigms, JVM languages, web formats, hardware description languages, and classical mainframes.</p>
+<h1 id="complete-65-language-syntax-highlighting-test-suite">Complete 65-Language Syntax Highlighting Test Suite</h1>
+<p>This suite validates tokenization, keywords, types, strings, comments, and line numbering across all 65 supported languages.</p>
 <nav class="toc" aria-label="Table of contents">
   <div class="toc-title">Table of Contents</div>
   <ul>
-    <li class="toc-level-1"><a href="#multi-language-syntax-highlighting-showcase">Multi-Language Syntax Highlighting Showcase</a></li>
-    <li class="toc-level-2"><a href="#systems-languages">1. Modern Systems Programming</a></li>
-    <li class="toc-level-2"><a href="#functional-languages">2. Functional &amp; Declarative Languages</a></li>
-    <li class="toc-level-2"><a href="#enterprise-jvm">3. JVM, Mobile &amp; Enterprise</a></li>
-    <li class="toc-level-2"><a href="#smart-contracts-database">4. Databases &amp; Blockchain</a></li>
-    <li class="toc-level-2"><a href="#hardware-classical">5. Hardware Description &amp; Assembly</a></li>
-    <li class="toc-level-2"><a href="#build-config">6. Build Systems, Containers &amp; Shells</a></li>
+    <li class="toc-level-1"><a href="#complete-65-language-syntax-highlighting-test-suite">Complete 65-Language Syntax Highlighting Test Suite</a></li>
+    <li class="toc-level-2"><a href="#1-systems-low-level">1. Systems &amp; Low-Level</a></li>
+    <li class="toc-level-2"><a href="#2-functional-declarative">2. Functional &amp; Declarative</a></li>
+    <li class="toc-level-2"><a href="#3-jvm-mobile-enterprise">3. JVM, Mobile &amp; Enterprise</a></li>
+    <li class="toc-level-2"><a href="#4-scripting-dynamic-languages">4. Scripting &amp; Dynamic Languages</a></li>
+    <li class="toc-level-2"><a href="#5-web-markup-config">5. Web, Markup &amp; Config</a></li>
+    <li class="toc-level-2"><a href="#6-shell-build-devops">6. Shell, Build &amp; DevOps</a></li>
+    <li class="toc-level-2"><a href="#7-databases-blockchain">7. Databases &amp; Blockchain</a></li>
+    <li class="toc-level-2"><a href="#8-hardware-description-assembly">8. Hardware Description &amp; Assembly</a></li>
+    <li class="toc-level-2"><a href="#9-classical-scientific">9. Classical &amp; Scientific</a></li>
   </ul>
 </nav>
 <hr>
-<h2 id="systems-languages">1. Modern Systems Programming</h2>
-<p>Zig allocator initialization and error handling:</p>
+<h2 id="1-systems-low-level">1. Systems &amp; Low-Level</h2>
+<p>Zig</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>allocator.zig</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>zig</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-zig line-numbers"><span class="code-line"><span class="tok-keyword">const</span> std = <span class="tok-keyword">@import</span>(<span class="tok-string">&quot;std&quot;</span>);</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> main() !<span class="tok-type">void</span> {</span><span class="code-line highlighted-line">    <span class="tok-keyword">var</span> gpa = std.heap.GeneralPurposeAllocator(.{}){};</span><span class="code-line">    <span class="tok-keyword">defer</span> _ = gpa.deinit();</span><span class="code-line highlighted-line">    <span class="tok-keyword">const</span> allocator = gpa.allocator();</span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">const</span> bytes = <span class="tok-keyword">try</span> allocator.alloc(<span class="tok-type">u8</span>, <span class="tok-number">1024</span>);</span><span class="code-line">    <span class="tok-keyword">defer</span> allocator.free(bytes);</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-zig line-numbers"><span class="code-line"><span class="tok-comment">// Zig error-union and allocator</span></span><span class="code-line"><span class="tok-keyword">const</span> std = <span class="tok-keyword">@import</span>(<span class="tok-string">&quot;std&quot;</span>);</span><span class="code-line"><span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> main() !<span class="tok-type">void</span> {</span><span class="code-line">    <span class="tok-keyword">const</span> mem = <span class="tok-keyword">try</span> std.heap.page_allocator.alloc(<span class="tok-type">u8</span>, <span class="tok-number">64</span>);</span><span class="code-line">    <span class="tok-keyword">defer</span> std.heap.page_allocator.free(mem);</span><span class="code-line">}</span></code></pre>
 </div>
-<p>Odin procedure declarations and context tracking:</p>
+<p>Odin</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>math.odin</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>odin</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-odin line-numbers"><span class="code-line"><span class="tok-keyword">package</span> math</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">import</span> <span class="tok-string">&quot;core:fmt&quot;</span></span><span class="code-line"></span><span class="code-line">Vector3 :: <span class="tok-keyword">struct</span> {</span><span class="code-line">    x, y, z: <span class="tok-type">f32</span>,</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">normalize :: <span class="tok-keyword">proc</span>(v: Vector3) -&gt; (Vector3, <span class="tok-type">bool</span>) {</span><span class="code-line">    <span class="tok-keyword">if</span> v.x == <span class="tok-number">0</span> &amp;&amp; v.y == <span class="tok-number">0</span> &amp;&amp; v.z == <span class="tok-number">0</span> {</span><span class="code-line">        <span class="tok-keyword">return</span> v, <span class="tok-type">false</span></span><span class="code-line">    }</span><span class="code-line">    <span class="tok-keyword">return</span> v, <span class="tok-type">true</span></span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-odin line-numbers"><span class="code-line"><span class="tok-comment">// Odin procedure definition</span></span><span class="code-line"><span class="tok-keyword">package</span> main</span><span class="code-line"><span class="tok-keyword">import</span> <span class="tok-string">&quot;core:fmt&quot;</span></span><span class="code-line">Vector2 :: <span class="tok-keyword">struct</span> { x, y: <span class="tok-type">f32</span> }</span><span class="code-line">main :: <span class="tok-keyword">proc</span>() { fmt.println(<span class="tok-string">&quot;Odin ok&quot;</span>, <span class="tok-number">42</span>) }</span></code></pre>
 </div>
-<p>Nim metaprogramming and block comments:</p>
+<p>Nim</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>cache.nim</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>nim</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-nim"><span class="tok-comment">#[
-  Thread-safe in-memory cache
-  with automatic eviction policies
-]#</span>
-<span class="tok-keyword">import</span> tables, locks
-
-<span class="tok-keyword">type</span>
-  Cache*[K, V] = <span class="tok-keyword">object</span>
-    data: Table[K, V]
-    lock: Lock
-
-<span class="tok-keyword">proc</span> initCache*[K, V](): Cache[K, V] =
-  initLock(<span class="tok-keyword">result</span>.lock)
-  <span class="tok-keyword">result</span>.data = initTable[K, V]()</code></pre>
+  <pre><code class="language-nim line-numbers"><span class="code-line"><span class="tok-comment">#[ Nim block comment ]#</span></span><span class="code-line"><span class="tok-keyword">import</span> std/strformat</span><span class="code-line"><span class="tok-keyword">type</span> State* = <span class="tok-keyword">object</span></span><span class="code-line">  id: <span class="tok-type">int</span></span><span class="code-line"><span class="tok-keyword">proc</span> run*(s: State): <span class="tok-type">bool</span> = <span class="tok-type">true</span></span></code></pre>
 </div>
-<p>D language range algorithms:</p>
+<p>D</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>stream.d</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>d</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-d line-numbers"><span class="code-line"><span class="tok-keyword">import</span> std.stdio;</span><span class="code-line"><span class="tok-keyword">import</span> std.algorithm : map, filter;</span><span class="code-line"></span><span class="code-line"><span class="tok-type">void</span> main() {</span><span class="code-line">    <span class="tok-type">int</span>[] numbers = [<span class="tok-number">1</span>, <span class="tok-number">2</span>, <span class="tok-number">3</span>, <span class="tok-number">4</span>, <span class="tok-number">5</span>, <span class="tok-number">6</span>];</span><span class="code-line">    <span class="tok-keyword">auto</span> evens = numbers.filter!(n =&gt; n % <span class="tok-number">2</span> == <span class="tok-number">0</span>);</span><span class="code-line">    writeln(evens);</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-d line-numbers"><span class="code-line"><span class="tok-keyword">import</span> std.stdio;</span><span class="code-line"><span class="tok-type">void</span> main() {</span><span class="code-line">    <span class="tok-type">string</span> msg = <span class="tok-string">`Raw string literal`</span>;</span><span class="code-line">    writeln(msg, <span class="tok-number">1024</span>);</span><span class="code-line">}</span></code></pre>
 </div>
-<hr>
-<h2 id="functional-languages">2. Functional &amp; Declarative Languages</h2>
-<p>Haskell monadic parser combinator:</p>
+<p>Rust</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>Parser.hs</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>rust</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-rust line-numbers"><span class="code-line"><span class="tok-comment">// Rust pattern matching</span></span><span class="code-line"><span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> check(val: <span class="tok-type">Option</span>&lt;<span class="tok-type">i32</span>&gt;) -&gt; <span class="tok-type">Result</span>&lt;<span class="tok-type">u64</span>, &amp;&#39;<span class="tok-keyword">static</span> <span class="tok-type">str</span>&gt; {</span><span class="code-line">    <span class="tok-keyword">match</span> val { <span class="tok-type">Some</span>(n) <span class="tok-keyword">if</span> n &gt; <span class="tok-number">0</span> =&gt; <span class="tok-type">Ok</span>(n <span class="tok-keyword">as</span> <span class="tok-type">u64</span>), _ =&gt; <span class="tok-type">Err</span>(<span class="tok-string">&quot;failed&quot;</span>) }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>C</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>c</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-c line-numbers"><span class="code-line">#include &lt;stdbool.h&gt;</span><span class="code-line"><span class="tok-keyword">typedef</span> <span class="tok-type">unsigned</span> <span class="tok-type">long</span> <span class="tok-type">size_t</span>;</span><span class="code-line"><span class="tok-keyword">const</span> <span class="tok-type">int</span> MAX_LIMIT = <span class="tok-number">512</span>;</span><span class="code-line"><span class="tok-type">bool</span> init(<span class="tok-type">char</span>* buffer, <span class="tok-type">size_t</span> len);</span></code></pre>
+</div>
+<p>C++</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>cpp</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-cpp line-numbers"><span class="code-line">#include &lt;concepts&gt;</span><span class="code-line"><span class="tok-keyword">template</span>&lt;<span class="tok-keyword">typename</span> T&gt;</span><span class="code-line"><span class="tok-keyword">concept</span> Numeric = <span class="tok-type">std</span>::is_integral_v&lt;T&gt;;</span><span class="code-line"><span class="tok-keyword">auto</span> add(Numeric <span class="tok-keyword">auto</span> a, Numeric <span class="tok-keyword">auto</span> b) -&gt; <span class="tok-keyword">decltype</span>(a + b) { <span class="tok-keyword">return</span> a + b; }</span></code></pre>
+</div>
+<p>Go</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>go</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-go line-numbers"><span class="code-line"><span class="tok-keyword">package</span> main</span><span class="code-line"><span class="tok-keyword">func</span> Worker(done <span class="tok-keyword">chan</span> <span class="tok-type">bool</span>, tasks <span class="tok-keyword">map</span>[<span class="tok-type">string</span>]<span class="tok-type">int</span>) {</span><span class="code-line">    <span class="tok-keyword">defer</span> close(done)</span><span class="code-line">    <span class="tok-keyword">for</span> k, v := <span class="tok-keyword">range</span> tasks { println(k, v) }</span><span class="code-line">}</span></code></pre>
+</div>
+<hr>
+<h2 id="2-functional-declarative">2. Functional &amp; Declarative</h2>
+<p>Haskell</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>haskell</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-haskell line-numbers"><span class="code-line"><span class="tok-comment">-- Monadic parsing unit</span></span><span class="code-line"><span class="tok-keyword">module</span> Parser (Parser, runParser) <span class="tok-keyword">where</span></span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">newtype</span> Parser a = Parser { runParser :: <span class="tok-type">String</span> -&gt; <span class="tok-type">Maybe</span> (a, <span class="tok-type">String</span>) }</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">instance</span> <span class="tok-type">Functor</span> Parser <span class="tok-keyword">where</span></span><span class="code-line">    fmap f (Parser p) = Parser $ \input -&gt; <span class="tok-keyword">do</span></span><span class="code-line">        (x, rest) &lt;- p input</span><span class="code-line">        <span class="tok-keyword">return</span> (f x, rest)</span></code></pre>
+  <pre><code class="language-haskell line-numbers"><span class="code-line"><span class="tok-comment">-- Haskell type signature and monad</span></span><span class="code-line">safeHead :: [a] -&gt; <span class="tok-type">Maybe</span> a</span><span class="code-line">safeHead [] = <span class="tok-type">Nothing</span></span><span class="code-line">safeHead (x:_) = <span class="tok-type">Just</span> x</span></code></pre>
 </div>
-<p>OCaml variant types and recursive pattern matching:</p>
+<p>OCaml</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>expr.ml</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>ocaml</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-ocaml line-numbers"><span class="code-line"><span class="tok-comment">(* Expression abstract syntax tree *)</span></span><span class="code-line"><span class="tok-keyword">type</span> expr =</span><span class="code-line">  | Const <span class="tok-keyword">of</span> <span class="tok-type">int</span></span><span class="code-line">  | Add <span class="tok-keyword">of</span> expr * expr</span><span class="code-line">  | Mul <span class="tok-keyword">of</span> expr * expr</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">let</span> <span class="tok-keyword">rec</span> eval = <span class="tok-keyword">function</span></span><span class="code-line">  | Const n -&gt; n</span><span class="code-line">  | Add (e1, e2) -&gt; eval e1 + eval e2</span><span class="code-line">  | Mul (e1, e2) -&gt; eval e1 * eval e2</span></code></pre>
+  <pre><code class="language-ocaml line-numbers"><span class="code-line"><span class="tok-comment">(* OCaml variant pattern *)</span></span><span class="code-line"><span class="tok-keyword">type</span> &#39;a tree = Leaf | Node <span class="tok-keyword">of</span> &#39;a * &#39;a tree * &#39;a tree</span><span class="code-line"><span class="tok-keyword">let</span> <span class="tok-keyword">rec</span> depth = <span class="tok-keyword">function</span> Leaf -&gt; <span class="tok-number">0</span> | Node (_, l, r) -&gt; <span class="tok-number">1</span> + max (depth l) (depth r)</span></code></pre>
 </div>
-<p>Elixir supervision tree:</p>
+<p>Elixir</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>worker.ex</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>elixir</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-elixir line-numbers"><span class="code-line"><span class="tok-keyword">defmodule</span> Core.Worker <span class="tok-keyword">do</span></span><span class="code-line">  <span class="tok-keyword">use</span> GenServer</span><span class="code-line"></span><span class="code-line">  <span class="tok-keyword">def</span> start_link(initial_state) <span class="tok-keyword">do</span></span><span class="code-line">    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)</span><span class="code-line">  <span class="tok-keyword">end</span></span><span class="code-line"></span><span class="code-line">  <span class="tok-keyword">@impl</span> <span class="tok-type">true</span></span><span class="code-line">  <span class="tok-keyword">def</span> init(state), <span class="tok-keyword">do</span>: {:ok, state}</span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
+  <pre><code class="language-elixir line-numbers"><span class="code-line"><span class="tok-keyword">defmodule</span> Calc <span class="tok-keyword">do</span></span><span class="code-line">  <span class="tok-keyword">@impl</span> <span class="tok-type">true</span></span><span class="code-line">  <span class="tok-keyword">def</span> run(val) <span class="tok-keyword">when</span> is_integer(val), <span class="tok-keyword">do</span>: {:ok, val * <span class="tok-number">2</span>}</span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
 </div>
-<p>Clojure concurrency using atoms and swaps:</p>
+<p>Erlang</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>state.clj</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>erlang</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-erlang line-numbers"><span class="code-line"><span class="tok-comment">% Erlang actor loop</span></span><span class="code-line">loop() -&gt;</span><span class="code-line">    <span class="tok-keyword">receive</span> {msg, From} -&gt; From ! <span class="tok-type">ok</span>, loop(); stop -&gt; <span class="tok-type">ok</span> <span class="tok-keyword">end</span>.</span></code></pre>
+</div>
+<p>Clojure</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>clojure</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-clojure"><span class="tok-comment">;; Thread-safe counter atom</span>
-(<span class="tok-keyword">ns</span> app.state)
-
-(<span class="tok-keyword">defonce</span> app-counter (<span class="tok-keyword">atom</span> <span class="tok-number">0</span>))
-
-(<span class="tok-keyword">defn</span> increment-counter [step]
-  (<span class="tok-keyword">swap!</span> app-counter + step))</code></pre>
+  <pre><code class="language-clojure line-numbers"><span class="code-line"><span class="tok-comment">;; Clojure thread-safe state</span></span><span class="code-line">(<span class="tok-keyword">defn</span> update-state [state-atom delta]</span><span class="code-line">  (<span class="tok-keyword">swap!</span> state-atom + delta))</span></code></pre>
 </div>
-<hr>
-<h2 id="enterprise-jvm">3. JVM, Mobile &amp; Enterprise</h2>
-<p>Kotlin coroutines flow emission:</p>
+<p>F#</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>Stream.kt</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>fsharp</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-fsharp line-numbers"><span class="code-line"><span class="tok-comment">// F# Async workflow</span></span><span class="code-line"><span class="tok-keyword">let</span> fetchAsync (url: <span class="tok-type">string</span>) : Async&lt;<span class="tok-type">string</span>&gt; = async {</span><span class="code-line">    <span class="tok-keyword">return</span> <span class="tok-string">&quot;response&quot;</span></span><span class="code-line">}</span></code></pre>
+</div>
+<p>Common Lisp</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>lisp</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-lisp line-numbers"><span class="code-line"><span class="tok-comment">;; Common Lisp defun</span></span><span class="code-line">(<span class="tok-keyword">defun</span> square (n)</span><span class="code-line">  (declare (type <span class="tok-type">integer</span> n))</span><span class="code-line">  (* n n))</span></code></pre>
+</div>
+<p>Scheme</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>scheme</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-scheme line-numbers"><span class="code-line"><span class="tok-comment">;; Scheme recursive factorial</span></span><span class="code-line">(<span class="tok-keyword">define</span> (fact n)</span><span class="code-line">  (<span class="tok-keyword">if</span> (&lt;= n <span class="tok-number">1</span>) <span class="tok-number">1</span> (* n (fact (- n <span class="tok-number">1</span>)))))</span></code></pre>
+</div>
+<p>Elm</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>elm</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-elm line-numbers"><span class="code-line"><span class="tok-comment">-- Elm model-view-update</span></span><span class="code-line"><span class="tok-keyword">type</span> Msg = Increment | Decrement</span><span class="code-line">update : Msg -&gt; <span class="tok-type">Int</span> -&gt; <span class="tok-type">Int</span></span><span class="code-line">update msg model = <span class="tok-keyword">case</span> msg <span class="tok-keyword">of</span> Increment -&gt; model + <span class="tok-number">1</span>; Decrement -&gt; model - <span class="tok-number">1</span></span></code></pre>
+</div>
+<p>PureScript</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>purescript</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-purescript line-numbers"><span class="code-line"><span class="tok-comment">-- PureScript effectful computation</span></span><span class="code-line"><span class="tok-keyword">module</span> Main <span class="tok-keyword">where</span></span><span class="code-line"><span class="tok-keyword">import</span> Effect (Effect)</span><span class="code-line">main :: Effect Unit</span><span class="code-line">main = pure unit</span></code></pre>
+</div>
+<p>Standard ML</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>sml</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-sml line-numbers"><span class="code-line"><span class="tok-comment">(* SML signature and structure *)</span></span><span class="code-line"><span class="tok-keyword">signature</span> QUEUE = <span class="tok-keyword">sig</span> <span class="tok-keyword">type</span> &#39;a queue <span class="tok-keyword">val</span> empty : &#39;a queue <span class="tok-keyword">end</span>;</span><span class="code-line"><span class="tok-keyword">structure</span> Q : QUEUE = <span class="tok-keyword">struct</span> <span class="tok-keyword">type</span> &#39;a queue = &#39;a <span class="tok-type">list</span> <span class="tok-keyword">val</span> empty = [] <span class="tok-keyword">end</span>;</span></code></pre>
+</div>
+<hr>
+<h2 id="3-jvm-mobile-enterprise">3. JVM, Mobile &amp; Enterprise</h2>
+<p>Java</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>java</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-java line-numbers"><span class="code-line"><span class="tok-keyword">package</span> com.demo;</span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">record</span> Point(<span class="tok-type">int</span> x, <span class="tok-type">int</span> y) {</span><span class="code-line">    <span class="tok-keyword">public</span> <span class="tok-keyword">static</span> <span class="tok-keyword">final</span> Point ZERO = <span class="tok-keyword">new</span> Point(<span class="tok-number">0</span>, <span class="tok-number">0</span>);</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Kotlin</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>kotlin</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-kotlin line-numbers"><span class="code-line"><span class="tok-keyword">package</span> com.docup.stream</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">import</span> kotlinx.coroutines.flow.<span class="tok-type">Flow</span></span><span class="code-line"><span class="tok-keyword">import</span> kotlinx.coroutines.flow.flow</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">fun</span> emitNumbers(): <span class="tok-type">Flow</span>&lt;<span class="tok-type">Int</span>&gt; = flow {</span><span class="code-line">    <span class="tok-keyword">for</span> (i <span class="tok-keyword">in</span> <span class="tok-number">1</span>..<span class="tok-number">10</span>) {</span><span class="code-line">        emit(i * <span class="tok-number">2</span>)</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-kotlin line-numbers"><span class="code-line"><span class="tok-comment">// Kotlin coroutine flow</span></span><span class="code-line"><span class="tok-keyword">fun</span> fetchEvents(): <span class="tok-type">Flow</span>&lt;<span class="tok-type">String</span>&gt; = flow {</span><span class="code-line">    emit(<span class="tok-string">&quot;init&quot;</span>)</span><span class="code-line">    delay(<span class="tok-number">100</span>L)</span><span class="code-line">}</span></code></pre>
 </div>
-<p>C# asynchronous LINQ records:</p>
+<p>Scala</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>RecordService.cs</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>scala</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-scala line-numbers"><span class="code-line"><span class="tok-keyword">sealed</span> <span class="tok-keyword">trait</span> Expr</span><span class="code-line"><span class="tok-keyword">case</span> <span class="tok-keyword">class</span> Number(n: <span class="tok-type">Int</span>) <span class="tok-keyword">extends</span> Expr</span><span class="code-line"><span class="tok-keyword">case</span> <span class="tok-keyword">class</span> Sum(e1: Expr, e2: Expr) <span class="tok-keyword">extends</span> Expr</span></code></pre>
+</div>
+<p>C#</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>csharp</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-csharp line-numbers"><span class="code-line"><span class="tok-keyword">using</span> System;</span><span class="code-line"><span class="tok-keyword">using</span> System.Threading.Tasks;</span><span class="code-line highlighted-line"></span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">record</span> UserProfile(<span class="tok-type">Guid</span> Id, <span class="tok-type">string</span> Username, <span class="tok-type">bool</span> IsActive);</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">class</span> UserService {</span><span class="code-line highlighted-line">    <span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span>&lt;UserProfile&gt; GetProfileAsync(<span class="tok-type">Guid</span> id) {</span><span class="code-line">        <span class="tok-keyword">await</span> <span class="tok-type">Task</span>.Delay(<span class="tok-number">10</span>);</span><span class="code-line">        <span class="tok-keyword">return</span> <span class="tok-keyword">new</span> UserProfile(id, <span class="tok-string">&quot;docup_dev&quot;</span>, <span class="tok-type">true</span>);</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-csharp line-numbers"><span class="code-line"><span class="tok-keyword">using</span> System.Threading.Tasks;</span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">record</span> User(<span class="tok-type">int</span> Id, <span class="tok-type">string</span> Name);</span><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">async</span> <span class="tok-type">Task</span>&lt;User&gt; FetchAsync() =&gt; <span class="tok-keyword">await</span> <span class="tok-type">Task</span>.FromResult(<span class="tok-keyword">new</span> User(<span class="tok-number">1</span>, <span class="tok-string">&quot;docup&quot;</span>));</span></code></pre>
 </div>
-<p>Swift actors with async/await concurrency:</p>
+<p>Swift</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>Bank.swift</span>
+    <span></span>
     <div class="codeblock-actions">
       <span>swift</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-swift line-numbers"><span class="code-line"><span class="tok-keyword">actor</span> BankAccount {</span><span class="code-line">    <span class="tok-keyword">private</span> <span class="tok-keyword">var</span> balance: <span class="tok-type">Double</span> = <span class="tok-number">0.0</span></span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">func</span> deposit(amount: <span class="tok-type">Double</span>) {</span><span class="code-line">        <span class="tok-keyword">guard</span> amount &gt; <span class="tok-number">0</span> <span class="tok-keyword">else</span> { <span class="tok-keyword">return</span> }</span><span class="code-line">        balance += amount</span><span class="code-line">    }</span><span class="code-line"></span><span class="code-line">    <span class="tok-keyword">func</span> getBalance() -&gt; <span class="tok-type">Double</span> {</span><span class="code-line">        <span class="tok-keyword">return</span> balance</span><span class="code-line">    }</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-swift line-numbers"><span class="code-line"><span class="tok-keyword">actor</span> BankStore {</span><span class="code-line">    <span class="tok-keyword">private</span> <span class="tok-keyword">var</span> balance: <span class="tok-type">Double</span> = <span class="tok-number">0.0</span></span><span class="code-line">    <span class="tok-keyword">func</span> deposit(amount: <span class="tok-type">Double</span>) { balance += amount }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Dart</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>dart</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-dart line-numbers"><span class="code-line"><span class="tok-type">Future</span>&lt;<span class="tok-type">String</span>&gt; fetchData() <span class="tok-keyword">async</span> {</span><span class="code-line">    <span class="tok-keyword">final</span> result = <span class="tok-keyword">await</span> <span class="tok-type">Future</span>.delayed(Duration(seconds: <span class="tok-number">1</span>), () =&gt; <span class="tok-string">&quot;payload&quot;</span>);</span><span class="code-line">    <span class="tok-keyword">return</span> result;</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Groovy</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>groovy</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-groovy line-numbers"><span class="code-line"><span class="tok-keyword">def</span> <span class="tok-keyword">static</span> calculate(<span class="tok-type">int</span> x, <span class="tok-type">int</span> y = <span class="tok-number">10</span>) {</span><span class="code-line">    <span class="tok-keyword">return</span> (x * y) + <span class="tok-number">42</span></span><span class="code-line">}</span></code></pre>
+</div>
+<p>Apex</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>apex</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-apex line-numbers"><span class="code-line"><span class="tok-keyword">public</span> <span class="tok-keyword">with</span> <span class="tok-keyword">sharing</span> <span class="tok-keyword">class</span> LeadProcessor {</span><span class="code-line">    <span class="tok-keyword">public</span> <span class="tok-keyword">static</span> void run(<span class="tok-type">List</span>&lt;Lead&gt; leads) { <span class="tok-keyword">update</span> leads; }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Visual Basic</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>vb</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-vb line-numbers"><span class="code-line"><span class="tok-comment">&#39; VB.NET Module</span></span><span class="code-line"><span class="tok-keyword">Module</span> App</span><span class="code-line">    <span class="tok-keyword">Sub</span> Main()</span><span class="code-line">        <span class="tok-keyword">Dim</span> active <span class="tok-keyword">As</span> <span class="tok-keyword">Boolean</span> = <span class="tok-keyword">True</span></span><span class="code-line">    <span class="tok-keyword">End</span> <span class="tok-keyword">Sub</span></span><span class="code-line"><span class="tok-keyword">End</span> <span class="tok-keyword">Module</span></span></code></pre>
 </div>
 <hr>
-<h2 id="smart-contracts-database">4. Databases &amp; Blockchain</h2>
-<p>Solidity ERC-20 token interface:</p>
+<h2 id="4-scripting-dynamic-languages">4. Scripting &amp; Dynamic Languages</h2>
+<p>Python</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>IToken.sol</span>
+    <span></span>
     <div class="codeblock-actions">
-      <span>solidity</span>
+      <span>python</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-solidity line-numbers"><span class="code-line"><span class="tok-comment">// SPDX-License-Identifier: MIT</span></span><span class="code-line"><span class="tok-keyword">pragma</span> <span class="tok-keyword">solidity</span> ^<span class="tok-number">0.8.20</span>;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">interface</span> IERC20 {</span><span class="code-line">    <span class="tok-keyword">event</span> Transfer(<span class="tok-type">address</span> <span class="tok-keyword">indexed</span> from, <span class="tok-type">address</span> <span class="tok-keyword">indexed</span> to, <span class="tok-type">uint256</span> value);</span><span class="code-line">    <span class="tok-keyword">function</span> balanceOf(<span class="tok-type">address</span> account) <span class="tok-keyword">external</span> <span class="tok-keyword">view</span> <span class="tok-keyword">returns</span> (<span class="tok-type">uint256</span>);</span><span class="code-line">    <span class="tok-keyword">function</span> transfer(<span class="tok-type">address</span> to, <span class="tok-type">uint256</span> value) <span class="tok-keyword">external</span> <span class="tok-keyword">returns</span> (<span class="tok-type">bool</span>);</span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-python line-numbers"><span class="code-line"><span class="tok-comment"># Python async generator</span></span><span class="code-line"><span class="tok-keyword">async</span> <span class="tok-keyword">def</span> produce(n: <span class="tok-type">int</span>) -&gt; <span class="tok-type">list</span>[<span class="tok-type">int</span>]:</span><span class="code-line">    <span class="tok-keyword">return</span> [i * <span class="tok-number">2</span> <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> range(n) <span class="tok-keyword">if</span> i % <span class="tok-number">2</span> == <span class="tok-number">0</span>]</span></code></pre>
 </div>
-<p>SQL case-insensitive query optimization:</p>
+<p>Ruby</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>analytics.sql</span>
+    <span></span>
     <div class="codeblock-actions">
-      <span>sql</span>
+      <span>ruby</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-sql line-numbers"><span class="code-line"><span class="tok-comment">-- Multi-column aggregated analytical query</span></span><span class="code-line"><span class="tok-keyword">SELECT</span> </span><span class="code-line">    u.id, </span><span class="code-line">    u.username, </span><span class="code-line">    <span class="tok-keyword">COUNT</span>(o.id) <span class="tok-keyword">AS</span> total_orders,</span><span class="code-line">    <span class="tok-keyword">COALESCE</span>(<span class="tok-keyword">SUM</span>(o.amount), <span class="tok-number">0.0</span>) <span class="tok-keyword">AS</span> lifetime_value</span><span class="code-line"><span class="tok-keyword">FROM</span> users <span class="tok-keyword">AS</span> u</span><span class="code-line"><span class="tok-keyword">LEFT</span> <span class="tok-keyword">JOIN</span> orders <span class="tok-keyword">AS</span> o <span class="tok-keyword">ON</span> u.id = o.user_id</span><span class="code-line"><span class="tok-keyword">WHERE</span> u.status = <span class="tok-string">&#39;active&#39;</span></span><span class="code-line"><span class="tok-keyword">GROUP</span> <span class="tok-keyword">BY</span> u.id, u.username</span><span class="code-line"><span class="tok-keyword">HAVING</span> <span class="tok-keyword">COUNT</span>(o.id) &gt; <span class="tok-number">5</span></span><span class="code-line"><span class="tok-keyword">ORDER</span> <span class="tok-keyword">BY</span> lifetime_value <span class="tok-keyword">DESC</span></span><span class="code-line"><span class="tok-keyword">LIMIT</span> <span class="tok-number">50</span>;</span></code></pre>
+  <pre><code class="language-ruby line-numbers"><span class="code-line"><span class="tok-comment"># Ruby module definition</span></span><span class="code-line"><span class="tok-keyword">module</span> Cacheable</span><span class="code-line">  <span class="tok-keyword">def</span> <span class="tok-keyword">self</span>.included(base)</span><span class="code-line">    base.extend(ClassMethods)</span><span class="code-line">  <span class="tok-keyword">end</span></span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
+</div>
+<p>PHP</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>php</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-php line-numbers"><span class="code-line">&lt;?php</span><span class="code-line"><span class="tok-keyword">declare</span>(strict_types=<span class="tok-number">1</span>);</span><span class="code-line"><span class="tok-keyword">readonly</span> <span class="tok-keyword">class</span> Config {</span><span class="code-line">    <span class="tok-keyword">public</span> <span class="tok-keyword">function</span> __construct(<span class="tok-keyword">public</span> <span class="tok-type">string</span> $dsn, <span class="tok-keyword">public</span> <span class="tok-type">int</span>$timeout = <span class="tok-number">30</span>) {}</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Perl</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>perl</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-perl line-numbers"><span class="code-line"><span class="tok-comment"># Perl package subroutine</span></span><span class="code-line"><span class="tok-keyword">package</span> Data::Handler;</span><span class="code-line"><span class="tok-keyword">use</span> strict;</span><span class="code-line"><span class="tok-keyword">sub</span> process { <span class="tok-keyword">my</span> ($self, $val) = @_; <span class="tok-keyword">return</span>$val // <span class="tok-number">0</span>; }</span></code></pre>
+</div>
+<p>Lua</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>lua</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-lua line-numbers"><span class="code-line"><span class="tok-comment">-- Lua closure counter</span></span><span class="code-line"><span class="tok-keyword">local</span> <span class="tok-keyword">function</span> createCounter(start)</span><span class="code-line">    <span class="tok-keyword">local</span> val = start <span class="tok-keyword">or</span> <span class="tok-number">0</span></span><span class="code-line">    <span class="tok-keyword">return</span> <span class="tok-keyword">function</span>() val = val + <span class="tok-number">1</span>; <span class="tok-keyword">return</span> val <span class="tok-keyword">end</span></span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
+</div>
+<p>R</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>r</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-r line-numbers"><span class="code-line"><span class="tok-comment"># R statistical function</span></span><span class="code-line">calc_mean &lt;- <span class="tok-keyword">function</span>(vec) {</span><span class="code-line">    <span class="tok-keyword">if</span> (length(vec) == <span class="tok-number">0</span>) return(<span class="tok-type">NA</span>)</span><span class="code-line">    mean(vec, na.rm = <span class="tok-type">TRUE</span>)</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Julia</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>julia</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-julia line-numbers"><span class="code-line"><span class="tok-comment"># Julia parametric struct</span></span><span class="code-line"><span class="tok-keyword">struct</span> Point{T &lt;: Real}</span><span class="code-line">    x::T</span><span class="code-line">    y::T</span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
+</div>
+<p>Crystal</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>crystal</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-crystal line-numbers"><span class="code-line"><span class="tok-comment"># Crystal typed class</span></span><span class="code-line"><span class="tok-keyword">class</span> Worker</span><span class="code-line">  property id : <span class="tok-type">Int32</span></span><span class="code-line">  <span class="tok-keyword">def</span> initialize(@id : <span class="tok-type">Int32</span>) <span class="tok-keyword">end</span></span><span class="code-line"><span class="tok-keyword">end</span></span></code></pre>
 </div>
 <hr>
-<h2 id="hardware-classical">5. Hardware Description &amp; Assembly</h2>
-<p>x86_64 Assembly string length routine:</p>
+<h2 id="5-web-markup-config">5. Web, Markup &amp; Config</h2>
+<p>JavaScript</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>strlen.asm</span>
+    <span></span>
     <div class="codeblock-actions">
-      <span>assembly</span>
+      <span>javascript</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-assembly line-numbers"><span class="code-line"><span class="tok-keyword">section</span> .text</span><span class="code-line"><span class="tok-keyword">global</span> _strlen</span><span class="code-line"></span><span class="code-line">_strlen:</span><span class="code-line">    <span class="tok-keyword">xor</span> <span class="tok-type">rax</span>, <span class="tok-type">rax</span></span><span class="code-line">.<span class="tok-keyword">loop</span>:</span><span class="code-line">    <span class="tok-keyword">cmp</span> <span class="tok-type">byte</span> [<span class="tok-type">rdi</span> + <span class="tok-type">rax</span>], <span class="tok-number">0</span></span><span class="code-line">    <span class="tok-keyword">je</span> .done</span><span class="code-line">    <span class="tok-keyword">inc</span> <span class="tok-type">rax</span></span><span class="code-line">    <span class="tok-keyword">jmp</span> .<span class="tok-keyword">loop</span></span><span class="code-line">.done:</span><span class="code-line">    <span class="tok-keyword">ret</span></span></code></pre>
+  <pre><code class="language-javascript line-numbers"><span class="code-line"><span class="tok-keyword">const</span> stream = <span class="tok-keyword">await</span> fetch(<span class="tok-string">&quot;/api/data&quot;</span>);</span><span class="code-line"><span class="tok-keyword">const</span> { results } = <span class="tok-keyword">await</span> stream.json();</span></code></pre>
 </div>
-<p>VHDL register architecture:</p>
+<p>TypeScript</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>d_ff.vhd</span>
+    <span></span>
     <div class="codeblock-actions">
-      <span>vhdl</span>
+      <span>typescript</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-vhdl line-numbers"><span class="code-line"><span class="tok-comment">-- D Flip-Flop with Active High Asynchronous Reset</span></span><span class="code-line"><span class="tok-keyword">library</span> IEEE;</span><span class="code-line"><span class="tok-keyword">use</span> IEEE.STD_LOGIC_1164.<span class="tok-keyword">ALL</span>;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">entity</span> d_ff <span class="tok-keyword">is</span></span><span class="code-line">    <span class="tok-keyword">port</span> (</span><span class="code-line">        clk, reset, d : <span class="tok-keyword">in</span>  <span class="tok-type">std_logic</span>;</span><span class="code-line">        q             : <span class="tok-keyword">out</span> <span class="tok-type">std_logic</span></span><span class="code-line">    );</span><span class="code-line"><span class="tok-keyword">end</span> d_ff;</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">architecture</span> Behavioral <span class="tok-keyword">of</span> d_ff <span class="tok-keyword">is</span></span><span class="code-line"><span class="tok-keyword">begin</span></span><span class="code-line">    <span class="tok-keyword">process</span>(clk, reset)</span><span class="code-line">    <span class="tok-keyword">begin</span></span><span class="code-line">        <span class="tok-keyword">if</span> reset = <span class="tok-string">&#39;1&#39;</span> <span class="tok-keyword">then</span></span><span class="code-line">            q &lt;= <span class="tok-string">&#39;0&#39;</span>;</span><span class="code-line">        <span class="tok-keyword">elsif</span> <span class="tok-type">rising_edge</span>(clk) <span class="tok-keyword">then</span></span><span class="code-line">            q &lt;= d;</span><span class="code-line">        <span class="tok-keyword">end</span> <span class="tok-keyword">if</span>;</span><span class="code-line">    <span class="tok-keyword">end</span> <span class="tok-keyword">process</span>;</span><span class="code-line"><span class="tok-keyword">end</span> Behavioral;</span></code></pre>
+  <pre><code class="language-typescript line-numbers"><span class="code-line"><span class="tok-keyword">interface</span> Config&lt;T <span class="tok-keyword">extends</span> <span class="tok-type">object</span>&gt; {</span><span class="code-line">    <span class="tok-keyword">readonly</span> endpoint: <span class="tok-type">string</span>;</span><span class="code-line">    validate(input: <span class="tok-type">unknown</span>): input <span class="tok-keyword">is</span> T;</span><span class="code-line">}</span></code></pre>
 </div>
-<p>Classical COBOL record processing:</p>
+<p>HTML</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>process.cbl</span>
+    <span></span>
     <div class="codeblock-actions">
-      <span>cobol</span>
+      <span>html</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-cobol"><span class="tok-comment">*&gt; Program to process transaction counts</span>
-<span class="tok-keyword">IDENTIFICATION</span> <span class="tok-keyword">DIVISION</span>.
-<span class="tok-keyword">PROGRAM-ID</span>. HELLO-DOCUP.
-<span class="tok-keyword">DATA</span> <span class="tok-keyword">DIVISION</span>.
-<span class="tok-keyword">WORKING-STORAGE</span> <span class="tok-keyword">SECTION</span>.
-<span class="tok-number">01</span> WS-COUNT <span class="tok-keyword">PIC</span> <span class="tok-number">9</span>(<span class="tok-number">4</span>) <span class="tok-keyword">VALUE</span> <span class="tok-number">1000.</span>
-<span class="tok-keyword">PROCEDURE</span> <span class="tok-keyword">DIVISION</span>.
-    <span class="tok-keyword">DISPLAY</span> <span class="tok-string">&quot;PROCESSING BATCH: &quot;</span> WS-COUNT.
-    <span class="tok-keyword">STOP</span> <span class="tok-keyword">RUN</span>.</code></pre>
+  <pre><code class="language-html line-numbers"><span class="code-line">&lt;!DOCTYPE <span class="tok-keyword">html</span>&gt;</span><span class="code-line">&lt;<span class="tok-keyword">html</span> lang=<span class="tok-string">&quot;en&quot;</span>&gt;</span><span class="code-line">  &lt;<span class="tok-keyword">head</span>&gt;&lt;<span class="tok-keyword">meta</span> charset=<span class="tok-string">&quot;UTF-8&quot;</span>&gt;&lt;<span class="tok-keyword">title</span>&gt;DocUP&lt;/<span class="tok-keyword">title</span>&gt;&lt;/<span class="tok-keyword">head</span>&gt;</span><span class="code-line">&lt;/<span class="tok-keyword">html</span>&gt;</span></code></pre>
+</div>
+<p>XML</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>xml</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-xml line-numbers"><span class="code-line"><span class="tok-comment">&lt;!-- XML configuration --&gt;</span></span><span class="code-line">&lt;server port=<span class="tok-string">&quot;8080&quot;</span> secure=<span class="tok-string">&quot;true&quot;</span>&gt;</span><span class="code-line">  &lt;host name=<span class="tok-string">&quot;localhost&quot;</span> timeout=<span class="tok-string">&quot;30&quot;</span>/&gt;</span><span class="code-line">&lt;/server&gt;</span></code></pre>
+</div>
+<p>CSS</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>css</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-css line-numbers"><span class="code-line">:<span class="tok-keyword">root</span> {</span><span class="code-line">  --theme-pad: <span class="tok-number">12</span>px;</span><span class="code-line">  <span class="tok-keyword">display</span>: <span class="tok-keyword">flex</span>;</span><span class="code-line">  <span class="tok-keyword">justify-content</span>: center;</span><span class="code-line">}</span></code></pre>
+</div>
+<p>SCSS</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>scss</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-scss line-numbers"><span class="code-line">$primary-color: #<span class="tok-number">0969da</span>;</span><span class="code-line">@<span class="tok-keyword">mixin</span> card($border: <span class="tok-number">1</span>px) {</span><span class="code-line">  border: $border solid$primary-color;</span><span class="code-line">}</span></code></pre>
+</div>
+<p>JSON</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>json</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-json line-numbers"><span class="code-line">{</span><span class="code-line">  <span class="tok-string">&quot;name&quot;</span>: <span class="tok-string">&quot;docup&quot;</span>,</span><span class="code-line">  <span class="tok-string">&quot;enabled&quot;</span>: <span class="tok-type">true</span>,</span><span class="code-line">  <span class="tok-string">&quot;count&quot;</span>: <span class="tok-number">100</span>,</span><span class="code-line">  <span class="tok-string">&quot;extra&quot;</span>: <span class="tok-type">null</span></span><span class="code-line">}</span></code></pre>
+</div>
+<p>YAML</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>yaml</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-yaml line-numbers"><span class="code-line"><span class="tok-comment"># YAML config</span></span><span class="code-line">server:</span><span class="code-line">  host: <span class="tok-number">127.0.0.1</span></span><span class="code-line">  ssl: <span class="tok-type">yes</span></span><span class="code-line">  retries: <span class="tok-number">3</span></span></code></pre>
+</div>
+<p>TOML</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>toml</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-toml line-numbers"><span class="code-line"><span class="tok-comment"># Cargo TOML</span></span><span class="code-line">[package]</span><span class="code-line">name = <span class="tok-string">&quot;docup&quot;</span></span><span class="code-line">version = <span class="tok-string">&quot;0.2.0&quot;</span></span><span class="code-line">line_numbers = <span class="tok-type">true</span></span></code></pre>
+</div>
+<p>INI</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>ini</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-ini line-numbers"><span class="code-line"><span class="tok-comment">; INI settings</span></span><span class="code-line">[database]</span><span class="code-line">host = <span class="tok-number">127.0.0.1</span></span><span class="code-line">port = <span class="tok-number">5432</span></span><span class="code-line">ssl = <span class="tok-type">on</span></span></code></pre>
+</div>
+<p>GraphQL</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>graphql</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-graphql line-numbers"><span class="code-line"><span class="tok-keyword">query</span> GetUserData($userId: <span class="tok-type">ID</span>!) {</span><span class="code-line">  user(id: $userId) { id username role }</span><span class="code-line">}</span></code></pre>
+</div>
+<p>Markdown</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>markdown</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-markdown line-numbers"><span class="code-line"><span class="tok-comment">&lt;!-- Markdown comment --&gt;</span></span><span class="code-line"># Title of Page</span><span class="code-line">Here is a list of [links](https://example.com).</span></code></pre>
 </div>
 <hr>
-<h2 id="build-config">6. Build Systems, Containers &amp; Shells</h2>
-<p>PowerShell administration script:</p>
+<h2 id="6-shell-build-devops">6. Shell, Build &amp; DevOps</h2>
+<p>Bash</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>deploy.ps1</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>bash</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-bash line-numbers"><span class="code-line"><span class="tok-comment">#!/usr/bin/env bash</span></span><span class="code-line"><span class="tok-keyword">set</span> -e</span><span class="code-line"><span class="tok-keyword">readonly</span> TARGET_DIR=<span class="tok-string">&quot;./dist&quot;</span></span><span class="code-line"><span class="tok-keyword">for</span> file <span class="tok-keyword">in</span> <span class="tok-string">&quot;$TARGET_DIR&quot;</span>/*.tar.gz; <span class="tok-keyword">do</span> echo <span class="tok-string">&quot;Extracting $file&quot;</span>; <span class="tok-keyword">done</span></span></code></pre>
+</div>
+<p>PowerShell</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>powershell</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-powershell line-numbers"><span class="code-line"><span class="tok-comment"># Automated container cluster configuration</span></span><span class="code-line"><span class="tok-keyword">param</span> (</span><span class="code-line">    [<span class="tok-type">string</span>]$Environment = <span class="tok-string">&quot;Production&quot;</span>,</span><span class="code-line">    [<span class="tok-type">int</span>]$Replicas = <span class="tok-number">3</span></span><span class="code-line">)</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">Write-Host</span> <span class="tok-string">&quot;Deploying to $Environment with $Replicas nodes&quot;</span></span><span class="code-line"><span class="tok-keyword">if</span> ($Replicas -lt <span class="tok-number">1</span>) {</span><span class="code-line">    <span class="tok-keyword">throw</span> <span class="tok-string">&quot;Invalid replica count specified.&quot;</span></span><span class="code-line">}</span></code></pre>
+  <pre><code class="language-powershell line-numbers"><span class="code-line"><span class="tok-comment">&lt;# PowerShell script #&gt;</span></span><span class="code-line"><span class="tok-keyword">param</span>([<span class="tok-type">string</span>]$Env = <span class="tok-string">&quot;Production&quot;</span>, [<span class="tok-type">int</span>]$Nodes = <span class="tok-number">5</span>)</span><span class="code-line"><span class="tok-keyword">Write-Host</span> <span class="tok-string">&quot;Running in $Env with$Nodes nodes&quot;</span></span></code></pre>
 </div>
-<p>Dockerfile multi-stage build:</p>
+<p>Batch</p>
 <div class="codeblock">
   <div class="codeblock-header">
-    <span>Dockerfile</span>
+    <span></span>
+    <div class="codeblock-actions">
+      <span>batch</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-batch line-numbers"><span class="code-line"><span class="tok-comment">:: Batch script setup</span></span><span class="code-line">@<span class="tok-keyword">echo</span> off</span><span class="code-line"><span class="tok-keyword">set</span> RUN_MODE=release</span><span class="code-line"><span class="tok-keyword">if</span> exist build\ <span class="tok-keyword">rd</span> /s /q build\</span></code></pre>
+</div>
+<p>Dockerfile</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
     <div class="codeblock-actions">
       <span>dockerfile</span>
       <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
     </div>
   </div>
-  <pre><code class="language-dockerfile line-numbers"><span class="code-line"><span class="tok-keyword">FROM</span> rust:<span class="tok-number">1.80</span>-<span class="tok-type">alpine</span> <span class="tok-keyword">AS</span> builder</span><span class="code-line"><span class="tok-keyword">WORKDIR</span> /app</span><span class="code-line"><span class="tok-keyword">COPY</span> . .</span><span class="code-line"><span class="tok-keyword">RUN</span> cargo build --release</span><span class="code-line"></span><span class="code-line"><span class="tok-keyword">FROM</span> <span class="tok-type">alpine</span>:<span class="tok-type">latest</span></span><span class="code-line"><span class="tok-keyword">WORKDIR</span> /root/</span><span class="code-line"><span class="tok-keyword">COPY</span> --<span class="tok-keyword">from</span>=builder /app/target/release/docup /usr/local/bin/</span><span class="code-line"><span class="tok-keyword">CMD</span> [<span class="tok-string">&quot;docup&quot;</span>, <span class="tok-string">&quot;--help&quot;</span>]</span></code></pre>
+  <pre><code class="language-dockerfile line-numbers"><span class="code-line"><span class="tok-keyword">FROM</span> <span class="tok-type">alpine</span>:<span class="tok-type">latest</span> <span class="tok-keyword">AS</span> base</span><span class="code-line"><span class="tok-keyword">WORKDIR</span> /app</span><span class="code-line"><span class="tok-keyword">COPY</span> . .</span><span class="code-line"><span class="tok-keyword">ENTRYPOINT</span> [<span class="tok-string">&quot;/bin/sh&quot;</span>]</span></code></pre>
+</div>
+<p>Makefile</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>makefile</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-makefile line-numbers"><span class="code-line"><span class="tok-comment"># Makefile rule</span></span><span class="code-line">CC ?= clang</span><span class="code-line">build:</span><span class="code-line">	$(CC) -O2 -o bin/app src/main.c</span></code></pre>
+</div>
+<p>CMake</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>cmake</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-cmake line-numbers"><span class="code-line"><span class="tok-comment"># CMake build definition</span></span><span class="code-line"><span class="tok-keyword">cmake_minimum_required</span>(VERSION <span class="tok-number">3.20</span>)</span><span class="code-line"><span class="tok-keyword">project</span>(DocUP LANGUAGES CXX)</span><span class="code-line"><span class="tok-keyword">add_executable</span>(docup src/main.cpp)</span></code></pre>
+</div>
+<p>Terraform / HCL</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>terraform</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-terraform line-numbers"><span class="code-line"><span class="tok-comment"># Terraform AWS provider</span></span><span class="code-line"><span class="tok-keyword">provider</span> <span class="tok-string">&quot;aws&quot;</span> { region = <span class="tok-string">&quot;us-east-1&quot;</span> }</span><span class="code-line"><span class="tok-keyword">resource</span> <span class="tok-string">&quot;aws_s3_bucket&quot;</span> <span class="tok-string">&quot;b&quot;</span> { bucket = <span class="tok-string">&quot;docup-storage&quot;</span> }</span></code></pre>
+</div>
+<hr>
+<h2 id="7-databases-blockchain">7. Databases &amp; Blockchain</h2>
+<p>SQL</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>sql</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-sql line-numbers"><span class="code-line"><span class="tok-comment">-- SQL case-insensitive query</span></span><span class="code-line"><span class="tok-keyword">SELECT</span> u.id, <span class="tok-keyword">COUNT</span>(o.id) <span class="tok-keyword">AS</span> total</span><span class="code-line"><span class="tok-keyword">FROM</span> users <span class="tok-keyword">AS</span> u</span><span class="code-line"><span class="tok-keyword">LEFT</span> <span class="tok-keyword">JOIN</span> orders <span class="tok-keyword">AS</span> o <span class="tok-keyword">ON</span> u.id = o.user_id</span><span class="code-line"><span class="tok-keyword">WHERE</span> u.status = <span class="tok-string">&#39;active&#39;</span></span><span class="code-line"><span class="tok-keyword">GROUP</span> <span class="tok-keyword">BY</span> u.id</span><span class="code-line"><span class="tok-keyword">LIMIT</span> <span class="tok-number">20</span>;</span></code></pre>
+</div>
+<p>Solidity</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>solidity</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-solidity line-numbers"><span class="code-line"><span class="tok-comment">// SPDX-License-Identifier: MIT</span></span><span class="code-line"><span class="tok-keyword">pragma</span> <span class="tok-keyword">solidity</span> ^<span class="tok-number">0.8.20</span>;</span><span class="code-line"><span class="tok-keyword">contract</span> Vault {</span><span class="code-line">    <span class="tok-keyword">mapping</span>(<span class="tok-type">address</span> =&gt; <span class="tok-type">uint256</span>) <span class="tok-keyword">public</span> balances;</span><span class="code-line">    <span class="tok-keyword">function</span> deposit() <span class="tok-keyword">external</span> <span class="tok-keyword">payable</span> { balances[msg.sender] += msg.value; }</span><span class="code-line">}</span></code></pre>
+</div>
+<hr>
+<h2 id="8-hardware-description-assembly">8. Hardware Description &amp; Assembly</h2>
+<p>x86_64 / ARM Assembly</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>assembly</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-assembly line-numbers"><span class="code-line"><span class="tok-comment">; Assembly routine</span></span><span class="code-line"><span class="tok-keyword">section</span> .text</span><span class="code-line"><span class="tok-keyword">global</span> _start</span><span class="code-line">_start:</span><span class="code-line">    <span class="tok-keyword">mov</span> <span class="tok-type">rax</span>, <span class="tok-number">1</span></span><span class="code-line">    <span class="tok-keyword">mov</span> <span class="tok-type">rdi</span>, <span class="tok-number">0</span></span><span class="code-line">    <span class="tok-keyword">syscall</span></span></code></pre>
+</div>
+<p>VHDL</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>vhdl</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-vhdl line-numbers"><span class="code-line"><span class="tok-comment">-- VHDL Entity</span></span><span class="code-line"><span class="tok-keyword">library</span> IEEE;</span><span class="code-line"><span class="tok-keyword">use</span> IEEE.STD_LOGIC_1164.<span class="tok-keyword">ALL</span>;</span><span class="code-line"><span class="tok-keyword">entity</span> mux <span class="tok-keyword">is</span></span><span class="code-line">    <span class="tok-keyword">port</span> (sel: <span class="tok-keyword">in</span> <span class="tok-type">std_logic</span>; a, b: <span class="tok-keyword">in</span> <span class="tok-type">std_logic</span>; y: <span class="tok-keyword">out</span> <span class="tok-type">std_logic</span>);</span><span class="code-line"><span class="tok-keyword">end</span> mux;</span></code></pre>
+</div>
+<p>Verilog</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>verilog</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-verilog line-numbers"><span class="code-line"><span class="tok-comment">// Verilog module</span></span><span class="code-line"><span class="tok-keyword">module</span> counter(<span class="tok-keyword">input</span> <span class="tok-keyword">wire</span> clk, <span class="tok-keyword">input</span> <span class="tok-keyword">wire</span> rst, <span class="tok-keyword">output</span> <span class="tok-keyword">reg</span> [<span class="tok-number">3</span>:<span class="tok-number">0</span>] q);</span><span class="code-line">    <span class="tok-keyword">always</span> @(<span class="tok-keyword">posedge</span> clk <span class="tok-keyword">or</span> <span class="tok-keyword">posedge</span> rst)</span><span class="code-line">        <span class="tok-keyword">if</span> (rst) q &lt;= <span class="tok-number">4</span>&#39;b0000; <span class="tok-keyword">else</span> q &lt;= q + <span class="tok-number">1</span>;</span><span class="code-line"><span class="tok-keyword">endmodule</span></span></code></pre>
+</div>
+<p>SystemVerilog</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>systemverilog</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-systemverilog line-numbers"><span class="code-line"><span class="tok-comment">// SystemVerilog interface</span></span><span class="code-line"><span class="tok-keyword">interface</span> BusIf(<span class="tok-keyword">input</span> <span class="tok-keyword">logic</span> clk);</span><span class="code-line">    <span class="tok-keyword">logic</span> [<span class="tok-number">31</span>:<span class="tok-number">0</span>] data;</span><span class="code-line">    <span class="tok-keyword">logic</span> ready;</span><span class="code-line">    <span class="tok-keyword">modport</span> Master(<span class="tok-keyword">input</span> ready, <span class="tok-keyword">output</span> data);</span><span class="code-line"><span class="tok-keyword">endinterface</span></span></code></pre>
+</div>
+<hr>
+<h2 id="9-classical-scientific">9. Classical &amp; Scientific</h2>
+<p>COBOL</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>cobol</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-cobol line-numbers"><span class="code-line"><span class="tok-comment">*&gt; COBOL display program</span></span><span class="code-line"><span class="tok-keyword">IDENTIFICATION</span> <span class="tok-keyword">DIVISION</span>.</span><span class="code-line"><span class="tok-keyword">PROGRAM-ID</span>. HELLO.</span><span class="code-line"><span class="tok-keyword">PROCEDURE</span> <span class="tok-keyword">DIVISION</span>.</span><span class="code-line">    <span class="tok-keyword">DISPLAY</span> <span class="tok-string">&quot;HELLO FROM COBOL&quot;</span>.</span><span class="code-line">    <span class="tok-keyword">STOP</span> <span class="tok-keyword">RUN</span>.</span></code></pre>
+</div>
+<p>Fortran</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>fortran</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-fortran line-numbers"><span class="code-line"><span class="tok-comment">! Modern Fortran loop</span></span><span class="code-line"><span class="tok-keyword">program</span> test</span><span class="code-line">    <span class="tok-keyword">implicit</span> <span class="tok-keyword">none</span></span><span class="code-line">    <span class="tok-type">integer</span> :: i, acc = <span class="tok-number">0</span></span><span class="code-line">    <span class="tok-keyword">do</span> i = <span class="tok-number">1</span>, <span class="tok-number">10</span></span><span class="code-line">        acc = acc + i</span><span class="code-line">    <span class="tok-keyword">end</span> <span class="tok-keyword">do</span></span><span class="code-line"><span class="tok-keyword">end</span> <span class="tok-keyword">program</span> test</span></code></pre>
+</div>
+<p>Pascal</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>pascal</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-pascal line-numbers"><span class="code-line"><span class="tok-comment">// Pascal program</span></span><span class="code-line"><span class="tok-keyword">program</span> Test;</span><span class="code-line"><span class="tok-keyword">var</span> n: <span class="tok-type">integer</span>;</span><span class="code-line"><span class="tok-keyword">begin</span></span><span class="code-line">    n := <span class="tok-number">42</span>;</span><span class="code-line">    writeln(<span class="tok-string">&#39;Answer: &#39;</span>, n);</span><span class="code-line"><span class="tok-keyword">end</span>.</span></code></pre>
+</div>
+<p>Ada</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>ada</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-ada line-numbers"><span class="code-line"><span class="tok-comment">-- Ada procedure</span></span><span class="code-line"><span class="tok-keyword">with</span> Ada.Text_IO;</span><span class="code-line"><span class="tok-keyword">procedure</span> Hello <span class="tok-keyword">is</span></span><span class="code-line"><span class="tok-keyword">begin</span></span><span class="code-line">    Ada.Text_IO.Put_Line(<span class="tok-string">&quot;Hello, Ada 2022!&quot;</span>);</span><span class="code-line"><span class="tok-keyword">end</span> Hello;</span></code></pre>
 </div>
   <script>
     function copyCode(btn) {
