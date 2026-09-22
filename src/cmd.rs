@@ -57,6 +57,7 @@ impl Colors {
 pub struct Options {
     pub input_path: String,
     pub output_path: String,
+    pub style_path: Option<String>,
     pub verbose: bool,
     pub quiet: bool,
 }
@@ -99,12 +100,14 @@ pub fn print_usage(c: Colors) {
     println!("  docup version");
     println!("  docup help\n");
     println!("{}FLAGS{}", c.bold, c.reset);
-    println!("  -o <file>       output HTML path (default: input with .html extension)");
-    println!("  --verbose, -V   print detailed timing for each build stage");
-    println!("  --quiet, -q     suppress step-by-step progress output\n");
+    println!("  -o, --output <file>  output HTML path (default: input with .html extension)");
+    println!("  -s, --style <file>   custom CSS stylesheet to inject into output HTML");
+    println!("  --verbose, -V        print detailed timing for each build stage");
+    println!("  --quiet, -q          suppress step-by-step progress output\n");
     println!("{}EXAMPLES{}", c.bold, c.reset);
     println!("  docup build report.du");
     println!("  docup build report.du -o dist/report.html");
+    println!("  docup build report.du -s styles/custom.css");
     println!("  docup build report.du --quiet");
 }
 
@@ -157,6 +160,14 @@ fn parse_build_args(c: Colors, args: &[String]) -> Option<Options> {
                     return None;
                 }
                 opts.output_path = args[i + 1].clone();
+                i += 1;
+            }
+            "-s" | "--style" => {
+                if i + 1 >= args.len() || looks_like_flag(&args[i + 1]) {
+                    fail(c, &format!("missing value for {arg}"));
+                    return None;
+                }
+                opts.style_path = Some(args[i + 1].clone());
                 i += 1;
             }
             "--verbose" | "-V" => {
@@ -253,8 +264,19 @@ fn build(c: Colors, opts: Options) -> i32 {
     }
 
     // Stage 4: Codegen
+    let custom_css = match &opts.style_path {
+        Some(path) => match std::fs::read_to_string(path) {
+            Ok(content) => Some(content),
+            Err(err) => {
+                report_file_error(c, path, &err);
+                return 1;
+            }
+        },
+        None => None,
+    };
+
     log_stage(4, "Generating", "HTML5 output");
-    let out = generate(&doc);
+    let out = generate(&doc, custom_css.as_deref());
 
     // Stage 5: Writing output
     log_stage(5, "Writing", &opts.output_path);

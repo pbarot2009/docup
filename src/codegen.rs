@@ -4,8 +4,71 @@ use crate::ast::{
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
 
-/// PAGE_CSS provides minimal, light-mode document styling[span_1](start_span)[span_1](end_span).
+/// PAGE_CSS provides modern, readable styling with automatic dark-mode support via
+/// CSS custom properties and `@media (prefers-color-scheme: dark)`[span_1](start_span)[span_1](end_span).
 pub const PAGE_CSS: &str = r#"
+:root {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --text: #c9d1d9;
+    --border: #30363d;
+    --border-muted: #21262d;
+    --link: #58a6ff;
+    --code-bg: #161b22;
+    --text-muted: #8b949e;
+    --tok-keyword: #ff7b72;
+    --tok-type: #ffa657;
+    --tok-string: #a5d6ff;
+    --tok-comment: #8b949e;
+    --tok-number: #79c0ff;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --text: #c9d1d9;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --link: #58a6ff;
+  --code-bg: #161b22;
+  --text-muted: #8b949e;
+  --tok-keyword: #ff7b72;
+  --tok-type: #ffa657;
+  --tok-string: #a5d6ff;
+  --tok-comment: #8b949e;
+  --tok-number: #79c0ff;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+}
+
 body {
   margin: 0 auto;
   max-width: 760px;
@@ -13,8 +76,9 @@ body {
   font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  color: #24292f;
-  background: #ffffff;
+  color: var(--text);
+  background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 * {
   box-sizing: border-box;
@@ -25,13 +89,14 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 1.6em;
   margin-bottom: 0.6em;
   overflow-wrap: break-word;
+  color: var(--text);
 }
-h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
-h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
 h3 { font-size: 1.25em; }
 h4 { font-size: 1.1em; }
 h5 { font-size: 1em; }
-h6 { font-size: 0.9em; color: #57606a; }
+h6 { font-size: 0.9em; color: var(--text-muted); }
 p {
   margin: 0.8em 0;
   overflow-wrap: break-word;
@@ -39,13 +104,13 @@ p {
 strong { font-weight: 600; }
 em { font-style: italic; }
 a {
-  color: #0969da;
+  color: var(--link);
   text-decoration: none;
   overflow-wrap: break-word;
 }
 a:hover { text-decoration: underline; }
 code {
-  background: #f6f8fa;
+  background: var(--code-bg);
   padding: 0.15em 0.4em;
   border-radius: 4px;
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
@@ -54,7 +119,7 @@ code {
 }
 hr {
   border: none;
-  border-top: 1px solid #eaecef;
+  border-top: 1px solid var(--border);
   margin: 2em 0;
 }
 ul, ol {
@@ -72,8 +137,8 @@ li.task-item input[type="checkbox"] {
 blockquote {
   margin: 1em 0;
   padding: 0 1em;
-  color: #57606a;
-  border-left: 0.25em solid #d0d7de;
+  color: var(--text-muted);
+  border-left: 0.25em solid var(--border-muted);
   overflow-wrap: break-word;
 }
 blockquote blockquote {
@@ -97,20 +162,20 @@ table {
   margin: 0;
 }
 th, td {
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--border-muted);
   padding: 0.5em 0.9em;
   text-align: left;
   overflow-wrap: break-word;
 }
 th {
-  background: #f6f8fa;
+  background: var(--code-bg);
   font-weight: 600;
   white-space: nowrap;
 }
-s { color: #57606a; }
+s { color: var(--text-muted); }
 .codeblock {
   margin: 1em 0;
-  border: 1px solid #eaecef;
+  border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -119,10 +184,10 @@ s { color: #57606a; }
   justify-content: space-between;
   gap: 0.75em;
   padding: 0.4em 0.9em;
-  background: #f6f8fa;
-  border-bottom: 1px solid #eaecef;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--border);
   font-size: 0.8em;
-  color: #57606a;
+  color: var(--text-muted);
   font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
   overflow-x: auto;
   white-space: nowrap;
@@ -131,7 +196,7 @@ s { color: #57606a; }
   margin: 0;
   padding: 1em;
   overflow-x: auto;
-  background: #f6f8fa;
+  background: var(--code-bg);
 }
 .codeblock code {
   background: none;
@@ -141,11 +206,11 @@ s { color: #57606a; }
   overflow-wrap: normal;
   white-space: pre;
 }
-.tok-keyword { color: #cf222e; font-weight: 600; }
-.tok-type    { color: #953800; }
-.tok-string  { color: #0a3069; }
-.tok-comment { color: #6e7781; font-style: italic; }
-.tok-number  { color: #0550ae; }
+.tok-keyword { color: var(--tok-keyword); font-weight: 600; }
+.tok-type    { color: var(--tok-type); }
+.tok-string  { color: var(--tok-string); }
+.tok-comment { color: var(--tok-comment); font-style: italic; }
+.tok-number  { color: var(--tok-number); }
 
 @media (max-width: 640px) {
   body {
@@ -164,20 +229,33 @@ pub const GOOGLE_FONTS_LINK: &str = r#"<link rel="preconnect" href="https://font
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">"#;
 
-/// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span).
-pub fn generate(doc: &DocumentNode) -> String {
+/// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span),
+/// incorporating OpenGraph/Twitter social cards, theme configurations,
+/// optional external stylesheets, and custom CLI CSS.
+pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     let mut body = String::new();
     for block in &doc.blocks {
         render_block(&mut body, block);
     }
 
     let mut title = "DocUP Document".to_string();
+    let mut lang = "en".to_string();
+    let mut theme_attr = String::new();
     let mut meta_tags = String::new();
+    let mut stylesheet_link = String::new();
 
     if let Some(ref meta) = doc.meta {
         if let Some(t) = meta.fields.get("title") {
             title = t.clone();
         }
+        if let Some(l) = meta.fields.get("lang") {
+            lang = l.clone();
+        }
+        if let Some(theme) = meta.fields.get("theme") {
+            theme_attr = format!(" data-theme=\"{}\"", escape_html(theme.trim()));
+        }
+
+        // Standard metadata tags
         for key in ["author", "version"] {
             if let Some(v) = meta.fields.get(key) {
                 meta_tags.push_str(&format!(
@@ -187,27 +265,89 @@ pub fn generate(doc: &DocumentNode) -> String {
                 ));
             }
         }
+
+        // Extended description & keywords
+        if let Some(desc) = meta.fields.get("description") {
+            let escaped_desc = escape_html(desc);
+            meta_tags.push_str(&format!(
+                "  <meta name=\"description\" content=\"{escaped_desc}\">\n"
+            ));
+            meta_tags.push_str(&format!(
+                "  <meta property=\"og:description\" content=\"{escaped_desc}\">\n"
+            ));
+            meta_tags.push_str(&format!(
+                "  <meta name=\"twitter:description\" content=\"{escaped_desc}\">\n"
+            ));
+        }
+        if let Some(keywords) = meta.fields.get("keywords") {
+            meta_tags.push_str(&format!(
+                "  <meta name=\"keywords\" content=\"{}\">\n",
+                escape_html(keywords)
+            ));
+        }
+
+        // Canonical URL & Social Cards (OpenGraph / Twitter)
+        if let Some(canonical) = meta.fields.get("canonical") {
+            let escaped_canonical = escape_html(canonical);
+            meta_tags.push_str(&format!(
+                "  <link rel=\"canonical\" href=\"{escaped_canonical}\">\n"
+            ));
+            meta_tags.push_str(&format!(
+                "  <meta property=\"og:url\" content=\"{escaped_canonical}\">\n"
+            ));
+        }
+
+        if let Some(img) = meta.fields.get("image") {
+            let escaped_img = escape_html(img);
+            meta_tags.push_str(&format!(
+                "  <meta property=\"og:image\" content=\"{escaped_img}\">\n"
+            ));
+            meta_tags.push_str(&format!(
+                "  <meta name=\"twitter:image\" content=\"{escaped_img}\">\n"
+            ));
+        }
+
+        // Linked custom stylesheet via meta block: `stylesheet: "path/to/style.css"`
+        if let Some(sheet) = meta.fields.get("stylesheet") {
+            stylesheet_link = format!(
+                "  <link rel=\"stylesheet\" href=\"{}\">\n",
+                escape_html(sheet)
+            );
+        }
     }
+
+    let escaped_title = escape_html(&title);
+    meta_tags.push_str(&format!(
+        "  <meta property=\"og:title\" content=\"{escaped_title}\">\n"
+    ));
+    meta_tags.push_str("  <meta property=\"og:type\" content=\"article\">\n");
+    meta_tags.push_str("  <meta name=\"twitter:card\" content=\"summary_large_image\">\n");
+    meta_tags.push_str(&format!(
+        "  <meta name=\"twitter:title\" content=\"{escaped_title}\">\n"
+    ));
+    meta_tags.push_str("  <meta name=\"generator\" content=\"DocUP v0.2.0\">\n");
+
+    let custom_style_tag = match custom_css {
+        Some(css) if !css.trim().is_empty() => {
+            format!("  <style id=\"docup-custom-css\">\n{css}\n  </style>\n")
+        }
+        _ => String::new(),
+    };
 
     format!(
         r#"<!DOCTYPE html>
-<html lang="en">
+<html lang="{lang}"{theme_attr}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{}</title>
-{}  {}
-  <style>{}</style>
-</head>
+  <title>{escaped_title}</title>
+{meta_tags}  {GOOGLE_FONTS_LINK}
+  <style>{PAGE_CSS}</style>
+{stylesheet_link}{custom_style_tag}</head>
 <body>
-{}</body>
+{body}</body>
 </html>
-"#,
-        escape_html(&title),
-        meta_tags,
-        GOOGLE_FONTS_LINK,
-        PAGE_CSS,
-        body
+"#
     )
 }
 
@@ -252,10 +392,11 @@ fn render_block(w: &mut String, block: &BlockNode) {
 
 fn render_quote_body(w: &mut String, children: &[QuoteChild]) {
     let mut pending: Vec<InlineNode> = Vec::new();
-    let mut flush = |w: &mut String, pending: &mut Vec<InlineNode>| {
+    let flush = |w: &mut String, pending: &mut Vec<InlineNode>| {
         if pending.is_empty() {
             return;
         }
+
         trim_inline_edges(pending);
         w.push_str("  <p>");
         render_inlines(w, pending);
