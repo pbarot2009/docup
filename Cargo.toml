@@ -1,0 +1,32 @@
+[package]
+name = "docup"
+version = "0.2.0"
+edition = "2024"
+authors = []
+description = "DocUP compiler: compiles .du documents to standalone HTML5"
+readme = "README.md"
+license = "MIT"
+
+[lib]
+name = "docup"
+path = "src/lib.rs"
+
+[[bin]]
+name = "docup"
+path = "src/main.rs"
+
+[dependencies]
+# Zero external dependencies.
+# Uses only Rust 2024 standard library facilities (std::io::IsTerminal, std::time, std::collections).
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[profile.dev]
+opt-level = 0
+debug = true
