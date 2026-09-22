@@ -1,13 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::ast::{
-    BlockNode, CalloutKind, CodeBlockNode, DocumentNode, FootnoteDefNode, InlineKind, InlineNode,
-    ItemChild, ItemNode, ListNode, QuoteChild, TableNode, trim_inline_edges,
+    trim_inline_edges, BlockNode, CalloutKind, CodeBlockNode, DocumentNode, FootnoteDefNode,
+    InlineKind, InlineNode, ItemChild, ItemNode, ListNode, QuoteChild, TableNode,
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
 
-/// PAGE_CSS provides modern, responsive styling with automatic dark-mode support,
-/// callout admonitions, table of contents hierarchy, codeblock line numbering, and footnotes[span_1](start_span)[span_1](end_span).
 pub const PAGE_CSS: &str = r#"
 :root {
   --bg: #ffffff;
@@ -379,12 +377,10 @@ s { color: var(--text-muted); }
 }
 "#;
 
-/// GOOGLE_FONTS_LINK preloads Google Sans Flex and Google Sans Code fonts[span_2](start_span)[span_2](end_span).
 pub const GOOGLE_FONTS_LINK: &str = r#"<link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">"#;
 
-/// KaTeX CDN resources loaded conditionally when math formulas are detected in the document.
 pub const KATEX_HEAD: &str = r#"  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
@@ -408,9 +404,6 @@ struct HeadingMeta {
     title: String,
 }
 
-/// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span),
-/// incorporating OpenGraph/Twitter cards, TOC generation, codeblock copy scripts,
-/// and bidirectional footnotes.
 pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     let heading_metas = collect_headings(doc);
     let (footnote_numbers, footnote_order) = collect_footnotes(doc);
@@ -660,7 +653,8 @@ fn collect_block_footnotes(
         | BlockNode::Raw(_)
         | BlockNode::Math(_)
         | BlockNode::TOC(_)
-        | BlockNode::Footnote(_) | BlockNode::Include(_) => {}
+        | BlockNode::Footnote(_)
+        | BlockNode::Include(_) => {}
     }
 }
 
@@ -1105,7 +1099,8 @@ fn block_has_math(block: &BlockNode) -> bool {
         | BlockNode::HR(_)
         | BlockNode::Image(_)
         | BlockNode::Raw(_)
-        | BlockNode::TOC(_) | BlockNode::Include(_) => false,
+        | BlockNode::TOC(_)
+        | BlockNode::Include(_) => false,
     }
 }
 

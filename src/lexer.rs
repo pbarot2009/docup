@@ -12,7 +12,7 @@ pub enum TokenType {
     Comma,
     Colon,
     RawScopeOpen, // {!
-    Number,       // bare integer literal (e.g. heading level)
+    Number,       // bare integer literal
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -126,7 +126,6 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    /// Returns the next structural token, skipping whitespace and comments[span_3](start_span)[span_3](end_span).
     pub fn next_token(&mut self) -> Result<Token, LexError> {
         self.skip_whitespace_and_comments()?;
         if self.pos >= self.src.len() {
@@ -194,7 +193,7 @@ impl<'a> Lexer<'a> {
     fn read_string(&mut self) -> Result<Token, LexError> {
         let start_line = self.line;
         let start_col = self.col;
-        self.advance(); // consume opening quote
+        self.advance();
 
         let mut buf = Vec::new();
         loop {
@@ -233,7 +232,6 @@ impl<'a> Lexer<'a> {
         Ok(Token::new(TokenType::Ident, val, start_line, start_col))
     }
 
-    /// Scans raw bytes verbatim starting after `{!` until `!}` is reached[span_4](start_span)[span_4](end_span).
     pub fn read_raw_until_bang_brace(&mut self) -> Result<(String, usize, usize), LexError> {
         let start_line = self.line;
         let start_col = self.col;
@@ -262,7 +260,6 @@ impl<'a> Lexer<'a> {
         self.peek()
     }
 
-    /// Reports whether the lexer is positioned at an inline element opening[span_5](start_span)[span_5](end_span).
     pub fn at_inline_start(&self) -> Option<String> {
         if !is_ident_start(self.peek()) {
             return None;
@@ -324,9 +321,10 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Reads raw identifier chars, including hyphens (-) for footnotes and attributes.
     pub fn read_raw_ident(&mut self) -> String {
         let start = self.pos;
-        while self.pos < self.src.len() && is_ident_cont(self.peek()) {
+        while self.pos < self.src.len() && (is_ident_cont(self.peek()) || self.peek() == b'-') {
             self.advance();
         }
         String::from_utf8_lossy(&self.src[start..self.pos]).into_owned()
@@ -340,7 +338,6 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    /// Reads balanced braces raw content up to the matching '}[span_6](start_span)'[span_6](end_span).
     pub fn read_balanced_braces(&mut self) -> String {
         let mut buf = Vec::new();
         let mut depth = 1;
@@ -412,7 +409,11 @@ impl<'a> Lexer<'a> {
 
     fn char_after_ident(&self, ident: &str) -> u8 {
         let i = self.pos + ident.len();
-        if i < self.src.len() { self.src[i] } else { 0 }
+        if i < self.src.len() {
+            self.src[i]
+        } else {
+            0
+        }
     }
 }
 

@@ -8,7 +8,7 @@ use std::time::{Duration, Instant, SystemTime};
 
 use crate::ast::{BlockNode, DocumentNode};
 use crate::codegen::generate;
-use crate::errors::{PositionedError, SemaError, source_snippet};
+use crate::errors::{source_snippet, PositionedError, SemaError};
 use crate::parser::Parser;
 use crate::sema::analyze;
 

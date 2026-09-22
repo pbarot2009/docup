@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode, FootnoteDefNode,
-    HRNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode,
-    ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode,
-    TOCNode, TableNode, trim_inline_edges,
+    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode,
+    FootnoteDefNode, HRNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode,
+    ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
+    RawNode, RowNode, TOCNode, TableNode,
 };
 use crate::errors::{LexError, ParseError};
 use crate::lexer::{Lexer, Token, TokenType};

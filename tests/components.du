@@ -1,0 +1,118 @@
+h(2, id: "included-lists-module", class: "modular-section") { 10. Included Module: Lists & Tasks }
+
+p {
+  This section was imported via code{include "components.du"}. It exercises list nesting, checkboxes, and additional syntax highlighters.
+}
+
+h(3) { Unordered and Nested Lists }
+
+list {
+  item { Primary item in root list fn(unicode-spec) }
+  item { Secondary item with inline code{HashMap<K, V>} reference }
+  item {
+    Parent item containing a nested sub-list:
+    list {
+      item { Nested item level 2 - child node alpha }
+      item {
+        Nested item level 2 - child node beta with deep recursion:
+        list {
+          item { Deeply nested item level 3 - leaf node }
+          item { Deeply nested item level 3 - terminal node }
+        }
+      }
+    }
+  }
+  item { Trailing root item returning to list level 1 }
+}
+
+h(3) { Sequential Ordered Lists }
+
+list(ordered: true) {
+  item { Step 1: Lexical analysis and token stream emission }
+  item { Step 2: AST recursive descent block and inline parsing }
+  item { Step 3: Canonical include path resolution and cycle checking }
+  item { Step 4: Semantic invariant validation pass }
+  item { Step 5: Standalone HTML5 code emission and CSS injection }
+}
+
+h(3) { Interactive Task Lists }
+
+list {
+  task(done: true) { Complete lexer token categorization and raw block extraction }
+  task(done: true) { Implement heading unique slug generation and anchor linking }
+  task(done: true) { Add multi-language syntax highlighter engines }
+  task(done: false) { Benchmark compiler throughput on 10,000-line source documents fn(algo-complexity) }
+  task(done: false) { Implement WebAssembly compilation target for in-browser playground }
+}
+
+hr {}
+
+h(3) { Multi-Language Code Highlighting }
+
+p { Python highlighting with hash comment handling and string parsing: }
+
+codeblock(lang: "python", file: "benchmark.py", line_numbers: true, highlight: "4,7") {!
+import time
+from typing import List
+
+def run_pipeline(sources: List[str]) -> float:
+    # Measure total compilation pipeline duration
+    start = time.perf_counter()
+    for doc in sources:
+        print(f"Processing: {doc}")
+    return time.perf_counter() - start
+!}
+
+p { Go language highlighting demonstrating keywords and built-in type tokens: }
+
+codeblock(lang: "go", file: "server.go", line_numbers: true) {!
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "DocUP Dev Server v0.2.0")
+}
+!}
+
+p { Shell script highlighting with string literals and parameters: }
+
+codeblock(lang: "bash", file: "build.sh", line_numbers: false) {!
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Compile all production documentation
+docup build main.du -o dist/index.html --verbose
+!}
+
+hr {}
+
+h(3) { Multiline Matrix & Integral Formulations }
+
+math {!
+\begin{bmatrix}
+\cos\theta & -\sin\theta \\
+\sin\theta & \cos\theta
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y
+\end{bmatrix}
+=
+\begin{bmatrix}
+x \cos\theta - y \sin\theta \\
+x \sin\theta + y \cos\theta
+\end{bmatrix}
+!}
+
+footnote(id: "unicode-spec") {
+  The Unicode Standard, Version 15.0 — Core Specification regarding multi-byte UTF-8 token boundaries.
+}
+
+footnote(id: "algo-complexity") {
+  Theoretical computational complexity guarantees linear $O(N)$ execution across lexer and parser stages.
+}
+

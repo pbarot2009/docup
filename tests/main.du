@@ -1,0 +1,197 @@
+meta {
+  title: "DocUP Full Compiler Verification Suite",
+  lang: "en",
+  theme: "dark",
+  author: "DocUP Core Team",
+  version: "0.2.0",
+  description: "Comprehensive end-to-end test suite verifying AST parser, semantic analyzer, and HTML5 codegen.",
+  keywords: "docup, compiler, test, ast, parser, html5, markdown"
+}
+
+h(1) { DocUP Compiler Test Specification }
+
+p {
+  Welcome to the official verification document for the b{DocUP} document compiler fn(docup-design). This test suite exercises every grammar construct, semantic boundary check, and code highlighting rule supported by the engine.
+}
+
+toc {}
+
+hr {}
+
+h(2, id: "typography-inline", class: "section-head") { 1. Inline Typography and Formats }
+
+p {
+  DocUP supports structured inline modifiers without ambiguity. You can use b{bold text}, i{italicized phrasing}, strike{strikethrough text}, and monospace code{let x: i32 = 42;}.
+}
+
+p {
+  Modifiers can also be cleanly nested: b{i{bold and italic together}}, or strike{b{struck-out bold text}}. Hyperlinks are declared with destination targets: link("https://github.com") { GitHub Repository } and link("https://rust-lang.org") { b{The Rust Language} }.
+}
+
+p {
+  Inline mathematics is seamlessly rendered through KaTeX integration fn(katex-engine): m{E = mc^2}, m{a^2 + b^2 = c^2}, and m{\lim_{x \to \infty} \frac{1}{x} = 0}.
+}
+
+h(2, id: "headings-hierarchy") { 2. Structural Heading Levels }
+
+h(3) { Heading Level Three Example }
+p { Subordinate content block explaining secondary topics. }
+
+h(4) { Heading Level Four Example }
+p { Tertiary block discussing finer details and technical sub-clauses. }
+
+h(5) { Heading Level Five Example }
+p { Deep hierarchical section for edge-case documentation. }
+
+h(6) { Heading Level Six Example }
+p { Lowest permissible heading depth defined in the semantic analyzer specification fn(spec-v2). }
+
+hr {}
+
+h(2, id: "admonitions-callouts") { 3. Admonitions & Callouts }
+
+callout(type: "note") {
+  This is a b{standard note} callout designed to emphasize neutral background information or supplementary details for the reader.
+}
+
+callout(type: "tip") {
+  Pro-tip: Always specify language tags on codeblocks to take advantage of DocUP's built-in token-level syntax highlighter!
+}
+
+callout(type: "warning") {
+  Warning: Semantic analysis will reject any table where rows contain mismatched cell counts.
+}
+
+callout(type: "danger") {
+  Danger: Omitting the mandatory code{title} key from the document code{meta} block will abort compilation immediately with a code{SemaError}.
+}
+
+hr {}
+
+h(2, id: "codeblock-showcase") { 4. Syntax Highlighting & Codeblocks }
+
+p {
+  Fenced codeblocks support source file attribution, optional line numbers, and selective line highlighting:
+}
+
+codeblock(lang: "rust", file: "src/main.rs", line_numbers: true, highlight: "2,5-6") {!
+use std::collections::HashMap;
+
+fn main() {
+    let mut counts: HashMap<&str, usize> = HashMap::new();
+    counts.insert("tokens", 1024);
+    counts.insert("ast_nodes", 256);
+
+    for (key, val) in &counts {
+        println!("{}: {}", key, val);
+    }
+}
+!}
+
+codeblock(lang: "typescript", file: "compiler.ts", line_numbers: false) {!
+interface DocumentAST {
+  meta?: Record<string, string>;
+  blocks: BlockNode[];
+}
+
+export function compileDocument(source: string): string {
+  const ast = parse(source);
+  return generateHTML(ast);
+}
+!}
+
+hr {}
+
+h(2, id: "data-tables") { 5. Data Tables }
+
+p {
+  DocUP tables enforce strict column rectangularity across all rows:
+}
+
+table {
+  row(header: true) {
+    cell { Node Kind }
+    cell { Syntax Pattern }
+    cell { Semantic Constraint }
+  }
+  row {
+    cell { code{Heading} }
+    cell { code{h(level) { ... }} }
+    cell { Level must strictly be between 1 and 6 }
+  }
+  row {
+    cell { code{Table} }
+    cell { code{table { row { cell {} } }} }
+    cell { All rows must possess equal cell counts }
+  }
+  row {
+    cell { code{Image} }
+    cell { code{image("url", alt: "...")} }
+    cell { Source URL cannot be empty }
+  }
+  row {
+    cell { code{CodeBlock} }
+    cell { code{codeblock(...) {! ... !}} }
+    cell { Raw code buffer must not be empty }
+  }
+}
+
+hr {}
+
+h(2, id: "math-and-raw") { 6. Display Formulas & HTML Escape Hatches }
+
+p {
+  Stand-alone display formulas are parsed into mathematical blocks:
+}
+
+math {!
+\oint_{C} \mathbf{B} \cdot d\boldsymbol{\ell} = \mu_0 \left( I_{\text{enc}} + \varepsilon_0 \frac{d\Phi_E}{dt} \right)
+!}
+
+p {
+  When custom HTML styling or specialized components are required, the raw escape hatch renders unescaped HTML5 directly:
+}
+
+raw {!
+<div style="padding: 1rem; border-radius: 8px; background: rgba(9, 105, 218, 0.08); border: 1px solid rgba(9, 105, 218, 0.3);">
+  <strong style="color: #0969da;">Raw Passthrough Container</strong>
+  <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">This markup bypasses DocUP escaping for customized embedded interfaces.</p>
+</div>
+!}
+
+hr {}
+
+h(2, id: "visual-media") { 7. Media & Visual Assets }
+
+image("https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80", alt: "High performance microprocessor circuitry board")
+
+hr {}
+
+h(2, id: "quotes-hierarchy") { 8. Blockquote Hierarchy }
+
+quote {
+  Simplicity is prerequisite for reliability.
+  quote {
+    There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies, and the other way is to make it so complicated that there are no obvious deficiencies.
+  }
+}
+
+hr {}
+
+h(2, id: "modular-subcomponents") { 9. Modular File Inclusion }
+
+include "components.du"
+
+hr {}
+
+footnote(id: "docup-design") {
+  DocUP language specification and compiler architecture, designed for structured document generation.
+}
+
+footnote(id: "katex-engine") {
+  Client-side mathematical typesetting rendered via Khan Academy's KaTeX distribution.
+}
+
+footnote(id: "spec-v2") {
+  Defined in RFC-002: Document Object Tree Constraints and AST Invariants.
+}

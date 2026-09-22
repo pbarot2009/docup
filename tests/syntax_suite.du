@@ -1,0 +1,184 @@
+meta {
+  title: "DocUP Advanced Syntax & Edge Cases",
+  lang: "en",
+  theme: "light",
+  author: "DocUP Engineering",
+  version: "0.2.0",
+  description: "Comprehensive stress test validating callout aliases, C/C++ highlighting, deep quotes, and table layouts."
+}
+
+h(1) { Advanced Syntax & Stress Test Suite }
+
+p {
+  This document serves as an isolated test target verifying callout kind aliases, low-level systems programming highlighters, multi-column tables, and boundary conditions.
+}
+
+h(2, id: "alias-callouts") { 1. Admonition Alias Testing }
+
+callout(type: "info") {
+  Verified: code{info} maps to the code{note} variant style in the AST generator.
+}
+
+callout(type: "hint") {
+  Verified: code{hint} maps to the code{tip} variant style with green border accents.
+}
+
+callout(type: "caution") {
+  Verified: code{caution} maps to the code{warning} amber warning palette.
+}
+
+callout(type: "error") {
+  Verified: code{error} maps to the code{danger} critical error box.
+}
+
+hr {}
+
+h(2, id: "c-cpp-highlighting") { 2. C and C++ Highlighting Verification }
+
+p { ISO C99 systems programming highlighting fn(iso-c99): }
+
+codeblock(lang: "c", file: "arena.c", line_numbers: true, highlight: "3,8") {!
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    size_t capacity;
+    size_t offset;
+    char *buffer;
+} Arena;
+
+Arena* arena_create(size_t cap) {
+    Arena *a = (Arena*)malloc(sizeof(Arena));
+    a->capacity = cap;
+    a->offset = 0;
+    a->buffer = (char*)malloc(cap);
+    return a;
+}
+!}
+
+p { Modern C++20 standard template highlighting: }
+
+codeblock(lang: "cpp", file: "dispatcher.cpp", line_numbers: true) {!
+#include <iostream>
+#include <vector>
+#include <string_view>
+
+template <typename T>
+class Dispatcher {
+private:
+    std::vector<T> items;
+public:
+    void append(T item) {
+        items.push_back(std::move(item));
+    }
+};
+!}
+
+hr {}
+
+h(2, id: "web-formats") { 3. HTML, CSS, and JSON Syntax Profiling }
+
+p { Structured JSON validation: }
+
+codeblock(lang: "json", file: "package.json", line_numbers: false) {!
+{
+  "name": "docup-toolchain",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {
+    "katex": "^0.16.11"
+  }
+}
+!}
+
+p { Cascading Style Sheets syntax validation: }
+
+codeblock(lang: "css", file: "theme.css", line_numbers: true) {!
+:root {
+  --primary-accent: #0969da;
+  --surface-border: #d0d7de;
+}
+
+body.docup-viewport {
+  margin: 0 auto;
+  font-family: monospace;
+}
+!}
+
+p { HyperText Markup Language highlighting fn(w3c-html5): }
+
+codeblock(lang: "html", file: "template.html", line_numbers: false) {!
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Embedded Template</title>
+  </head>
+  <body>
+    <!-- Main content injection boundary -->
+    <main id="app-root"></main>
+  </body>
+</html>
+!}
+
+hr {}
+
+h(2, id: "dense-data-grid") { 4. Multi-Column Dense Matrix }
+
+table {
+  row(header: true) {
+    cell { Language }
+    cell { Category }
+    cell { Highlight Profile }
+    cell { Block Comment Delimiter }
+  }
+  row {
+    cell { b{Rust} }
+    cell { Systems }
+    cell { Keywords, Types, Numeric, Strings }
+    cell { code{/* ... */} }
+  }
+  row {
+    cell { b{Python} }
+    cell { Scripting }
+    cell { Hash comments, String escapes }
+    cell { None (Hash only) }
+  }
+  row {
+    cell { b{TypeScript} }
+    cell { Web / Application }
+    cell { Keywords, Types, Template Strings }
+    cell { code{/* ... */} }
+  }
+  row {
+    cell { b{Bash} }
+    cell { Automation }
+    cell { Shell commands, Environment flags }
+    cell { None (Hash only) }
+  }
+}
+
+hr {}
+
+h(2, id: "deep-nesting-quotes") { 5. Multi-Level Recursive Blockquotes }
+
+quote {
+  Level 1: The outer quotation layer holds introductory context.
+  quote {
+    Level 2: The inner quotation layer provides deeper secondary citations.
+    quote {
+      Level 3: Deepest nested blockquote exploring edge-case rendering and margin indentation.
+    }
+  }
+}
+
+hr {}
+
+footnote(id: "iso-c99") {
+  ISO/IEC 9899:1999 — Programming Languages — C specification standards.
+}
+
+footnote(id: "w3c-html5") {
+  W3C Recommendation: HTML5 Living Standard semantic layout tags.
+}
+
