@@ -1,0 +1,48 @@
+h(2, id: "blocks") { Blocks }
+
+h(3, id: "heading") { h }
+
+p { Heading. Level is a number in parentheses and must be 1 through 6. The body is prose. }
+
+codeblock(lang: "text") {!
+h(1) { Title }
+h(2, id: "install", class: "section") { Install }
+!}
+
+p { Optional attributes after the level are name/string pairs. The generator writes code{id} and code{class}. If you omit code{id}, the generator builds one from the heading text (lowercase, ASCII letters and digits, hyphens). Duplicate slugs get a numeric suffix. }
+
+h(3, id: "paragraph") { p }
+
+p { A paragraph. Body is prose: text plus inline elements. }
+
+codeblock(lang: "text") {!
+p { One paragraph. Use another p block for the next one. }
+!}
+
+h(3, id: "hr") { hr }
+
+p { Horizontal rule. Empty body. }
+
+codeblock(lang: "text") {!
+hr {}
+!}
+
+h(3, id: "toc-block") { toc }
+
+p { Table of contents. Empty body. The generator fills it from every heading in the finished document, after includes are resolved. Headings are listed in source order with links to their ids. If there are no headings, the block emits nothing. }
+
+codeblock(lang: "text") {!
+toc {}
+!}
+
+h(3, id: "raw") { raw }
+
+p { Unescaped HTML. The body is a raw scope opened by brace-bang and closed by bang-brace. A leading blank line of only spaces is stripped. Trailing whitespace is stripped. Empty content after that trim is a semantic error. }
+
+p { Header line: }
+
+codeblock(lang: "text") {!
+raw
+!}
+
+p { Then a raw scope whose body is HTML. Nothing inside that scope is lexed as DocUP. Braces and comments are literal. A raw scope ends at the first bang-brace, so a sample inside another raw scope cannot contain that closer. }

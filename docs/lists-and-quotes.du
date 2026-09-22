@@ -1,0 +1,94 @@
+h(2, id: "lists") { Lists }
+
+p { A list contains code{item} and code{task} children only. Zero items is a semantic error. }
+
+codeblock(lang: "text") {!
+list {
+  item { First }
+  item { Second }
+}
+
+list(ordered: true) {
+  item { Step one }
+  item { Step two }
+}
+!}
+
+p { code{ordered: true} emits code{<ol>}. Anything else, including omitting the attribute, emits code{<ul>}. }
+
+h(3, id: "tasks") { Tasks }
+
+codeblock(lang: "text") {!
+list {
+  task(done: false) { Open work }
+  task(done: true) { Finished work }
+}
+!}
+
+p { code{done} is a boolean. Missing code{done} is treated as false. The checkbox is rendered disabled. }
+
+p { Live example: }
+
+list {
+  task(done: true) { Write the grammar down }
+  task(done: false) { Add a new block type }
+}
+
+h(3, id: "nested-lists") { Nested lists }
+
+p { A list may appear inside an item. It must be the last child of that item.fn(item-nest) }
+
+codeblock(lang: "text") {!
+list {
+  item {
+    Parent text
+    list {
+      item { Child }
+      item { Other child }
+    }
+  }
+  item { Sibling of the parent }
+}
+!}
+
+p { Live example: }
+
+list {
+  item {
+    Block types
+    list {
+      item { Prose: h, p, quote, callout }
+      item { Structure: list, table, toc }
+      item { Pass-through: raw, codeblock, math }
+    }
+  }
+  item { Inline types: b, i, strike, code, m, link, fn }
+}
+
+list(ordered: true) {
+  item { Parse }
+  item { Analyze }
+  item { Generate }
+}
+
+h(2, id: "quotes") { Quotes }
+
+p { A block quote. Body is prose and, optionally, one nested quote at the end. }
+
+codeblock(lang: "text") {!
+quote {
+  Outer line.
+  quote {
+    Inner line.
+  }
+}
+!}
+
+p { Live example: }
+
+quote {
+  A quote is a block, not an inline. Consecutive text inside it becomes one paragraph in HTML.
+  quote {
+    The inner quote closes the outer body. Do not put text after it.
+  }
+}

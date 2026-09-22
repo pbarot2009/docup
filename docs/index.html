@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocUP Documentation</title>
+  <meta name="author" content="DocUP">
+  <meta name="version" content="0.2.0">
+  <meta name="description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
+  <meta property="og:description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
+  <meta name="twitter:description" content="Compiler and language reference for DocUP, a document format that compiles to standalone HTML5.">
+  <meta name="keywords" content="docup, markup, html, compiler, .du">
+  <meta property="og:title" content="DocUP Documentation">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DocUP Documentation">
+  <meta name="generator" content="DocUP v0.2.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --text: #c9d1d9;
+    --border: #30363d;
+    --border-muted: #21262d;
+    --link: #58a6ff;
+    --code-bg: #161b22;
+    --text-muted: #8b949e;
+    --tok-keyword: #ff7b72;
+    --tok-type: #ffa657;
+    --tok-string: #a5d6ff;
+    --tok-comment: #8b949e;
+    --tok-number: #79c0ff;
+    --callout-note: #58a6ff;
+    --callout-tip: #3fb950;
+    --callout-warning: #d29922;
+    --callout-danger: #f85149;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --text: #c9d1d9;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --link: #58a6ff;
+  --code-bg: #161b22;
+  --text-muted: #8b949e;
+  --tok-keyword: #ff7b72;
+  --tok-type: #ffa657;
+  --tok-string: #a5d6ff;
+  --tok-comment: #8b949e;
+  --tok-number: #79c0ff;
+  --callout-note: #58a6ff;
+  --callout-tip: #3fb950;
+  --callout-warning: #d29922;
+  --callout-danger: #f85149;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --text: #24292f;
+  --border: #eaecef;
+  --border-muted: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f6f8fa;
+  --text-muted: #57606a;
+  --tok-keyword: #cf222e;
+  --tok-type: #953800;
+  --tok-string: #0a3069;
+  --tok-comment: #6e7781;
+  --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+* {
+  box-sizing: border-box;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  overflow-wrap: break-word;
+  color: var(--text);
+  scroll-margin-top: 1em;
+}
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 0.9em; color: var(--text-muted); }
+p {
+  margin: 0.8em 0;
+  overflow-wrap: break-word;
+}
+strong { font-weight: 600; }
+em { font-style: italic; }
+a {
+  color: var(--link);
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
+a:hover { text-decoration: underline; }
+code {
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-size: 0.9em;
+  overflow-wrap: break-word;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+ul, ol {
+  margin: 0.8em 0;
+  padding-left: 1.6em;
+}
+li {
+  margin: 0.25em 0;
+  overflow-wrap: break-word;
+}
+li.task-item { list-style: none; margin-left: -1.6em; }
+li.task-item input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+blockquote {
+  margin: 1em 0;
+  padding: 0 1em;
+  color: var(--text-muted);
+  border-left: 0.25em solid var(--border-muted);
+  overflow-wrap: break-word;
+}
+blockquote blockquote {
+  margin: 0.6em 0;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.callout {
+  margin: 1.2em 0;
+  padding: 0.85em 1.2em;
+  border-left: 4px solid;
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+.callout-note { border-color: var(--callout-note); }
+.callout-tip { border-color: var(--callout-tip); }
+.callout-warning { border-color: var(--callout-warning); }
+.callout-danger { border-color: var(--callout-danger); }
+.callout-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4em;
+}
+.callout-note .callout-title { color: var(--callout-note); }
+.callout-tip .callout-title { color: var(--callout-tip); }
+.callout-warning .callout-title { color: var(--callout-warning); }
+.callout-danger .callout-title { color: var(--callout-danger); }
+.callout-body {
+  overflow-wrap: break-word;
+}
+.math-block {
+  margin: 1.2em 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.toc {
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.toc-title {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: var(--text);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.toc li {
+  margin: 0.35em 0;
+  font-size: 0.95em;
+}
+.toc li a {
+  color: var(--text);
+}
+.toc li a:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+.toc li.toc-level-1 { font-weight: 600; }
+.toc li.toc-level-2 { padding-left: 1.2em; }
+.toc li.toc-level-3 { padding-left: 2.4em; }
+.toc li.toc-level-4 { padding-left: 3.6em; }
+.toc li.toc-level-5 { padding-left: 4.8em; }
+.toc li.toc-level-6 { padding-left: 6em; }
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1em 0;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+  margin: 0;
+}
+th, td {
+  border: 1px solid var(--border-muted);
+  padding: 0.5em 0.9em;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+th {
+  background: var(--code-bg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+s { color: var(--text-muted); }
+
+.codeblock {
+  margin: 1.2em 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.codeblock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.4em 0.9em;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8em;
+  color: var(--text-muted);
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+}
+.codeblock-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+.codeblock-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  color: var(--text-muted);
+  padding: 0.15em 0.55em;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.codeblock-copy-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--border);
+}
+.codeblock pre {
+  margin: 0;
+  padding: 0.85em 1em;
+  overflow-x: auto;
+  background: var(--code-bg);
+}
+.codeblock code {
+  display: block;
+  background: none;
+  padding: 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+.code-line {
+  display: block;
+  min-height: 1.5em;
+  line-height: 1.5;
+}
+.code-line.highlighted-line {
+  background: rgba(88, 166, 255, 0.15);
+  margin: 0 -1em;
+  padding: 0 1em;
+}
+.line-numbers .code-line {
+  counter-increment: line;
+}
+.line-numbers .code-line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.2em;
+  padding-right: 0.8em;
+  margin-right: 0.8em;
+  color: var(--text-muted);
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid var(--border);
+}
+
+.footnote-ref {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: super;
+  padding-left: 0.1em;
+}
+.footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+.footnotes ol {
+  padding-left: 1.4em;
+}
+.footnotes li {
+  margin: 0.5em 0;
+}
+.footnote-back {
+  margin-left: 0.4em;
+  text-decoration: none;
+}
+
+.tok-keyword { color: var(--tok-keyword); font-weight: 600; }
+.tok-type    { color: var(--tok-type); }
+.tok-string  { color: var(--tok-string); }
+.tok-comment { color: var(--tok-comment); font-style: italic; }
+.tok-number  { color: var(--tok-number); }
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 1rem 3rem;
+    font-size: 15px;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.35em; }
+  h3 { font-size: 1.15em; }
+  th, td { padding: 0.4em 0.6em; }
+}
+</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+<h1 id="docup">DocUP</h1>
+<p>DocUP is a compiler. It reads a <strong>.du</strong> file and writes a single HTML5 document. The format is block-based: every top-level construct is a named block with optional attributes and a body. This book is written in that format.</p>
+<p>Compiler version: <code>0.2.0</code>.</p>
+<nav class="toc" aria-label="Table of contents">
+  <div class="toc-title">Table of Contents</div>
+  <ul>
+    <li class="toc-level-1"><a href="#docup">DocUP</a></li>
+    <li class="toc-level-2"><a href="#what-it-does">What it does</a></li>
+    <li class="toc-level-3"><a href="#pipeline">Pipeline</a></li>
+    <li class="toc-level-3"><a href="#what-this-book-covers">What this book covers</a></li>
+    <li class="toc-level-2"><a href="#cli">Command line</a></li>
+    <li class="toc-level-3"><a href="#flags">Flags</a></li>
+    <li class="toc-level-3"><a href="#build">build</a></li>
+    <li class="toc-level-3"><a href="#watch">watch</a></li>
+    <li class="toc-level-2"><a href="#source-layout">Source layout</a></li>
+    <li class="toc-level-3"><a href="#comments">Comments</a></li>
+    <li class="toc-level-3"><a href="#strings-and-numbers">Strings and numbers</a></li>
+    <li class="toc-level-3"><a href="#whitespace">Whitespace in prose</a></li>
+    <li class="toc-level-3"><a href="#raw-scopes">Raw scopes</a></li>
+    <li class="toc-level-3"><a href="#attributes">Attribute lists</a></li>
+    <li class="toc-level-2"><a href="#meta">meta</a></li>
+    <li class="toc-level-2"><a href="#blocks">Blocks</a></li>
+    <li class="toc-level-3"><a href="#heading">h</a></li>
+    <li class="toc-level-3"><a href="#paragraph">p</a></li>
+    <li class="toc-level-3"><a href="#hr">hr</a></li>
+    <li class="toc-level-3"><a href="#toc-block">toc</a></li>
+    <li class="toc-level-3"><a href="#raw">raw</a></li>
+    <li class="toc-level-2"><a href="#inlines">Inlines</a></li>
+    <li class="toc-level-3"><a href="#emphasis">Emphasis</a></li>
+    <li class="toc-level-3"><a href="#inline-code">Inline code</a></li>
+    <li class="toc-level-3"><a href="#links">Links</a></li>
+    <li class="toc-level-3"><a href="#inline-math-ref">Inline math and footnotes</a></li>
+    <li class="toc-level-2"><a href="#lists">Lists</a></li>
+    <li class="toc-level-3"><a href="#tasks">Tasks</a></li>
+    <li class="toc-level-3"><a href="#nested-lists">Nested lists</a></li>
+    <li class="toc-level-2"><a href="#quotes">Quotes</a></li>
+    <li class="toc-level-2"><a href="#codeblock">codeblock</a></li>
+    <li class="toc-level-2"><a href="#math">Math</a></li>
+    <li class="toc-level-3"><a href="#math-block">Display</a></li>
+    <li class="toc-level-3"><a href="#math-inline">Inline</a></li>
+    <li class="toc-level-2"><a href="#tables">Tables</a></li>
+    <li class="toc-level-2"><a href="#images">Images</a></li>
+    <li class="toc-level-2"><a href="#callouts">Callouts</a></li>
+    <li class="toc-level-2"><a href="#footnotes">Footnotes</a></li>
+    <li class="toc-level-2"><a href="#includes">Includes</a></li>
+    <li class="toc-level-2"><a href="#semantics">Semantic checks</a></li>
+    <li class="toc-level-3"><a href="#diagnostics">Diagnostics</a></li>
+    <li class="toc-level-2"><a href="#minimal-example">Minimal document</a></li>
+    <li class="toc-level-2"><a href="#full-example">Features used in this book</a></li>
+    <li class="toc-level-2"><a href="#limits">Limits</a></li>
+    <li class="toc-level-6"><a href="#end">End of reference</a></li>
+    <li class="toc-level-2"><a href="#build-these-pages">Building these pages</a></li>
+  </ul>
+</nav>
+<h2 id="what-it-does">What it does</h2>
+<p>A .du file is source. The compiler lexes it, parses it into an AST, checks semantic rules, then emits HTML. Watch mode rebuilds on change and serves the result on localhost.</p>
+<p>Output is a complete page: doctype, metadata, CSS, optional KaTeX, and the body. You can inject extra CSS with <code>--style</code> or with a stylesheet field in meta.</p>
+<h3 id="pipeline">Pipeline</h3>
+<ol>
+  <li>Read the input file.</li>
+  <li>Lex and parse into a document node.</li>
+  <li>Resolve include statements, recursively.</li>
+  <li>Run semantic checks.</li>
+  <li>Generate HTML and write the output file.</li>
+</ol>
+<h3 id="what-this-book-covers">What this book covers</h3>
+<p>Syntax for every block and inline the compiler accepts, the CLI, include resolution, and the checks that run after parse. Features that exist only as ignored attribute keys are not documented as if they did something.</p>
+<h2 id="cli">Command line</h2>
+<p>The binary is named <code>docup</code>. Commands:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>usage</span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text line-numbers"><span class="code-line">docup build &lt;input.du&gt; [flags]</span><span class="code-line">docup watch &lt;input.du&gt; [flags]</span><span class="code-line">docup version</span><span class="code-line">docup help</span></code></pre>
+</div>
+<p><code>docup -v</code> and <code>docup --version</code> print the same version string as <code>docup version</code>. <code>docup -h</code> and <code>docup --help</code> print usage. Any other command name is an error.</p>
+<h3 id="flags">Flags</h3>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Flag</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td><code>-o</code>, <code>--output</code></td>
+    <td>Output HTML path. Default is the input path with the extension changed to .html.</td>
+  </tr>
+  <tr>
+    <td><code>-s</code>, <code>--style</code></td>
+    <td>Path to a CSS file. Its contents are copied into a style tag in the output.</td>
+  </tr>
+  <tr>
+    <td><code>-p</code>, <code>--port</code></td>
+    <td>Port for the watch-mode server. Default 8080. Must be a valid u16.</td>
+  </tr>
+  <tr>
+    <td><code>-V</code>, <code>--verbose</code></td>
+    <td>Print elapsed time for each build stage.</td>
+  </tr>
+  <tr>
+    <td><code>-q</code>, <code>--quiet</code></td>
+    <td>Hide stage progress and the success summary.</td>
+  </tr>
+</table>
+</div>
+<p><code>--verbose</code> and <code>--quiet</code> together are an error. A flag that expects a value and does not get one is an error. Unknown flags are an error. Only one input path is accepted.</p>
+<h3 id="build">build</h3>
+<p>Compiles once and writes the HTML file. A missing or unreadable input file is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If the input does not use a .du extension, the compiler prints a warning and continues.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">docup build report.du
+docup build report.du -o dist/index.html -s style.css
+docup build report.du --verbose</code></pre>
+</div>
+<h3 id="watch">watch</h3>
+<p>Compiles once, writes the output file, then binds <code>127.0.0.1:&lt;port&gt;</code>. It polls watched files every 250 ms. On change it rebuilds. A failed rebuild leaves the last good (or last error placeholder) page in place and keeps watching.</p>
+<p>The served HTML has a small EventSource script injected before <code>&lt;/body&gt;</code>. The server also exposes <code>/docup-events</code> and static files from the input file&#39;s directory.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">docup watch report.du
+docup watch report.du --port <span class="tok-number">3000</span></code></pre>
+</div>
+<p>Watched paths are the root source file, every successfully resolved include, and the <code>--style</code> file if one was given.</p>
+<h2 id="source-layout">Source layout</h2>
+<p>A document is a sequence of top-level blocks. The first token of each block is an identifier: the block type. After the last block the file ends. Anything else at top level is a parse error.</p>
+<p>Allowed top-level names:</p>
+<ul>
+  <li><code>meta</code></li>
+  <li><code>h</code></li>
+  <li><code>p</code></li>
+  <li><code>codeblock</code></li>
+  <li><code>hr</code></li>
+  <li><code>list</code></li>
+  <li><code>quote</code></li>
+  <li><code>image</code></li>
+  <li><code>table</code></li>
+  <li><code>callout</code></li>
+  <li><code>raw</code></li>
+  <li><code>math</code></li>
+  <li><code>toc</code></li>
+  <li><code>footnote</code></li>
+  <li><code>include</code></li>
+</ul>
+<h3 id="comments">Comments</h3>
+<p>Line comments start with <code>//</code> and run to the end of the line. Block comments are <code>/* ... */</code> and may span lines. An unclosed block comment is a lex error. Comments are skipped in the token stream. They are not skipped inside raw scopes, inline code, or inline math.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>comments.du</span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text"><span class="tok-comment">// a whole line</span>
+
+p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
+</div>
+<h3 id="strings-and-numbers">Strings and numbers</h3>
+<p>String literals use double quotes. The only escape is a backslash before a quote: <code>\&quot;</code> inserts a quote. An unclosed string is a lex error.</p>
+<p>Bare integers are tokens. Heading level is the only place the grammar requires a number.</p>
+<h3 id="whitespace">Whitespace in prose</h3>
+<p>Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a single space. Leading and trailing spaces on a body are trimmed. Line breaks in source do not become line breaks in HTML unless you use a codeblock, raw block, or explicit HTML.</p>
+<h3 id="raw-scopes">Raw scopes</h3>
+<p><code>codeblock</code>, <code>raw</code>, and <code>math</code> take a body that starts with brace-bang and ends at the first bang-brace in the file from that point. The body is not tokenized. A leading all-whitespace line is dropped. Trailing spaces and newlines are dropped.</p>
+<h3 id="attributes">Attribute lists</h3>
+<p>Many blocks take a parenthesized list after the name:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">name(key: <span class="tok-string">&quot;value&quot;</span>, flag: true, <span class="tok-string">&quot;positional&quot;</span>)</code></pre>
+</div>
+<p>A named field is an identifier, a colon, then a string or the identifiers <code>true</code> / <code>false</code>. A bare string is a positional argument. Entries may be separated by commas. An empty <code>()</code> is valid where the list is optional.</p>
+<p>Which keys are read depends on the block. Unknown keys are stored or dropped; they do not fail the parse.</p>
+<h2 id="meta">meta</h2>
+<p>Optional. At most one per document. If present it must contain title.<sup class="footnote-ref"><a href="#fn-required-title" id="fnref-required-title">[1]</a></sup></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>meta.du</span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">meta {
+  title: <span class="tok-string">&quot;Required when meta is present&quot;</span>,
+  lang: <span class="tok-string">&quot;en&quot;</span>,
+  theme: <span class="tok-string">&quot;light&quot;</span>,
+  author: <span class="tok-string">&quot;Name&quot;</span>,
+  version: <span class="tok-string">&quot;0.2.0&quot;</span>,
+  description: <span class="tok-string">&quot;One-line summary&quot;</span>,
+  keywords: <span class="tok-string">&quot;comma, separated&quot;</span>,
+  canonical: <span class="tok-string">&quot;https://example.com/page&quot;</span>,
+  image: <span class="tok-string">&quot;https://example.com/og.png&quot;</span>,
+  stylesheet: <span class="tok-string">&quot;extra.css&quot;</span>
+}</code></pre>
+</div>
+<p>Keys the generator uses:</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Effect</th>
+  </tr>
+  <tr>
+    <td>title</td>
+    <td>Document title and Open Graph / Twitter title. Required if meta exists.</td>
+  </tr>
+  <tr>
+    <td>lang</td>
+    <td><code>lang</code> attribute on <code>&lt;html&gt;</code>. Default <code>en</code>.</td>
+  </tr>
+  <tr>
+    <td>theme</td>
+    <td><code>data-theme</code> on <code>&lt;html&gt;</code>. Use <code>light</code> or <code>dark</code> to lock the palette. If omitted, CSS follows prefers-color-scheme.</td>
+  </tr>
+  <tr>
+    <td>author, version</td>
+    <td><code>&lt;meta name&gt;</code> tags.</td>
+  </tr>
+  <tr>
+    <td>description</td>
+    <td>description, og:description, twitter:description.</td>
+  </tr>
+  <tr>
+    <td>keywords</td>
+    <td><code>&lt;meta name=&quot;keywords&quot;&gt;</code>.</td>
+  </tr>
+  <tr>
+    <td>canonical</td>
+    <td>canonical link and og:url.</td>
+  </tr>
+  <tr>
+    <td>image</td>
+    <td>og:image and twitter:image.</td>
+  </tr>
+  <tr>
+    <td>stylesheet</td>
+    <td>Extra <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> in head.</td>
+  </tr>
+</table>
+</div>
+<p>Values are strings. A second meta block is a parse error. Other keys are kept in the AST and ignored by the generator.</p>
+<h2 id="blocks">Blocks</h2>
+<h3 id="heading">h</h3>
+<p>Heading. Level is a number in parentheses and must be 1 through 6. The body is prose.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">h(<span class="tok-number">1</span>) { Title }
+h(<span class="tok-number">2</span>, id: <span class="tok-string">&quot;install&quot;</span>, class: <span class="tok-string">&quot;section&quot;</span>) { Install }</code></pre>
+</div>
+<p>Optional attributes after the level are name/string pairs. The generator writes <code>id</code> and <code>class</code>. If you omit <code>id</code>, the generator builds one from the heading text (lowercase, ASCII letters and digits, hyphens). Duplicate slugs get a numeric suffix.</p>
+<h3 id="paragraph">p</h3>
+<p>A paragraph. Body is prose: text plus inline elements.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { One paragraph. Use another p block for the next one. }</code></pre>
+</div>
+<h3 id="hr">hr</h3>
+<p>Horizontal rule. Empty body.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">hr {}</code></pre>
+</div>
+<h3 id="toc-block">toc</h3>
+<p>Table of contents. Empty body. The generator fills it from every heading in the finished document, after includes are resolved. Headings are listed in source order with links to their ids. If there are no headings, the block emits nothing.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">toc {}</code></pre>
+</div>
+<h3 id="raw">raw</h3>
+<p>Unescaped HTML. The body is a raw scope opened by brace-bang and closed by bang-brace. A leading blank line of only spaces is stripped. Trailing whitespace is stripped. Empty content after that trim is a semantic error.</p>
+<p>Header line:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">raw</code></pre>
+</div>
+<p>Then a raw scope whose body is HTML. Nothing inside that scope is lexed as DocUP. Braces and comments are literal. A raw scope ends at the first bang-brace, so a sample inside another raw scope cannot contain that closer.</p>
+<h2 id="inlines">Inlines</h2>
+<p>Inlines appear in prose bodies: headings, paragraphs, callouts, table cells, footnote definitions, and the text parts of list items and quotes.</p>
+<p>Brace forms: <code>b</code>, <code>i</code>, <code>strike</code>, <code>code</code>, <code>m</code>. Parenthesis forms: <code>link</code>, <code>fn</code>.</p>
+<h3 id="emphasis">Emphasis</h3>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { b{bold} i{italic} strike{struck} }</code></pre>
+</div>
+<p>These nest. Depth is capped at 64; deeper input is a parse error.</p>
+<p>Rendered: <strong>bold</strong> <em>italic</em> <s>struck</s>. Combined: <strong><em>bold italic</em></strong>.</p>
+<h3 id="inline-code">Inline code</h3>
+<p><code>code{...}</code> reads bytes until the matching closing brace. Nested braces are counted. There are no inlines inside it.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { Use code{h(<span class="tok-number">1</span>) { Title }} at the top of a page. }</code></pre>
+</div>
+<p>HTML special characters in the body are escaped in output.</p>
+<h3 id="links">Links</h3>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { See link(<span class="tok-string">&quot;https://example.com&quot;</span>) { the site }. }</code></pre>
+</div>
+<p>The URL is a string inside parentheses. The visible text is the brace body. An empty URL is a semantic error. Extra comma-separated string attributes after the URL are parsed and discarded.</p>
+<p>Example: <a href="https://example.com">example.com</a>.</p>
+<h3 id="inline-math-ref">Inline math and footnotes</h3>
+<p>Inline math uses <code>m{...}</code> and is described with math blocks. Footnote references use <code>fn(id)</code> and are described with footnote blocks.</p>
+<p>An identifier that looks like an inline but is not one of the names above is ordinary text.</p>
+<h2 id="lists">Lists</h2>
+<p>A list contains <code>item</code> and <code>task</code> children only. Zero items is a semantic error.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">list {
+  item { First }
+  item { Second }
+}
+
+list(ordered: true) {
+  item { Step one }
+  item { Step two }
+}</code></pre>
+</div>
+<p><code>ordered: true</code> emits <code>&lt;ol&gt;</code>. Anything else, including omitting the attribute, emits <code>&lt;ul&gt;</code>.</p>
+<h3 id="tasks">Tasks</h3>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">list {
+  task(done: false) { Open work }
+  task(done: true) { Finished work }
+}</code></pre>
+</div>
+<p><code>done</code> is a boolean. Missing <code>done</code> is treated as false. The checkbox is rendered disabled.</p>
+<p>Live example:</p>
+<ul>
+  <li class="task-item"><input type="checkbox" disabled checked> Write the grammar down</li>
+  <li class="task-item"><input type="checkbox" disabled> Add a new block type</li>
+</ul>
+<h3 id="nested-lists">Nested lists</h3>
+<p>A list may appear inside an item. It must be the last child of that item.<sup class="footnote-ref"><a href="#fn-item-nest" id="fnref-item-nest">[2]</a></sup></p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">list {
+  item {
+    Parent text
+    list {
+      item { Child }
+      item { Other child }
+    }
+  }
+  item { Sibling of the parent }
+}</code></pre>
+</div>
+<p>Live example:</p>
+<ul>
+  <li>Block types<ul>
+  <li>Prose: h, p, quote, callout</li>
+  <li>Structure: list, table, toc</li>
+  <li>Pass-through: raw, codeblock, math</li>
+</ul>
+</li>
+  <li>Inline types: b, i, strike, code, m, link, fn</li>
+</ul>
+<ol>
+  <li>Parse</li>
+  <li>Analyze</li>
+  <li>Generate</li>
+</ol>
+<h2 id="quotes">Quotes</h2>
+<p>A block quote. Body is prose and, optionally, one nested quote at the end.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">quote {
+  Outer line.
+  quote {
+    Inner line.
+  }
+}</code></pre>
+</div>
+<p>Live example:</p>
+<blockquote>
+  <p>A quote is a block, not an inline. Consecutive text inside it becomes one paragraph in HTML.</p>
+  <blockquote>
+  <p>The inner quote closes the outer body. Do not put text after it.</p>
+  </blockquote>
+</blockquote>
+<h2 id="codeblock">codeblock</h2>
+<p>Fenced source. The body is a raw scope opened by brace-bang and closed by bang-brace.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">codeblock(lang: <span class="tok-string">&quot;rust&quot;</span>, file: <span class="tok-string">&quot;main.rs&quot;</span>, line_numbers: true, highlight: <span class="tok-string">&quot;1,3-5&quot;</span>)</code></pre>
+</div>
+<p>Follow the attribute list with a raw scope. The live block below is the same construct.</p>
+<p>Attributes:</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Effect</th>
+  </tr>
+  <tr>
+    <td>lang</td>
+    <td>string</td>
+    <td>Language label and highlight grammar. Empty means no language class.</td>
+  </tr>
+  <tr>
+    <td>file</td>
+    <td>string</td>
+    <td>Label in the header.</td>
+  </tr>
+  <tr>
+    <td>line_numbers</td>
+    <td>boolean</td>
+    <td>Show line numbers. Default false.</td>
+  </tr>
+  <tr>
+    <td>highlight</td>
+    <td>string</td>
+    <td>Line numbers to mark. Comma-separated items, each a number or an inclusive range <code>start-end</code>.</td>
+  </tr>
+</table>
+</div>
+<p>Content empty after trim is a semantic error. The output header always includes a Copy button.</p>
+<p>Live example:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>parse_heading.rs</span>
+    <div class="codeblock-actions">
+      <span>rust</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-rust line-numbers"><span class="code-line highlighted-line"><span class="tok-keyword">fn</span> parse_heading(&amp;<span class="tok-keyword">mut</span> <span class="tok-keyword">self</span>) -&gt; <span class="tok-type">Result</span>&lt;HeadingNode, ParseError&gt; {</span><span class="code-line">    <span class="tok-keyword">self</span>.next()?;</span><span class="code-line">    <span class="tok-keyword">self</span>.expect(TokenType::LParen, <span class="tok-string">&quot;&#39;(&#39; after h&quot;</span>)?;</span><span class="code-line highlighted-line">    <span class="tok-keyword">let</span> level_tok = <span class="tok-keyword">self</span>.expect(TokenType::Number, <span class="tok-string">&quot;heading level&quot;</span>)?;</span><span class="code-line highlighted-line">    <span class="tok-keyword">let</span> level: <span class="tok-type">usize</span> = level_tok.value.parse().map_err(|_| {</span><span class="code-line highlighted-line">        <span class="tok-keyword">self</span>.errorf(format!(<span class="tok-string">&quot;invalid heading level {:?}&quot;</span>, level_tok.value))</span><span class="code-line">    })?;</span><span class="code-line">    <span class="tok-comment">// ...</span></span><span class="code-line">}</span></code></pre>
+</div>
+<h2 id="math">Math</h2>
+<p>Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags only if the document contains at least one math node.</p>
+<h3 id="math-block">Display</h3>
+<p>Header line is <code>math</code>, then a raw scope of LaTeX. Empty content is a semantic error. Output is wrapped as display math.</p>
+<div class="math-block">\[
+\int_{0}^{1} x \, dx = \frac{1}{2}
+\]</div>
+<h3 id="math-inline">Inline</h3>
+<p><code>m{...}</code> is a raw brace body, same rules as inline code.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { The area is m{\frac{<span class="tok-number">1</span>}{<span class="tok-number">2</span>}}. }</code></pre>
+</div>
+<p>The area is <span class="math-inline">\(\frac{1}{2}\)</span>. Einstein: <span class="math-inline">\(E = mc^2\)</span>.</p>
+<h2 id="tables">Tables</h2>
+<p>A table is rows. A row is cells. A cell body is prose.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">table {
+  row(header: true) {
+    cell { Name }
+    cell { Kind }
+  }
+  row {
+    cell { code{p} }
+    cell { block }
+  }
+  row {
+    cell { code{b} }
+    cell { inline }
+  }
+}</code></pre>
+</div>
+<p>Rules checked after parse:</p>
+<ul>
+  <li>At least one row.</li>
+  <li>Each row has at least one cell.</li>
+  <li>Every row has the same number of cells.</li>
+</ul>
+<p><code>row(header: true)</code> emits <code>&lt;th&gt;</code> instead of <code>&lt;td&gt;</code>. Table-level attributes are parsed and ignored.</p>
+<p>Live example, pulled in with include:</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Token</th>
+    <th>Spelling</th>
+    <th>Used for</th>
+  </tr>
+  <tr>
+    <td>Ident</td>
+    <td>letters, digits, underscore</td>
+    <td>block names, attribute keys, <code>true</code>/<code>false</code></td>
+  </tr>
+  <tr>
+    <td>String</td>
+    <td>double-quoted</td>
+    <td>paths, URLs, attribute values</td>
+  </tr>
+  <tr>
+    <td>Number</td>
+    <td>digits</td>
+    <td>heading level</td>
+  </tr>
+  <tr>
+    <td>RawScopeOpen</td>
+    <td>brace-bang</td>
+    <td>codeblock, raw, math</td>
+  </tr>
+</table>
+</div>
+<h2 id="images">Images</h2>
+<p>No body. First argument is the source URL or path. Optional <code>alt</code> is a string. Other named attributes after that are parsed and ignored.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">image(<span class="tok-string">&quot;images/logo.svg&quot;</span>, alt: <span class="tok-string">&quot;DocUP&quot;</span>)</code></pre>
+</div>
+<p>An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input.</p>
+<img src="images/logo.svg" alt="DocUP">
+<h2 id="callouts">Callouts</h2>
+<p>Admonition block. Body is prose.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">callout { Defaults to note. }
+callout(type: <span class="tok-string">&quot;warning&quot;</span>) { Check the heading level. }</code></pre>
+</div>
+<p><code>type</code> is a string. Matching is case-insensitive.</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>type</th>
+    <th>Also accepted</th>
+  </tr>
+  <tr>
+    <td>note</td>
+    <td>info</td>
+  </tr>
+  <tr>
+    <td>tip</td>
+    <td>hint</td>
+  </tr>
+  <tr>
+    <td>warning</td>
+    <td>caution</td>
+  </tr>
+  <tr>
+    <td>danger</td>
+    <td>error</td>
+  </tr>
+</table>
+</div>
+<p>Any other string is a parse error. Omitted type is note.</p>
+<div class="callout callout-note">
+  <div class="callout-title">Note</div>
+  <div class="callout-body">Semantic errors are reported with file, line, and column. The compiler prints the source line and a caret.</div>
+</div>
+<div class="callout callout-tip">
+  <div class="callout-title">Tip</div>
+  <div class="callout-body">Put examples in codeblock raw scopes so the sample is not parsed as DocUP.</div>
+</div>
+<div class="callout callout-warning">
+  <div class="callout-title">Warning</div>
+  <div class="callout-body">Heading levels outside 1 through 6 fail semantic analysis, not parsing. The tokens are valid; the values are not.</div>
+</div>
+<div class="callout callout-danger">
+  <div class="callout-title">Danger</div>
+  <div class="callout-body">include cycles and missing include files fail before semantic analysis. The error is reported against the include statement.</div>
+</div>
+<h2 id="footnotes">Footnotes</h2>
+<p>A definition is a top-level block. A reference is an inline.</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">p { See the rule.fn(required-title) }
+
+footnote(id: <span class="tok-string">&quot;required-title&quot;</span>) { Title is required when meta is present. }</code></pre>
+</div>
+<p>The definition needs a non-empty <code>id</code> attribute. The body is prose.</p>
+<p>The reference is <code>fn(id)</code> or <code>fn(&quot;id&quot;)</code>. The identifier form allows letters, digits, underscore, and hyphen.</p>
+<p>Checks:</p>
+<ul>
+  <li>Duplicate definition ids are a semantic error.</li>
+  <li>A reference whose id has no definition is a semantic error.</li>
+  <li>Definitions with no references still appear in the footnotes section.</li>
+</ul>
+<p>Numbering follows first-reference order in the document after includes are merged. Output ids are <code>fn-&lt;id&gt;</code> and <code>fnref-&lt;id&gt;</code>.</p>
+<p>This page uses three definitions. The first two are referenced from earlier sections.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[3]</a></sup></p>
+<h2 id="includes">Includes</h2>
+<p>Splice another .du file into the current document. Two spellings:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">include <span class="tok-string">&quot;path/to/file.du&quot;</span>
+include(<span class="tok-string">&quot;path/to/file.du&quot;</span>)</code></pre>
+</div>
+<p>The path is relative to the file that contains the statement, not to the process working directory.</p>
+<p>Resolution:</p>
+<ol>
+  <li>Join the path to the parent file&#39;s directory.</li>
+  <li>Canonicalize. Failure is an error on the include statement.</li>
+  <li>Reject the path if it is already on the current include stack (cycle).</li>
+  <li>Read, lex, parse the child.</li>
+  <li>Resolve includes inside the child.</li>
+  <li>Append the child&#39;s blocks to the parent. Child meta is discarded.<sup class="footnote-ref"><a href="#fn-include-meta" id="fnref-include-meta">[3]</a></sup></li>
+  <li>Pop the child from the stack so the same file may be included from a different branch.</li>
+</ol>
+<p>An empty path is a semantic error if the statement survives until analysis. In practice a missing file fails earlier.</p>
+<p>Watch mode adds every successfully resolved include to the watch set.</p>
+<p>This book is one HTML file built from several .du files. index.du holds meta, the title, the toc, the includes, and the footnote definitions.</p>
+<h2 id="semantics">Semantic checks</h2>
+<p>Analysis runs on the document after includes are expanded. The first violation stops the build.</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>Check</th>
+    <th>When it fires</th>
+  </tr>
+  <tr>
+    <td>meta title</td>
+    <td>meta is present and has no title field</td>
+  </tr>
+  <tr>
+    <td>heading level</td>
+    <td>level is not in 1..6</td>
+  </tr>
+  <tr>
+    <td>empty codeblock / raw / math</td>
+    <td>trimmed content is empty</td>
+  </tr>
+  <tr>
+    <td>empty list</td>
+    <td>no items</td>
+  </tr>
+  <tr>
+    <td>empty table</td>
+    <td>no rows</td>
+  </tr>
+  <tr>
+    <td>empty row</td>
+    <td>no cells</td>
+  </tr>
+  <tr>
+    <td>ragged table</td>
+    <td>a row&#39;s cell count differs from the first row</td>
+  </tr>
+  <tr>
+    <td>image src</td>
+    <td>source string is empty</td>
+  </tr>
+  <tr>
+    <td>link URL</td>
+    <td>URL string is empty</td>
+  </tr>
+  <tr>
+    <td>include path</td>
+    <td>path is empty or only whitespace</td>
+  </tr>
+  <tr>
+    <td>footnote id</td>
+    <td>duplicate definition, or a reference with no definition</td>
+  </tr>
+</table>
+</div>
+<p>Parse errors are separate: unknown block names, missing braces, bad callout types, unclosed raw scopes, unclosed strings, unclosed comments, inline or list nesting past 64, text after a nested list or nested quote.</p>
+<h3 id="diagnostics">Diagnostics</h3>
+<p>Errors print the message, then <code>path:line:col</code>, then the source line and a caret. Line and column are 1-based.</p>
+<h2 id="minimal-example">Minimal document</h2>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span>hello.du</span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text line-numbers"><span class="code-line highlighted-line">meta {</span><span class="code-line highlighted-line">  title: <span class="tok-string">&quot;Hello&quot;</span></span><span class="code-line highlighted-line">}</span><span class="code-line"></span><span class="code-line">h(<span class="tok-number">1</span>) { Hello }</span><span class="code-line"></span><span class="code-line">p { First paragraph. b{Bold}, i{italic}, code{code}. }</span><span class="code-line"></span><span class="code-line">list {</span><span class="code-line">  item { An item }</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">hr {}</span></code></pre>
+</div>
+<h2 id="full-example">Features used in this book</h2>
+<p>This document uses every block and inline the compiler implements:</p>
+<ul>
+  <li>meta, including title and the optional fields the generator reads</li>
+  <li>headings with explicit ids and one class</li>
+  <li>paragraphs</li>
+  <li>toc</li>
+  <li>lists, ordered lists, tasks, nested lists</li>
+  <li>quotes and a nested quote</li>
+  <li>tables, including a header row and an included fragment</li>
+  <li>images</li>
+  <li>callouts of all four kinds</li>
+  <li>codeblock with lang, file, line numbers, and highlight ranges</li>
+  <li>raw HTML</li>
+  <li>display math and inline math</li>
+  <li>footnote references and definitions</li>
+  <li>include, both from the root file and from a child file</li>
+  <li>line comments in the files that need them</li>
+</ul>
+<aside class="callout callout-note">
+  <div class="callout-title">Raw</div>
+  <div class="callout-body">This aside was emitted by a raw block. It is not parsed as DocUP.</div>
+</aside>
+<h2 id="limits">Limits</h2>
+<ul>
+  <li>One meta block.</li>
+  <li>Include cycles are rejected.</li>
+  <li>Inline, list, and quote nesting stop at 64.</li>
+  <li>Nested list or quote must be the last child of its parent body.</li>
+  <li>No block inside a paragraph. A list inside <code>p { ... }</code> is plain text.</li>
+  <li>Child-file meta is not merged.</li>
+</ul>
+<h6 id="end">End of reference</h6>
+<p>Compiler version <code>0.2.0</code>.</p>
+<h2 id="build-these-pages">Building these pages</h2>
+<p>The root file is <code>index.du</code>. From the docs directory:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">docup build index.du
+docup build index.du -o index.html
+docup watch index.du --port <span class="tok-number">8080</span></code></pre>
+</div>
+<p>Output defaults to <code>index.html</code> next to the input.</p>
+<section class="footnotes" aria-label="Footnotes">
+  <hr>
+  <ol>
+    <li id="fn-required-title">If a document contains a meta block, that block must include a title field. A document with no meta block is valid; the generated page title then defaults to &quot;DocUP Document&quot;. <a href="#fnref-required-title" class="footnote-back" aria-label="Back to reference">↩</a></li>
+    <li id="fn-item-nest">After a nested list is parsed inside an item, the item must close. Text after that nested list is a parse error. The same rule applies to a nested quote inside a quote. <a href="#fnref-item-nest" class="footnote-back" aria-label="Back to reference">↩</a></li>
+    <li id="fn-include-meta">An included file may contain its own meta block. The compiler parses it, then drops it. Only the included file&#39;s blocks are spliced into the parent. <a href="#fnref-include-meta" class="footnote-back" aria-label="Back to reference">↩</a></li>
+  </ol>
+</section>
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.codeblock').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = orig; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

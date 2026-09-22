@@ -1,0 +1,73 @@
+h(2, id: "minimal-example") { Minimal document }
+
+codeblock(lang: "text", file: "hello.du", line_numbers: true, highlight: "1-3") {!
+meta {
+  title: "Hello"
+}
+
+h(1) { Hello }
+
+p { First paragraph. b{Bold}, i{italic}, code{code}. }
+
+list {
+  item { An item }
+}
+
+hr {}
+!}
+
+h(2, id: "full-example") { Features used in this book }
+
+p { This document uses every block and inline the compiler implements: }
+
+list {
+  item { meta, including title and the optional fields the generator reads }
+  item { headings with explicit ids and one class }
+  item { paragraphs }
+  item { toc }
+  item { lists, ordered lists, tasks, nested lists }
+  item { quotes and a nested quote }
+  item { tables, including a header row and an included fragment }
+  item { images }
+  item { callouts of all four kinds }
+  item { codeblock with lang, file, line numbers, and highlight ranges }
+  item { raw HTML }
+  item { display math and inline math }
+  item { footnote references and definitions }
+  item { include, both from the root file and from a child file }
+  item { line comments in the files that need them }
+}
+
+raw {!
+<aside class="callout callout-note">
+  <div class="callout-title">Raw</div>
+  <div class="callout-body">This aside was emitted by a raw block. It is not parsed as DocUP.</div>
+</aside>
+!}
+
+h(2, id: "limits") { Limits }
+
+list {
+  item { One meta block. }
+  item { Include cycles are rejected. }
+  item { Inline, list, and quote nesting stop at 64. }
+  item { Nested list or quote must be the last child of its parent body. }
+  item { No block inside a paragraph. A list inside code{p { ... }} is plain text. }
+  item { Child-file meta is not merged. }
+}
+
+h(6, id: "end") { End of reference }
+
+p { Compiler version code{0.2.0}. }
+
+h(2, id: "build-these-pages") { Building these pages }
+
+p { The root file is code{index.du}. From the docs directory: }
+
+codeblock(lang: "text") {!
+docup build index.du
+docup build index.du -o index.html
+docup watch index.du --port 8080
+!}
+
+p { Output defaults to code{index.html} next to the input. }

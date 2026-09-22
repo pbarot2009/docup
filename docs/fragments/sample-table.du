@@ -1,0 +1,29 @@
+p { Live example, pulled in with include: }
+
+table {
+  row(header: true) {
+    cell { Token }
+    cell { Spelling }
+    cell { Used for }
+  }
+  row {
+    cell { Ident }
+    cell { letters, digits, underscore }
+    cell { block names, attribute keys, code{true}/code{false} }
+  }
+  row {
+    cell { String }
+    cell { double-quoted }
+    cell { paths, URLs, attribute values }
+  }
+  row {
+    cell { Number }
+    cell { digits }
+    cell { heading level }
+  }
+  row {
+    cell { RawScopeOpen }
+    cell { brace-bang }
+    cell { codeblock, raw, math }
+  }
+}

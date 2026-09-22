@@ -1,0 +1,19 @@
+h(2, id: "what-it-does") { What it does }
+
+p { A .du file is source. The compiler lexes it, parses it into an AST, checks semantic rules, then emits HTML. Watch mode rebuilds on change and serves the result on localhost. }
+
+p { Output is a complete page: doctype, metadata, CSS, optional KaTeX, and the body. You can inject extra CSS with code{--style} or with a stylesheet field in meta. }
+
+h(3, id: "pipeline") { Pipeline }
+
+list(ordered: true) {
+  item { Read the input file. }
+  item { Lex and parse into a document node. }
+  item { Resolve include statements, recursively. }
+  item { Run semantic checks. }
+  item { Generate HTML and write the output file. }
+}
+
+h(3, id: "what-this-book-covers") { What this book covers }
+
+p { Syntax for every block and inline the compiler accepts, the CLI, include resolution, and the checks that run after parse. Features that exist only as ignored attribute keys are not documented as if they did something. }

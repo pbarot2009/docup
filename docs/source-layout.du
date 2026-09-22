@@ -1,0 +1,59 @@
+h(2, id: "source-layout") { Source layout }
+
+p { A document is a sequence of top-level blocks. The first token of each block is an identifier: the block type. After the last block the file ends. Anything else at top level is a parse error. }
+
+p { Allowed top-level names: }
+
+list {
+  item { code{meta} }
+  item { code{h} }
+  item { code{p} }
+  item { code{codeblock} }
+  item { code{hr} }
+  item { code{list} }
+  item { code{quote} }
+  item { code{image} }
+  item { code{table} }
+  item { code{callout} }
+  item { code{raw} }
+  item { code{math} }
+  item { code{toc} }
+  item { code{footnote} }
+  item { code{include} }
+}
+
+h(3, id: "comments") { Comments }
+
+p { Line comments start with code{//} and run to the end of the line. Block comments are code{/* ... */} and may span lines. An unclosed block comment is a lex error. Comments are skipped in the token stream. They are not skipped inside raw scopes, inline code, or inline math. }
+
+codeblock(lang: "text", file: "comments.du") {!
+// a whole line
+
+p { visible /* hidden */ text }
+!}
+
+h(3, id: "strings-and-numbers") { Strings and numbers }
+
+p { String literals use double quotes. The only escape is a backslash before a quote: code{\"} inserts a quote. An unclosed string is a lex error. }
+
+p { Bare integers are tokens. Heading level is the only place the grammar requires a number. }
+
+h(3, id: "whitespace") { Whitespace in prose }
+
+p { Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a single space. Leading and trailing spaces on a body are trimmed. Line breaks in source do not become line breaks in HTML unless you use a codeblock, raw block, or explicit HTML. }
+
+
+h(3, id: "raw-scopes") { Raw scopes }
+
+p { code{codeblock}, code{raw}, and code{math} take a body that starts with brace-bang and ends at the first bang-brace in the file from that point. The body is not tokenized. A leading all-whitespace line is dropped. Trailing spaces and newlines are dropped. }
+h(3, id: "attributes") { Attribute lists }
+
+p { Many blocks take a parenthesized list after the name: }
+
+codeblock(lang: "text") {!
+name(key: "value", flag: true, "positional")
+!}
+
+p { A named field is an identifier, a colon, then a string or the identifiers code{true} / code{false}. A bare string is a positional argument. Entries may be separated by commas. An empty code{()} is valid where the list is optional. }
+
+p { Which keys are read depends on the block. Unknown keys are stored or dropped; they do not fail the parse. }

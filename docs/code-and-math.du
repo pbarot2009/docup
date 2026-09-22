@@ -1,0 +1,77 @@
+h(2, id: "codeblock") { codeblock }
+
+p { Fenced source. The body is a raw scope opened by brace-bang and closed by bang-brace. }
+
+codeblock(lang: "text") {!
+codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5")
+!}
+
+p { Follow the attribute list with a raw scope. The live block below is the same construct. }
+
+p { Attributes: }
+
+table {
+  row(header: true) {
+    cell { Key }
+    cell { Type }
+    cell { Effect }
+  }
+  row {
+    cell { lang }
+    cell { string }
+    cell { Language label and highlight grammar. Empty means no language class. }
+  }
+  row {
+    cell { file }
+    cell { string }
+    cell { Label in the header. }
+  }
+  row {
+    cell { line_numbers }
+    cell { boolean }
+    cell { Show line numbers. Default false. }
+  }
+  row {
+    cell { highlight }
+    cell { string }
+    cell { Line numbers to mark. Comma-separated items, each a number or an inclusive range code{start-end}. }
+  }
+}
+
+p { Content empty after trim is a semantic error. The output header always includes a Copy button. }
+
+p { Live example: }
+
+codeblock(lang: "rust", file: "parse_heading.rs", line_numbers: true, highlight: "1,4-6") {!
+fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
+    self.next()?;
+    self.expect(TokenType::LParen, "'(' after h")?;
+    let level_tok = self.expect(TokenType::Number, "heading level")?;
+    let level: usize = level_tok.value.parse().map_err(|_| {
+        self.errorf(format!("invalid heading level {:?}", level_tok.value))
+    })?;
+    // ...
+}
+!}
+
+h(2, id: "math") { Math }
+
+p { Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags only if the document contains at least one math node. }
+
+h(3, id: "math-block") { Display }
+
+p { Header line is code{math}, then a raw scope of LaTeX. Empty content is a semantic error. Output is wrapped as display math. }
+
+math {!
+\int_{0}^{1} x \, dx = \frac{1}{2}
+!}
+
+h(3, id: "math-inline") { Inline }
+
+p { code{m{...}} is a raw brace body, same rules as inline code. }
+
+codeblock(lang: "text") {!
+p { The area is m{\frac{1}{2}}. }
+!}
+
+p { The area is m{\frac{1}{2}}. Einstein: m{E = mc^2}. }

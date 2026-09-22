@@ -1,0 +1,25 @@
+h(2, id: "footnotes") { Footnotes }
+
+p { A definition is a top-level block. A reference is an inline. }
+
+codeblock(lang: "text") {!
+p { See the rule.fn(required-title) }
+
+footnote(id: "required-title") { Title is required when meta is present. }
+!}
+
+p { The definition needs a non-empty code{id} attribute. The body is prose. }
+
+p { The reference is code{fn(id)} or code{fn("id")}. The identifier form allows letters, digits, underscore, and hyphen. }
+
+p { Checks: }
+
+list {
+  item { Duplicate definition ids are a semantic error. }
+  item { A reference whose id has no definition is a semantic error. }
+  item { Definitions with no references still appear in the footnotes section. }
+}
+
+p { Numbering follows first-reference order in the document after includes are merged. Output ids are code{fn-<id>} and code{fnref-<id>}. }
+
+p { This page uses three definitions. The first two are referenced from earlier sections.fn(include-meta) }

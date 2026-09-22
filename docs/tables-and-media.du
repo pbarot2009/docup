@@ -1,0 +1,44 @@
+h(2, id: "tables") { Tables }
+
+p { A table is rows. A row is cells. A cell body is prose. }
+
+codeblock(lang: "text") {!
+table {
+  row(header: true) {
+    cell { Name }
+    cell { Kind }
+  }
+  row {
+    cell { code{p} }
+    cell { block }
+  }
+  row {
+    cell { code{b} }
+    cell { inline }
+  }
+}
+!}
+
+p { Rules checked after parse: }
+
+list {
+  item { At least one row. }
+  item { Each row has at least one cell. }
+  item { Every row has the same number of cells. }
+}
+
+p { code{row(header: true)} emits code{<th>} instead of code{<td>}. Table-level attributes are parsed and ignored. }
+
+include "fragments/sample-table.du"
+
+h(2, id: "images") { Images }
+
+p { No body. First argument is the source URL or path. Optional code{alt} is a string. Other named attributes after that are parsed and ignored. }
+
+codeblock(lang: "text") {!
+image("images/logo.svg", alt: "DocUP")
+!}
+
+p { An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input. }
+
+image("images/logo.svg", alt: "DocUP")

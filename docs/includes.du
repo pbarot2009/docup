@@ -1,0 +1,28 @@
+h(2, id: "includes") { Includes }
+
+p { Splice another .du file into the current document. Two spellings: }
+
+codeblock(lang: "text") {!
+include "path/to/file.du"
+include("path/to/file.du")
+!}
+
+p { The path is relative to the file that contains the statement, not to the process working directory. }
+
+p { Resolution: }
+
+list(ordered: true) {
+  item { Join the path to the parent file's directory. }
+  item { Canonicalize. Failure is an error on the include statement. }
+  item { Reject the path if it is already on the current include stack (cycle). }
+  item { Read, lex, parse the child. }
+  item { Resolve includes inside the child. }
+  item { Append the child's blocks to the parent. Child meta is discarded.fn(include-meta) }
+  item { Pop the child from the stack so the same file may be included from a different branch. }
+}
+
+p { An empty path is a semantic error if the statement survives until analysis. In practice a missing file fails earlier. }
+
+p { Watch mode adds every successfully resolved include to the watch set. }
+
+p { This book is one HTML file built from several .du files. index.du holds meta, the title, the toc, the includes, and the footnote definitions. }

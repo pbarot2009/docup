@@ -1,0 +1,7 @@
+Root file: index.du
+
+  docup build index.du
+  docup watch index.du
+
+Other .du files are included from index.du or from a child of it.
+Images live in images/.
