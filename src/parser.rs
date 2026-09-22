@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    BlockNode, CellNode, CodeBlockNode, DocumentNode, HRNode, HeadingNode, ImageNode, InlineKind,
-    InlineNode, ItemChild, ItemNode, ListNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
-    RowNode, TableNode, trim_inline_edges,
+    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode,
+    HRNode, HeadingNode, ImageNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode,
+    MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TableNode,
 };
 use crate::errors::{LexError, ParseError};
 use crate::lexer::{Lexer, Token, TokenType};
 
 /// max_inline_depth bounds nested inline elements (e.g. b{i{b{...}}}) to prevent
-/// adversarial or deeply nested input from overflowing the stack.
+/// adversarial or deeply nested input from overflowing the stack[span_1](start_span)[span_1](end_span).
 const MAX_INLINE_DEPTH: usize = 64;
 
 impl From<LexError> for ParseError {
@@ -49,13 +49,13 @@ impl<'a> Parser<'a> {
         Ok(tok)
     }
 
-    /// ParseDocument parses the complete token stream into a DocumentNode.
+    /// ParseDocument parses the complete token stream into a DocumentNode[span_2](start_span)[span_2](end_span).
     pub fn parse_document(&mut self) -> Result<DocumentNode, ParseError> {
         let mut doc = DocumentNode::new();
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table), got {:?}",
+                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math), got {:?}",
                     self.cur.value
                 )));
             }
@@ -98,6 +98,18 @@ impl<'a> Parser<'a> {
                     let tbl = self.parse_table()?;
                     doc.blocks.push(BlockNode::Table(tbl));
                 }
+                "callout" => {
+                    let callout = self.parse_callout()?;
+                    doc.blocks.push(BlockNode::Callout(callout));
+                }
+                "raw" => {
+                    let raw = self.parse_raw()?;
+                    doc.blocks.push(BlockNode::Raw(raw));
+                }
+                "math" => {
+                    let math = self.parse_math()?;
+                    doc.blocks.push(BlockNode::Math(math));
+                }
                 _ => {
                     return Err(self.errorf(format!("unknown block type {:?}", self.cur.value)));
                 }
@@ -126,7 +138,7 @@ impl<'a> Parser<'a> {
         Ok(MetaNode::new(line, col, fields))
     }
 
-    /// parse_attrs parses an optional attribute list: `(key: "val", "posArg", flag: true)`
+    /// parse_attrs parses an optional attribute list: `(key: "val", "posArg", flag: true)`[span_3](start_span)[span_3](end_span)
     fn parse_attrs(&mut self) -> Result<(HashMap<String, String>, Vec<String>), ParseError> {
         let mut attrs = HashMap::new();
         let mut positional = Vec::new();
@@ -225,6 +237,74 @@ impl<'a> Parser<'a> {
         })
     }
 
+    fn parse_callout(&mut self) -> Result<CalloutNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'callout'
+        let (attrs, _) = self.parse_attrs()?;
+        let kind_str = attrs.get("type").map(|s| s.as_str()).unwrap_or("note");
+        let kind = match CalloutKind::parse(kind_str) {
+            Some(k) => k,
+            None => {
+                return Err(self.errorf(format!(
+                    "invalid callout type {:?}, expected note, tip, warning, or danger",
+                    kind_str
+                )));
+            }
+        };
+        if self.cur.token_type != TokenType::LBrace {
+            return Err(self.errorf(format!(
+                "expected '{{' after callout, got {:?}",
+                self.cur.value
+            )));
+        }
+        let children = self.parse_prose_block()?;
+        Ok(CalloutNode {
+            line,
+            col,
+            kind,
+            children,
+        })
+    }
+
+    fn parse_raw(&mut self) -> Result<RawNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'raw'
+        if self.cur.token_type != TokenType::RawScopeOpen {
+            return Err(self.errorf(format!(
+                "expected '{{!' to open raw scope, got {:?}",
+                self.cur.value
+            )));
+        }
+        let (raw, _, _) = self.lex.read_raw_until_bang_brace()?;
+        self.next()?;
+        Ok(RawNode {
+            line,
+            col,
+            html: raw,
+        })
+    }
+
+    fn parse_math(&mut self) -> Result<MathBlockNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'math'
+        if self.cur.token_type != TokenType::RawScopeOpen {
+            return Err(self.errorf(format!(
+                "expected '{{!' to open math scope, got {:?}",
+                self.cur.value
+            )));
+        }
+        let (raw, _, _) = self.lex.read_raw_until_bang_brace()?;
+        self.next()?;
+        Ok(MathBlockNode {
+            line,
+            col,
+            latex: raw,
+        })
+    }
+
     fn parse_prose_block(&mut self) -> Result<Vec<InlineNode>, ParseError> {
         let children = self.parse_prose_until_rbrace()?;
         self.next()?; // resync token stream past '}'
@@ -287,10 +367,15 @@ impl<'a> Parser<'a> {
         self.lex.consume_ident_only(ident);
         self.lex.consume_lbrace()?;
 
-        if ident == "code" {
+        if ident == "code" || ident == "m" {
             let raw = self.lex.read_balanced_braces();
             self.lex.consume_rbrace()?;
-            return Ok(InlineNode::new(line, col, InlineKind::Code(raw)));
+            let kind = if ident == "code" {
+                InlineKind::Code(raw)
+            } else {
+                InlineKind::Math(raw)
+            };
+            return Ok(InlineNode::new(line, col, kind));
         }
 
         let children = self.parse_prose_until_rbrace()?;

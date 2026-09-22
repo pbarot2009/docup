@@ -1,6 +1,6 @@
 use crate::ast::{
-    BlockNode, CodeBlockNode, DocumentNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode,
-    QuoteChild, TableNode, trim_inline_edges,
+    trim_inline_edges, BlockNode, CalloutKind, CodeBlockNode, DocumentNode, InlineKind, InlineNode,
+    ItemChild, ItemNode, ListNode, QuoteChild, TableNode,
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
 
@@ -20,6 +20,10 @@ pub const PAGE_CSS: &str = r#"
   --tok-string: #0a3069;
   --tok-comment: #6e7781;
   --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,6 +40,10 @@ pub const PAGE_CSS: &str = r#"
     --tok-string: #a5d6ff;
     --tok-comment: #8b949e;
     --tok-number: #79c0ff;
+    --callout-note: #58a6ff;
+    --callout-tip: #3fb950;
+    --callout-warning: #d29922;
+    --callout-danger: #f85149;
   }
 }
 
@@ -52,6 +60,10 @@ pub const PAGE_CSS: &str = r#"
   --tok-string: #a5d6ff;
   --tok-comment: #8b949e;
   --tok-number: #79c0ff;
+  --callout-note: #58a6ff;
+  --callout-tip: #3fb950;
+  --callout-warning: #d29922;
+  --callout-danger: #f85149;
 }
 
 :root[data-theme="light"] {
@@ -67,6 +79,10 @@ pub const PAGE_CSS: &str = r#"
   --tok-string: #0a3069;
   --tok-comment: #6e7781;
   --tok-number: #0550ae;
+  --callout-note: #0969da;
+  --callout-tip: #1a7f37;
+  --callout-warning: #9a6700;
+  --callout-danger: #cf222e;
 }
 
 body {
@@ -149,6 +165,36 @@ img {
   height: auto;
   border-radius: 4px;
 }
+.callout {
+  margin: 1.2em 0;
+  padding: 0.85em 1.2em;
+  border-left: 4px solid;
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+.callout-note { border-color: var(--callout-note); }
+.callout-tip { border-color: var(--callout-tip); }
+.callout-warning { border-color: var(--callout-warning); }
+.callout-danger { border-color: var(--callout-danger); }
+.callout-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4em;
+}
+.callout-note .callout-title { color: var(--callout-note); }
+.callout-tip .callout-title { color: var(--callout-tip); }
+.callout-warning .callout-title { color: var(--callout-warning); }
+.callout-danger .callout-title { color: var(--callout-danger); }
+.callout-body {
+  overflow-wrap: break-word;
+}
+.math-block {
+  margin: 1.2em 0;
+  text-align: center;
+  overflow-x: auto;
+}
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -229,9 +275,15 @@ pub const GOOGLE_FONTS_LINK: &str = r#"<link rel="preconnect" href="https://font
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">"#;
 
+/// KaTeX CDN resources loaded conditionally when math formulas are detected in the document.
+pub const KATEX_HEAD: &str = r#"  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+"#;
+
 /// Generate produces a complete standalone HTML5 document from the AST[span_3](start_span)[span_3](end_span),
 /// incorporating OpenGraph/Twitter social cards, theme configurations,
-/// optional external stylesheets, and custom CLI CSS.
+/// optional external stylesheets, custom CLI CSS, and conditional KaTeX scripts.
 pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     let mut body = String::new();
     for block in &doc.blocks {
@@ -296,7 +348,6 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
                 "  <meta property=\"og:url\" content=\"{escaped_canonical}\">\n"
             ));
         }
-
         if let Some(img) = meta.fields.get("image") {
             let escaped_img = escape_html(img);
             meta_tags.push_str(&format!(
@@ -327,6 +378,8 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     ));
     meta_tags.push_str("  <meta name=\"generator\" content=\"DocUP v0.2.0\">\n");
 
+    let katex_tags = if doc_has_math(doc) { KATEX_HEAD } else { "" };
+
     let custom_style_tag = match custom_css {
         Some(css) if !css.trim().is_empty() => {
             format!("  <style id=\"docup-custom-css\">\n{css}\n  </style>\n")
@@ -343,7 +396,7 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
   <title>{escaped_title}</title>
 {meta_tags}  {GOOGLE_FONTS_LINK}
   <style>{PAGE_CSS}</style>
-{stylesheet_link}{custom_style_tag}</head>
+{katex_tags}{stylesheet_link}{custom_style_tag}</head>
 <body>
 {body}</body>
 </html>
@@ -387,6 +440,29 @@ fn render_block(w: &mut String, block: &BlockNode) {
             ));
         }
         BlockNode::Table(b) => render_table(w, b),
+        BlockNode::Callout(c) => {
+            let kind_str = c.kind.as_str();
+            let title = match c.kind {
+                CalloutKind::Note => "Note",
+                CalloutKind::Tip => "Tip",
+                CalloutKind::Warning => "Warning",
+                CalloutKind::Danger => "Danger",
+            };
+            w.push_str(&format!("<div class=\"callout callout-{kind_str}\">\n"));
+            w.push_str(&format!("  <div class=\"callout-title\">{title}</div>\n"));
+            w.push_str("  <div class=\"callout-body\">");
+            render_inlines(w, &c.children);
+            w.push_str("</div>\n</div>\n");
+        }
+        BlockNode::Raw(r) => {
+            w.push_str(&r.html);
+            w.push('\n');
+        }
+        BlockNode::Math(m) => {
+            w.push_str("<div class=\"math-block\">\\[\n");
+            escape_html_into(&m.latex, w);
+            w.push_str("\n\\]</div>\n");
+        }
     }
 }
 
@@ -396,7 +472,6 @@ fn render_quote_body(w: &mut String, children: &[QuoteChild]) {
         if pending.is_empty() {
             return;
         }
-
         trim_inline_edges(pending);
         w.push_str("  <p>");
         render_inlines(w, pending);
@@ -505,6 +580,11 @@ fn render_inlines(w: &mut String, children: &[InlineNode]) {
                 render_inlines(w, children);
                 w.push_str("</a>");
             }
+            InlineKind::Math(val) => {
+                w.push_str("<span class=\"math-inline\">\\(");
+                escape_html_into(val, w);
+                w.push_str("\\)</span>");
+            }
         }
     }
 }
@@ -535,4 +615,79 @@ fn render_code_block(w: &mut String, b: &CodeBlockNode) {
         highlighted
     ));
     w.push_str("</div>\n");
+}
+
+fn doc_has_math(doc: &DocumentNode) -> bool {
+    doc.blocks.iter().any(block_has_math)
+}
+
+fn block_has_math(block: &BlockNode) -> bool {
+    match block {
+        BlockNode::Math(_) => true,
+        BlockNode::Heading(h) => inlines_have_math(&h.children),
+        BlockNode::Paragraph(p) => inlines_have_math(&p.children),
+        BlockNode::Callout(c) => inlines_have_math(&c.children),
+        BlockNode::Table(t) => t
+            .rows
+            .iter()
+            .any(|r| r.cells.iter().any(|c| inlines_have_math(&c.children))),
+        BlockNode::List(l) => list_has_math(l),
+        BlockNode::Quote(q) => quote_has_math(&q.children),
+        BlockNode::CodeBlock(_) | BlockNode::HR(_) | BlockNode::Image(_) | BlockNode::Raw(_) => {
+            false
+        }
+    }
+}
+
+fn list_has_math(l: &ListNode) -> bool {
+    for item in &l.items {
+        for child in &item.children {
+            match child {
+                ItemChild::Inline(i) => {
+                    if inline_has_math(i) {
+                        return true;
+                    }
+                }
+                ItemChild::List(nested) => {
+                    if list_has_math(nested) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
+fn quote_has_math(children: &[QuoteChild]) -> bool {
+    for child in children {
+        match child {
+            QuoteChild::Inline(i) => {
+                if inline_has_math(i) {
+                    return true;
+                }
+            }
+            QuoteChild::Quote(nested) => {
+                if quote_has_math(&nested.children) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+fn inlines_have_math(inlines: &[InlineNode]) -> bool {
+    inlines.iter().any(inline_has_math)
+}
+
+fn inline_has_math(inline: &InlineNode) -> bool {
+    match &inline.kind {
+        InlineKind::Math(_) => true,
+        InlineKind::Bold(children)
+        | InlineKind::Italic(children)
+        | InlineKind::Strike(children)
+        | InlineKind::Link { children, .. } => inlines_have_math(children),
+        InlineKind::Text(_) | InlineKind::Code(_) => false,
+    }
 }

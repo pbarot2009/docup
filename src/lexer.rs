@@ -126,7 +126,7 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    /// Returns the next structural token, skipping whitespace and comments.
+    /// Returns the next structural token, skipping whitespace and comments[span_2](start_span)[span_2](end_span).
     pub fn next_token(&mut self) -> Result<Token, LexError> {
         self.skip_whitespace_and_comments()?;
         if self.pos >= self.src.len() {
@@ -233,7 +233,7 @@ impl<'a> Lexer<'a> {
         Ok(Token::new(TokenType::Ident, val, start_line, start_col))
     }
 
-    /// Scans raw bytes verbatim starting after `{!` until `!}` is reached.
+    /// Scans raw bytes verbatim starting after `{!` until `!}` is reached[span_3](start_span)[span_3](end_span).
     pub fn read_raw_until_bang_brace(&mut self) -> Result<(String, usize, usize), LexError> {
         let start_line = self.line;
         let start_col = self.col;
@@ -262,7 +262,7 @@ impl<'a> Lexer<'a> {
         self.peek()
     }
 
-    /// Reports whether the lexer is positioned at an inline element opening.
+    /// Reports whether the lexer is positioned at an inline element opening[span_4](start_span)[span_4](end_span).
     pub fn at_inline_start(&self) -> Option<String> {
         if !is_ident_start(self.peek()) {
             return None;
@@ -340,7 +340,7 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    /// Reads balanced braces raw content up to the matching '}', keeping the closing '}'.
+    /// Reads balanced braces raw content up to the matching '}[span_5](start_span)'[span_5](end_span).
     pub fn read_balanced_braces(&mut self) -> String {
         let mut buf = Vec::new();
         let mut depth = 1;
@@ -412,7 +412,11 @@ impl<'a> Lexer<'a> {
 
     fn char_after_ident(&self, ident: &str) -> u8 {
         let i = self.pos + ident.len();
-        if i < self.src.len() { self.src[i] } else { 0 }
+        if i < self.src.len() {
+            self.src[i]
+        } else {
+            0
+        }
     }
 }
 
@@ -428,7 +432,7 @@ fn is_ident_cont(c: u8) -> bool {
 
 #[inline]
 fn is_brace_inline_keyword(s: &str) -> bool {
-    matches!(s, "b" | "i" | "code" | "strike")
+    matches!(s, "b" | "i" | "code" | "strike" | "m")
 }
 
 fn trim_raw_block(raw: &str) -> String {

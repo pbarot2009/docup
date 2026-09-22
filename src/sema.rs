@@ -1,6 +1,6 @@
 use crate::ast::{
-    BlockNode, DocumentNode, HeadingNode, InlineKind, InlineNode, ItemChild, ListNode, MetaNode,
-    QuoteChild, TableNode,
+    BlockNode, DocumentNode, InlineKind, InlineNode, ItemChild, ListNode, MetaNode, QuoteChild,
+    TableNode,
 };
 use crate::errors::SemaError;
 
@@ -66,6 +66,23 @@ fn analyze_block(block: &BlockNode) -> Result<(), SemaError> {
             Ok(())
         }
         BlockNode::Table(t) => analyze_table(t),
+        BlockNode::Callout(c) => analyze_inlines(&c.children),
+        BlockNode::Raw(r) => {
+            if r.html.is_empty() {
+                return Err(SemaError::new(r.line, r.col, "raw block has empty content"));
+            }
+            Ok(())
+        }
+        BlockNode::Math(m) => {
+            if m.latex.is_empty() {
+                return Err(SemaError::new(
+                    m.line,
+                    m.col,
+                    "math block has empty content",
+                ));
+            }
+            Ok(())
+        }
     }
 }
 
@@ -151,7 +168,7 @@ fn analyze_inlines(children: &[InlineNode]) -> Result<(), SemaError> {
 
 fn analyze_inline(inline: &InlineNode) -> Result<(), SemaError> {
     match &inline.kind {
-        InlineKind::Text(_) | InlineKind::Code(_) => Ok(()),
+        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::Math(_) => Ok(()),
         InlineKind::Bold(children)
         | InlineKind::Italic(children)
         | InlineKind::Strike(children) => analyze_inlines(children),
