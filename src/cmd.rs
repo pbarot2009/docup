@@ -12,7 +12,10 @@ use crate::errors::{source_snippet, PositionedError, SemaError};
 use crate::parser::Parser;
 use crate::sema::analyze;
 
-/// docup compiler version reported by `docup version` and `docup --version`.
+use xarp::style::Styles;
+use xarp::{Arg, ArgAction, ArgMatches, Xarp, XarpError};
+
+/// DocUP compiler version reported by `docup version`, `docup -v`, and `docup --version`.
 pub const VERSION: &str = "0.2.0";
 
 const LIVE_RELOAD_SCRIPT: &str = r#"  <script>
@@ -101,63 +104,222 @@ struct IncludeError {
     error: SemaError,
 }
 
+/// Constructs the top-level application CLI definition with `xarp`.
+pub fn build_cli() -> Xarp {
+    Xarp::new("docup")
+        .version(VERSION)
+        .about("DocUP Compiler — compiles .du documents to standalone HTML5")
+        .styles(Styles::styled())
+        .arg(
+            Arg::new("v")
+                .short('v')
+                .action(ArgAction::SetTrue)
+                .help("Print version information"),
+        )
+        .subcommand(
+            Xarp::new("build")
+                .about("Compile a .du document to standalone HTML5")
+                .arg(
+                    Arg::new("input")
+                        .value_name("input.du")
+                        .help("Path to the input .du document")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("output")
+                        .short('o')
+                        .long("output")
+                        .value_name("file")
+                        .help("Output HTML path (default: input with .html extension)"),
+                )
+                .arg(
+                    Arg::new("style")
+                        .short('s')
+                        .long("style")
+                        .value_name("file")
+                        .help("Custom CSS stylesheet to inject into output HTML"),
+                )
+                .arg(
+                    Arg::new("verbose")
+                        .short('v')
+                        .long("verbose")
+                        .action(ArgAction::SetTrue)
+                        .help("Print detailed timing for each build stage")
+                        .conflicts_with("quiet"),
+                )
+                .arg(
+                    Arg::new("quiet")
+                        .short('q')
+                        .long("quiet")
+                        .action(ArgAction::SetTrue)
+                        .help("Suppress step-by-step progress output")
+                        .conflicts_with("verbose"),
+                ),
+        )
+        .subcommand(
+            Xarp::new("watch")
+                .about("Watch a .du document and rebuild with live reloading")
+                .arg(
+                    Arg::new("input")
+                        .value_name("input.du")
+                        .help("Path to the input .du document")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("output")
+                        .short('o')
+                        .long("output")
+                        .value_name("file")
+                        .help("Output HTML path (default: input with .html extension)"),
+                )
+                .arg(
+                    Arg::new("style")
+                        .short('s')
+                        .long("style")
+                        .value_name("file")
+                        .help("Custom CSS stylesheet to inject into output HTML"),
+                )
+                .arg(
+                    Arg::new("port")
+                        .short('p')
+                        .long("port")
+                        .value_name("port")
+                        .default_value("8080")
+                        .help("Local development server port for watch mode (default: 8080)"),
+                )
+                .arg(
+                    Arg::new("verbose")
+                        .short('v')
+                        .long("verbose")
+                        .action(ArgAction::SetTrue)
+                        .help("Print detailed timing for each build stage")
+                        .conflicts_with("quiet"),
+                )
+                .arg(
+                    Arg::new("quiet")
+                        .short('q')
+                        .long("quiet")
+                        .action(ArgAction::SetTrue)
+                        .help("Suppress step-by-step progress output")
+                        .conflicts_with("verbose"),
+                ),
+        )
+        .subcommand(Xarp::new("version").about("Print version information"))
+        .subcommand(Xarp::new("help").about("Print help information"))
+}
+
 /// Run is the main CLI entry point called by `main`.
 pub fn run(args: &[String]) -> i32 {
     let colors = Colors::detect();
+    let cli = build_cli();
 
-    if args.is_empty() {
-        print_usage(colors);
+    // Reconstruct argv ensuring the application name occupies index 0 for xarp
+    let mut argv: Vec<String> = if args.first().map_or(false, |a| {
+        a == "docup"
+            || a.ends_with("/docup")
+            || a.ends_with("\\docup.exe")
+            || a.ends_with("\\docup")
+    }) {
+        args.to_vec()
+    } else {
+        let mut v = Vec::with_capacity(args.len() + 1);
+        v.push("docup".to_string());
+        v.extend_from_slice(args);
+        v
+    };
+
+    if argv.len() <= 1 {
+        cli.print_help();
         return 1;
     }
 
-    match args[0].as_str() {
-        "build" => run_build(colors, &args[1..]),
-        "watch" => run_watch(colors, &args[1..]),
-        "version" | "-v" | "--version" => {
+    // Support -V as an alias for -v / --verbose in subcommand invocations
+    if argv.len() > 2 && (argv[1] == "build" || argv[1] == "watch") {
+        for arg in &mut argv[2..] {
+            if arg == "-V" {
+                *arg = "-v".to_string();
+            }
+        }
+    }
+
+    let matches = match cli.try_get_matches_from(&argv) {
+        Ok(m) => m,
+        Err(XarpError::Help(msg)) => {
+            print!("{msg}");
+            return 0;
+        }
+        Err(XarpError::Version(msg)) => {
+            println!("{msg}");
+            return 0;
+        }
+        Err(XarpError::Parse(err)) => {
+            eprintln!("{err}");
+            return 1;
+        }
+    };
+
+    match matches.subcommand() {
+        Some(("build", sub_matches)) => match options_from_matches(sub_matches) {
+            Ok(opts) => run_build(colors, opts),
+            Err(err) => {
+                fail(colors, &err);
+                1
+            }
+        },
+        Some(("watch", sub_matches)) => match options_from_matches(sub_matches) {
+            Ok(opts) => run_watch(colors, opts),
+            Err(err) => {
+                fail(colors, &err);
+                1
+            }
+        },
+        Some(("version", _)) => {
             println!("docup version {VERSION}");
             0
         }
-        "help" | "-h" | "--help" => {
-            print_usage(colors);
+        Some(("help", _)) => {
+            build_cli().print_help();
             0
         }
-        other => {
-            fail(colors, &format!("unknown command \"{other}\""));
-            println!();
-            print_usage(colors);
-            1
+        _ => {
+            if matches.get_flag("v") {
+                println!("docup version {VERSION}");
+                0
+            } else {
+                build_cli().print_help();
+                1
+            }
         }
     }
 }
 
-pub fn print_usage(c: Colors) {
-    println!(
-        "{}{}DocUP Compiler{} {}— compiles .du documents to standalone HTML5{}\n",
-        c.bold, c.cyan, c.reset, c.dim, c.reset
-    );
-    println!("{}USAGE{}", c.bold, c.reset);
-    println!("  docup build <input.du> [flags]");
-    println!("  docup watch <input.du> [flags]");
-    println!("  docup version");
-    println!("  docup help\n");
-    println!("{}FLAGS{}", c.bold, c.reset);
-    println!("  -o, --output <file>  output HTML path (default: input with .html extension)");
-    println!("  -s, --style <file>   custom CSS stylesheet to inject into output HTML");
-    println!("  -p, --port <port>    local development server port for watch mode (default: 8080)");
-    println!("  --verbose, -V        print detailed timing for each build stage");
-    println!("  --quiet, -q          suppress step-by-step progress output\n");
-    println!("{}EXAMPLES{}", c.bold, c.reset);
-    println!("  docup build report.du");
-    println!("  docup build report.du -o dist/index.html -s style.css");
-    println!("  docup watch report.du --port 3000");
+pub fn print_usage(_c: Colors) {
+    build_cli().print_help();
 }
 
-fn run_build(c: Colors, args: &[String]) -> i32 {
-    let opts = match parse_cli_args(c, args) {
-        Some(o) => o,
-        None => return 1,
+fn options_from_matches(matches: &ArgMatches) -> Result<Options, String> {
+    let input_path = matches.get_one::<String>("input").unwrap_or_default();
+    let output_path = matches.get_one::<String>("output").unwrap_or_default();
+    let style_path = matches.get_one::<String>("style");
+    let port = match matches.try_get_one::<u16>("port") {
+        Ok(Some(p)) => p,
+        Ok(None) => 8080,
+        Err(err) => return Err(err.to_string()),
     };
+    let verbose = matches.get_flag("verbose");
+    let quiet = matches.get_flag("quiet");
 
+    Ok(Options {
+        input_path,
+        output_path,
+        style_path,
+        port,
+        verbose,
+        quiet,
+    })
+}
+
+fn run_build(c: Colors, opts: Options) -> i32 {
     if opts.input_path.is_empty() {
         fail(c, "no input .du file specified");
         println!();
@@ -184,12 +346,7 @@ fn run_build(c: Colors, args: &[String]) -> i32 {
     }
 }
 
-fn run_watch(c: Colors, args: &[String]) -> i32 {
-    let opts = match parse_cli_args(c, args) {
-        Some(o) => o,
-        None => return 1,
-    };
-
+fn run_watch(c: Colors, opts: Options) -> i32 {
     if opts.input_path.is_empty() {
         fail(c, "no input .du file specified");
         println!();
@@ -651,78 +808,6 @@ fn resolve_document_includes(
     Ok(())
 }
 
-fn parse_cli_args(c: Colors, args: &[String]) -> Option<Options> {
-    let mut opts = Options::default();
-    let mut i = 0;
-
-    while i < args.len() {
-        let arg = &args[i];
-        match arg.as_str() {
-            "-o" | "--output" => {
-                if i + 1 >= args.len() || looks_like_flag(&args[i + 1]) {
-                    fail(c, &format!("missing value for {arg}"));
-                    return None;
-                }
-                opts.output_path = args[i + 1].clone();
-                i += 1;
-            }
-            "-s" | "--style" => {
-                if i + 1 >= args.len() || looks_like_flag(&args[i + 1]) {
-                    fail(c, &format!("missing value for {arg}"));
-                    return None;
-                }
-                opts.style_path = Some(args[i + 1].clone());
-                i += 1;
-            }
-            "-p" | "--port" => {
-                if i + 1 >= args.len() || looks_like_flag(&args[i + 1]) {
-                    fail(c, &format!("missing value for {arg}"));
-                    return None;
-                }
-                match args[i + 1].parse::<u16>() {
-                    Ok(p) => opts.port = p,
-                    Err(_) => {
-                        fail(c, &format!("invalid port number \"{}\"", args[i + 1]));
-                        return None;
-                    }
-                }
-                i += 1;
-            }
-            "--verbose" | "-V" => {
-                opts.verbose = true;
-            }
-            "--quiet" | "-q" => {
-                opts.quiet = true;
-            }
-            _ => {
-                if looks_like_flag(arg) {
-                    fail(c, &format!("unknown flag \"{arg}\""));
-                    return None;
-                }
-                if !opts.input_path.is_empty() {
-                    fail(
-                        c,
-                        &format!(
-                            "unexpected extra argument \"{arg}\" (input file already set to \"{}\")",
-                            opts.input_path
-                        ),
-                    );
-                    return None;
-                }
-                opts.input_path = arg.clone();
-            }
-        }
-        i += 1;
-    }
-
-    if opts.verbose && opts.quiet {
-        fail(c, "--verbose and --quiet cannot be used together");
-        return None;
-    }
-
-    Some(opts)
-}
-
 fn validate_extension(c: Colors, path: &str) {
     let p = Path::new(path);
     let is_du = p
@@ -735,10 +820,6 @@ fn validate_extension(c: Colors, path: &str) {
             &format!("input file {path:?} does not have a .du extension"),
         );
     }
-}
-
-fn looks_like_flag(s: &str) -> bool {
-    s.starts_with('-') && s != "-"
 }
 
 fn ms_since(t: Instant) -> f64 {

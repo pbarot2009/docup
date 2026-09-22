@@ -16,6 +16,7 @@ name = "docup"
 path = "src/main.rs"
 
 [dependencies]
+xarp = "0.1.2"
 # Zero external dependencies.
 # Uses only Rust 2024 standard library facilities (std::io::IsTerminal, std::time, std::collections).
 

@@ -5,3 +5,12 @@ version = 4
 [[package]]
 name = "docup"
 version = "0.2.0"
+dependencies = [
+ "xarp",
+]
+
+[[package]]
+name = "xarp"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f9cccd65f71095671f990b970d6980896866fdd16e207e2fc67b38e26a34686"
