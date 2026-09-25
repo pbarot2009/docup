@@ -10,6 +10,7 @@ use crate::ast::{BlockNode, DocumentNode};
 use crate::codegen::generate;
 use crate::errors::{source_snippet, PositionedError, SemaError};
 use crate::fmt::format_source;
+use crate::init::{scaffold_init, scaffold_new, ProjectConfig};
 use crate::parser::Parser;
 use crate::sema::analyze;
 
@@ -230,6 +231,82 @@ pub fn build_cli() -> Xarp {
                         .conflicts_with("check"),
                 ),
         )
+        .subcommand(
+            Xarp::new("new")
+                .about("Create a new DocUP document project in a new directory")
+                .arg(
+                    Arg::new("path")
+                        .value_name("directory")
+                        .help("Target directory name")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("title")
+                        .long("title")
+                        .value_name("title")
+                        .help("Project document title"),
+                )
+                .arg(
+                    Arg::new("author")
+                        .long("author")
+                        .value_name("name")
+                        .help("Author name"),
+                )
+                .arg(
+                    Arg::new("theme")
+                        .long("theme")
+                        .value_name("theme")
+                        .help("Theme name (textbook, default, sepia, nord, solarized)"),
+                )
+                .arg(
+                    Arg::new("desc")
+                        .long("desc")
+                        .value_name("text")
+                        .help("Project description"),
+                )
+                .arg(
+                    Arg::new("yes")
+                        .short('y')
+                        .long("yes")
+                        .action(ArgAction::SetTrue)
+                        .help("Skip interactive prompts and use default settings"),
+                ),
+        )
+        .subcommand(
+            Xarp::new("init")
+                .about("Initialize a DocUP project in the current working directory")
+                .arg(
+                    Arg::new("title")
+                        .long("title")
+                        .value_name("title")
+                        .help("Project document title"),
+                )
+                .arg(
+                    Arg::new("author")
+                        .long("author")
+                        .value_name("name")
+                        .help("Author name"),
+                )
+                .arg(
+                    Arg::new("theme")
+                        .long("theme")
+                        .value_name("theme")
+                        .help("Theme name (textbook, default, sepia, nord, solarized)"),
+                )
+                .arg(
+                    Arg::new("desc")
+                        .long("desc")
+                        .value_name("text")
+                        .help("Project description"),
+                )
+                .arg(
+                    Arg::new("yes")
+                        .short('y')
+                        .long("yes")
+                        .action(ArgAction::SetTrue)
+                        .help("Skip interactive prompts and use default settings"),
+                ),
+        )
         .subcommand(Xarp::new("version").about("Print version information"))
         .subcommand(Xarp::new("help").about("Print help information"))
 }
@@ -300,10 +377,37 @@ pub fn run(args: &[String]) -> i32 {
             }
         },
         Some(("fmt", sub_matches)) => {
-            let path = sub_matches.get_one::<String>("path").unwrap_or_else(|| ".".to_string());
+            let path = sub_matches
+                .get_one::<String>("path")
+                .unwrap_or_else(|| ".".to_string());
             let check = sub_matches.get_flag("check");
             let stdout = sub_matches.get_flag("stdout");
             run_fmt(colors, &path, check, stdout)
+        }
+        Some(("new", sub_matches)) => {
+            let path_str = sub_matches.get_one::<String>("path").unwrap_or_default();
+            let target_path = Path::new(&path_str);
+            let yes = sub_matches.get_flag("yes");
+            let cfg = parse_project_config(sub_matches);
+            match scaffold_new(target_path, cfg, yes, colors) {
+                Ok(_) => 0,
+                Err(err) => {
+                    fail(colors, &err);
+                    1
+                }
+            }
+        }
+        Some(("init", sub_matches)) => {
+            let target_path = Path::new(".");
+            let yes = sub_matches.get_flag("yes");
+            let cfg = parse_project_config(sub_matches);
+            match scaffold_init(target_path, cfg, yes, colors) {
+                Ok(_) => 0,
+                Err(err) => {
+                    fail(colors, &err);
+                    1
+                }
+            }
         }
         Some(("version", _)) => {
             println!("docup version {VERSION}");
@@ -327,6 +431,38 @@ pub fn run(args: &[String]) -> i32 {
 
 pub fn print_usage(_c: Colors) {
     build_cli().print_help();
+}
+
+fn parse_project_config(matches: &ArgMatches) -> Option<ProjectConfig> {
+    let title = matches.get_one::<String>("title").unwrap_or_default();
+    let author = matches.get_one::<String>("author").unwrap_or_default();
+    let theme = matches.get_one::<String>("theme").unwrap_or_default();
+    let desc = matches.get_one::<String>("desc").unwrap_or_default();
+
+    if title.is_empty() && author.is_empty() && theme.is_empty() && desc.is_empty() {
+        None
+    } else {
+        let default_cfg = ProjectConfig::default();
+        Some(ProjectConfig {
+            title: if title.is_empty() {
+                default_cfg.title
+            } else {
+                title
+            },
+            author: if author.is_empty() {
+                default_cfg.author
+            } else {
+                author
+            },
+            theme: if theme.is_empty() {
+                default_cfg.theme
+            } else {
+                theme
+            },
+            description: desc,
+            sample_content: true,
+        })
+    }
 }
 
 fn options_from_matches(matches: &ArgMatches) -> Result<Options, String> {
