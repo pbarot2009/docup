@@ -8,6 +8,7 @@ pub mod init;
 pub mod lexer;
 pub mod parser;
 pub mod sema;
+pub mod theme;
 
 // Re-export primary compiler types and entry points for library consumers
 pub use ast::{
@@ -23,3 +24,4 @@ pub use init::{scaffold_init, scaffold_new, ProjectConfig, SUPPORTED_THEMES};
 pub use lexer::{Lexer, Token, TokenType};
 pub use parser::Parser;
 pub use sema::analyze;
+pub use theme::ThemeKind;

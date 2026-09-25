@@ -5,100 +5,25 @@ use crate::ast::{
     InlineKind, InlineNode, ItemChild, ItemNode, ListNode, QuoteChild, TableNode,
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
+use crate::theme::ThemeKind;
 
-pub const PAGE_CSS: &str = r#"
-:root {
-  --bg: #ffffff;
-  --text: #24292f;
-  --border: #eaecef;
-  --border-muted: #d0d7de;
-  --link: #0969da;
-  --code-bg: #f6f8fa;
-  --text-muted: #57606a;
-  --tok-keyword: #cf222e;
-  --tok-type: #953800;
-  --tok-string: #0a3069;
-  --tok-comment: #6e7781;
-  --tok-number: #0550ae;
-  --callout-note: #0969da;
-  --callout-tip: #1a7f37;
-  --callout-warning: #9a6700;
-  --callout-danger: #cf222e;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0d1117;
-    --text: #c9d1d9;
-    --border: #30363d;
-    --border-muted: #21262d;
-    --link: #58a6ff;
-    --code-bg: #161b22;
-    --text-muted: #8b949e;
-    --tok-keyword: #ff7b72;
-    --tok-type: #ffa657;
-    --tok-string: #a5d6ff;
-    --tok-comment: #8b949e;
-    --tok-number: #79c0ff;
-    --callout-note: #58a6ff;
-    --callout-tip: #3fb950;
-    --callout-warning: #d29922;
-    --callout-danger: #f85149;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #0d1117;
-  --text: #c9d1d9;
-  --border: #30363d;
-  --border-muted: #21262d;
-  --link: #58a6ff;
-  --code-bg: #161b22;
-  --text-muted: #8b949e;
-  --tok-keyword: #ff7b72;
-  --tok-type: #ffa657;
-  --tok-string: #a5d6ff;
-  --tok-comment: #8b949e;
-  --tok-number: #79c0ff;
-  --callout-note: #58a6ff;
-  --callout-tip: #3fb950;
-  --callout-warning: #d29922;
-  --callout-danger: #f85149;
-}
-
-:root[data-theme="light"] {
-  --bg: #ffffff;
-  --text: #24292f;
-  --border: #eaecef;
-  --border-muted: #d0d7de;
-  --link: #0969da;
-  --code-bg: #f6f8fa;
-  --text-muted: #57606a;
-  --tok-keyword: #cf222e;
-  --tok-type: #953800;
-  --tok-string: #0a3069;
-  --tok-comment: #6e7781;
-  --tok-number: #0550ae;
-  --callout-note: #0969da;
-  --callout-tip: #1a7f37;
-  --callout-warning: #9a6700;
-  --callout-danger: #cf222e;
+pub const BASE_CSS: &str = r#"
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0 auto;
   max-width: 760px;
   padding: 2.5rem 1.25rem 4rem;
-  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body, "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif);
   font-size: 16px;
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-* {
-  box-sizing: border-box;
-}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.25;
@@ -114,6 +39,7 @@ h3 { font-size: 1.25em; }
 h4 { font-size: 1.1em; }
 h5 { font-size: 1em; }
 h6 { font-size: 0.9em; color: var(--text-muted); }
+
 p {
   margin: 0.8em 0;
   overflow-wrap: break-word;
@@ -126,19 +52,22 @@ a {
   overflow-wrap: break-word;
 }
 a:hover { text-decoration: underline; }
+
 code {
   background: var(--code-bg);
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
   font-size: 0.9em;
   overflow-wrap: break-word;
 }
+
 hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 2em 0;
 }
+
 ul, ol {
   margin: 0.8em 0;
   padding-left: 1.6em;
@@ -151,6 +80,7 @@ li.task-item { list-style: none; margin-left: -1.6em; }
 li.task-item input[type="checkbox"] {
   margin-right: 0.5em;
 }
+
 blockquote {
   margin: 1em 0;
   padding: 0 1em;
@@ -161,11 +91,13 @@ blockquote {
 blockquote blockquote {
   margin: 0.6em 0;
 }
+
 img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
 }
+
 .callout {
   margin: 1.2em 0;
   padding: 0.85em 1.2em;
@@ -191,11 +123,13 @@ img {
 .callout-body {
   overflow-wrap: break-word;
 }
+
 .math-block {
   margin: 1.2em 0;
   text-align: center;
   overflow-x: auto;
 }
+
 .toc {
   margin: 1.5em 0;
   padding: 1em 1.25em;
@@ -275,7 +209,7 @@ s { color: var(--text-muted); }
   border-bottom: 1px solid var(--border);
   font-size: 0.8em;
   color: var(--text-muted);
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
 }
 .codeblock-actions {
   display: flex;
@@ -310,7 +244,7 @@ s { color: var(--text-muted); }
   padding: 0;
   font-size: 0.9em;
   line-height: 1.5;
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
   overflow-wrap: normal;
   white-space: pre;
 }
@@ -380,6 +314,8 @@ s { color: var(--text-muted); }
 }
 "#;
 
+pub const PAGE_CSS: &str = BASE_CSS;
+
 pub const GOOGLE_FONTS_LINK: &str = r#"<link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">"#;
@@ -400,6 +336,17 @@ pub const COPY_SCRIPT: &str = r#"  <script>
     }
   </script>
 "#;
+
+/// Compiles full theme CSS: typography stacks, color variables, base structure, and theme-specific rules.
+pub fn build_page_css(theme: ThemeKind) -> String {
+    let (body_font, code_font) = theme.font_stacks();
+    let palette = theme.css_palette();
+    let custom_rules = theme.custom_rules();
+
+    format!(
+        ":root {{\n  --font-body: {body_font};\n  --font-code: {code_font};\n}}\n{palette}\n{BASE_CSS}\n{custom_rules}"
+    )
+}
 
 struct HeadingMeta {
     level: usize,
@@ -430,6 +377,7 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     let mut theme_attr = String::new();
     let mut meta_tags = String::new();
     let mut stylesheet_link = String::new();
+    let mut theme_kind = ThemeKind::Default;
 
     if let Some(ref meta) = doc.meta {
         if let Some(t) = meta.fields.get("title") {
@@ -439,6 +387,7 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
             lang = l.clone();
         }
         if let Some(theme) = meta.fields.get("theme") {
+            theme_kind = ThemeKind::parse(theme);
             theme_attr = format!(" data-theme=\"{}\"", escape_html(theme.trim()));
         }
 
@@ -507,7 +456,13 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     meta_tags.push_str(&format!(
         "  <meta name=\"twitter:title\" content=\"{escaped_title}\">\n"
     ));
-    meta_tags.push_str("  <meta name=\"generator\" content=\"DocUP v0.2.0\">\n");
+    meta_tags.push_str(&format!(
+        "  <meta name=\"generator\" content=\"DocUP v{}\">\n",
+        crate::cmd::VERSION
+    ));
+
+    let font_head_tags = theme_kind.font_head_tags();
+    let page_css = build_page_css(theme_kind);
 
     let katex_tags = if doc_has_math(doc) { KATEX_HEAD } else { "" };
 
@@ -525,8 +480,8 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{escaped_title}</title>
-{meta_tags}  {GOOGLE_FONTS_LINK}
-  <style>{PAGE_CSS}</style>
+{meta_tags}{font_head_tags}
+  <style>{page_css}</style>
 {katex_tags}{stylesheet_link}{custom_style_tag}</head>
 <body>
 {body}{COPY_SCRIPT}</body>

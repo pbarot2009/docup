@@ -1,0 +1,9 @@
+/* Custom CSS overrides for DocUP */
+/* This file is loaded via: docup build index.du -s style.css */
+
+/* Example: customize maximum reading container width */
+/*
+body {
+  max-width: 820px;
+}
+*/
