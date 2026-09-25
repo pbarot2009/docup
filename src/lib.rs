@@ -2,6 +2,7 @@ pub mod ast;
 pub mod cmd;
 pub mod codegen;
 pub mod errors;
+pub mod fmt;
 pub mod highlight;
 pub mod lexer;
 pub mod parser;
@@ -12,9 +13,10 @@ pub use ast::{
     BlockNode, DocumentNode, HeadingNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode,
     MetaNode, ParagraphNode, QuoteChild, QuoteNode, RowNode, TableNode,
 };
-pub use cmd::{VERSION, run};
-pub use codegen::{PAGE_CSS, generate};
-pub use errors::{DocupError, LexError, ParseError, PositionedError, SemaError, source_snippet};
+pub use cmd::{run, VERSION};
+pub use codegen::{generate, PAGE_CSS};
+pub use errors::{source_snippet, DocupError, LexError, ParseError, PositionedError, SemaError};
+pub use fmt::{format_document, format_source};
 pub use highlight::{highlight_code, normalize_lang_name};
 pub use lexer::{Lexer, Token, TokenType};
 pub use parser::Parser;

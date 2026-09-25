@@ -1,43 +1,60 @@
 h(2, id: "callouts") { 13. Callouts }
 
-p { Admonition block. Body is prose. }
+p {
+    Admonition block. Body is prose.
+}
 
 codeblock(lang: "text") {!
 callout { Defaults to note. }
 callout(type: "warning") { Check the heading level. }
 !}
 
-p { code{type} is a string. Matching is case-insensitive. }
-
-table {
-  row(header: true) {
-    cell { type }
-    cell { Also accepted }
-  }
-  row {
-    cell { note }
-    cell { info }
-  }
-  row {
-    cell { tip }
-    cell { hint }
-  }
-  row {
-    cell { warning }
-    cell { caution }
-  }
-  row {
-    cell { danger }
-    cell { error }
-  }
+p {
+    code{type} is a string. Matching is case-insensitive.
 }
 
-p { Any other string is a parse error. Omitted type is note. }
+table {
+    row(header: true) {
+        cell { type }
+        cell { Also accepted }
+    }
+    row {
+        cell { note }
+        cell { info }
+    }
+    row {
+        cell { tip }
+        cell { hint }
+    }
+    row {
+        cell { warning }
+        cell { caution }
+    }
+    row {
+        cell { danger }
+        cell { error }
+    }
+}
 
-callout(type: "note") { Semantic errors are reported with file, line, and column. The compiler prints the source line and a caret. }
+p {
+    Any other string is a parse error. Omitted type is note.
+}
 
-callout(type: "tip") { Put examples in codeblock raw scopes so the sample is not parsed as DocUP. }
+callout(type: "note") {
+    Semantic errors are reported with file, line, and column. The compiler
+    prints the source line and a caret.
+}
 
-callout(type: "warning") { Heading levels outside 1 through 6 fail semantic analysis, not parsing. The tokens are valid; the values are not. }
+callout(type: "tip") {
+    Put examples in codeblock raw scopes so the sample is not parsed as DocUP.
+}
 
-callout(type: "danger") { include cycles and missing include files fail before semantic analysis. The error is reported against the include statement. }
+callout(type: "warning") {
+    Heading levels outside 1 through 6 fail semantic analysis, not parsing. The
+    tokens are valid; the values are not.
+}
+
+callout(type: "danger") {
+    include cycles and missing include files fail before semantic analysis. The
+    error is reported against the include statement.
+}

@@ -1,44 +1,64 @@
 h(2, id: "overview") { 1. Overview }
 
-p { A .du file is source. The compiler lexes it, parses it into an AST, checks semantic rules, then emits HTML. Watch mode rebuilds on change and serves the result on localhost. }
+p {
+    A .du file is source. The compiler lexes it, parses it into an AST, checks
+    semantic rules, then emits HTML. Watch mode rebuilds on change and serves
+    the result on localhost.
+}
 
-p { Extra CSS can be injected with code{--style} or with a stylesheet field in meta. Those two paths are not the same. See section 1.3. }
+p {
+    Extra CSS can be injected with code{--style} or with a stylesheet field in
+    meta. Those two paths are not the same. See section 1.3.
+}
 
 h(3, id: "pipeline") { 1.1 Pipeline }
 
 list(ordered: true) {
-  item { Read the input file. }
-  item { Lex and parse into a document node. }
-  item { Resolve include statements, recursively. }
-  item { Run semantic checks. }
-  item { Generate HTML and write the output file. }
+    item { Read the input file. }
+    item { Lex and parse into a document node. }
+    item { Resolve include statements, recursively. }
+    item { Run semantic checks. }
+    item { Generate HTML and write the output file. }
 }
 
 h(3, id: "scope") { 1.2 Scope }
 
-p { This document covers every block and inline the compiler accepts, the CLI, include resolution, and the checks that run after parse. Keys that are parsed and then ignored are named as ignored. They are not described as features. }
+p {
+    This document covers every block and inline the compiler accepts, the CLI,
+    include resolution, and the checks that run after parse. Keys that are
+    parsed and then ignored are named as ignored. They are not described as
+    features.
+}
 
 h(3, id: "generated-page") { 1.3 Generated page }
 
-p { The output is a complete HTML5 document. The generator always writes: }
-
-list {
-  item { code{<!DOCTYPE html>} and code{<html lang="...">} }
-  item { charset and viewport meta tags }
-  item { title, Open Graph, and Twitter tags derived from meta }
-  item { code{<meta name="generator" content="DocUP v0.2.0">} }
-  item { Google Fonts links for the bundled page font }
-  item { the built-in page CSS }
-  item { a copy-to-clipboard script for code blocks }
+p {
+    The output is a complete HTML5 document. The generator always writes:
 }
 
-p { Added only when needed: }
-
 list {
-  item { KaTeX CSS and scripts, if the document contains any math node }
-  item { a code{<link rel="stylesheet">} from meta field code{stylesheet} }
-  item { a code{<style id="docup-custom-css">} block from code{--style} }
-  item { code{data-theme} on code{<html>}, from meta field code{theme} }
+    item { code{<!DOCTYPE html>} and code{<html lang="...">} }
+    item { charset and viewport meta tags }
+    item { title, Open Graph, and Twitter tags derived from meta }
+    item { code{<meta name="generator" content="DocUP v0.2.0">} }
+    item { Google Fonts links for the bundled page font }
+    item { the built-in page CSS }
+    item { a copy-to-clipboard script for code blocks }
 }
 
-p { If code{theme} is omitted, the built-in CSS follows the browser code{prefers-color-scheme} setting. Values code{light} and code{dark} lock the palette. }
+p {
+    Added only when needed:
+}
+
+list {
+    item { KaTeX CSS and scripts, if the document contains any math node }
+    item { a code{<link rel="stylesheet">} from meta field code{stylesheet} }
+    item { a code{<style id="docup-custom-css">} block from code{--style} }
+    item { code{data-theme} on code{<html>}, from meta field code{theme} }
+}
+
+p {
+    If code{theme} is omitted, the built-in CSS follows the browser
+    code{prefers-color-scheme} setting. Values code{light} and code{dark} lock
+    the palette.
+}

@@ -1,60 +1,71 @@
 h(2, id: "semantics") { 16. Semantic checks }
 
-p { Analysis runs on the document after includes are expanded. The first violation stops the build. }
-
-table {
-  row(header: true) {
-    cell { Check }
-    cell { When it fires }
-  }
-  row {
-    cell { meta title }
-    cell { meta is present and has no title field }
-  }
-  row {
-    cell { heading level }
-    cell { level is not in 1..6 }
-  }
-  row {
-    cell { empty codeblock / raw / math }
-    cell { trimmed content is empty }
-  }
-  row {
-    cell { empty list }
-    cell { no items }
-  }
-  row {
-    cell { empty table }
-    cell { no rows }
-  }
-  row {
-    cell { empty row }
-    cell { no cells }
-  }
-  row {
-    cell { ragged table }
-    cell { a row's cell count differs from the first row }
-  }
-  row {
-    cell { image src }
-    cell { source string is empty }
-  }
-  row {
-    cell { link URL }
-    cell { URL string is empty }
-  }
-  row {
-    cell { include path }
-    cell { path is empty or only whitespace }
-  }
-  row {
-    cell { footnote id }
-    cell { duplicate definition, or a reference with no definition }
-  }
+p {
+    Analysis runs on the document after includes are expanded. The first
+    violation stops the build.
 }
 
-p { Parse errors are separate: unknown block names, missing braces, bad callout types, unclosed raw scopes, unclosed strings, unclosed comments, nesting past 64, text after a nested list or nested quote. }
+table {
+    row(header: true) {
+        cell { Check }
+        cell { When it fires }
+    }
+    row {
+        cell { meta title }
+        cell { meta is present and has no title field }
+    }
+    row {
+        cell { heading level }
+        cell { level is not in 1..6 }
+    }
+    row {
+        cell { empty codeblock / raw / math }
+        cell { trimmed content is empty }
+    }
+    row {
+        cell { empty list }
+        cell { no items }
+    }
+    row {
+        cell { empty table }
+        cell { no rows }
+    }
+    row {
+        cell { empty row }
+        cell { no cells }
+    }
+    row {
+        cell { ragged table }
+        cell { a row's cell count differs from the first row }
+    }
+    row {
+        cell { image src }
+        cell { source string is empty }
+    }
+    row {
+        cell { link URL }
+        cell { URL string is empty }
+    }
+    row {
+        cell { include path }
+        cell { path is empty or only whitespace }
+    }
+    row {
+        cell { footnote id }
+        cell { duplicate definition, or a reference with no definition }
+    }
+}
+
+p {
+    Parse errors are separate: unknown block names, missing braces, bad callout
+    types, unclosed raw scopes, unclosed strings, unclosed comments, nesting
+    past 64, text after a nested list or nested quote.
+}
 
 h(3, id: "diagnostics") { 16.1 Diagnostics }
 
-p { Errors print the message, then code{path:line:col}, then the source line and a caret. Line and column are 1-based. File errors use distinct text for not found and permission denied. }
+p {
+    Errors print the message, then code{path:line:col}, then the source line and
+    a caret. Line and column are 1-based. File errors use distinct text for not
+    found and permission denied.
+}

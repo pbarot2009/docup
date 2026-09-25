@@ -9,6 +9,7 @@ use std::time::{Duration, Instant, SystemTime};
 use crate::ast::{BlockNode, DocumentNode};
 use crate::codegen::generate;
 use crate::errors::{source_snippet, PositionedError, SemaError};
+use crate::fmt::format_source;
 use crate::parser::Parser;
 use crate::sema::analyze;
 
@@ -204,6 +205,31 @@ pub fn build_cli() -> Xarp {
                         .conflicts_with("verbose"),
                 ),
         )
+        .subcommand(
+            Xarp::new("fmt")
+                .about("Format .du documents to canonical style")
+                .arg(
+                    Arg::new("path")
+                        .value_name("path")
+                        .help("File or directory to format (defaults to current directory)")
+                        .default_value("."),
+                )
+                .arg(
+                    Arg::new("check")
+                        .long("check")
+                        .action(ArgAction::SetTrue)
+                        .help(
+                        "Check formatting without writing changes to disk (exits 1 if unformatted)",
+                    ),
+                )
+                .arg(
+                    Arg::new("stdout")
+                        .long("stdout")
+                        .action(ArgAction::SetTrue)
+                        .help("Print formatted document to stdout (single file only)")
+                        .conflicts_with("check"),
+                ),
+        )
         .subcommand(Xarp::new("version").about("Print version information"))
         .subcommand(Xarp::new("help").about("Print help information"))
 }
@@ -273,6 +299,12 @@ pub fn run(args: &[String]) -> i32 {
                 1
             }
         },
+        Some(("fmt", sub_matches)) => {
+            let path = sub_matches.get_one::<String>("path").unwrap_or_else(|| ".".to_string());
+            let check = sub_matches.get_flag("check");
+            let stdout = sub_matches.get_flag("stdout");
+            run_fmt(colors, &path, check, stdout)
+        }
         Some(("version", _)) => {
             println!("docup version {VERSION}");
             0
@@ -460,6 +492,152 @@ fn run_watch(c: Colors, opts: Options) -> i32 {
             }
         }
     }
+}
+
+fn run_fmt(c: Colors, target: &str, check: bool, stdout: bool) -> i32 {
+    let target_path = Path::new(target);
+    if !target_path.exists() {
+        fail(c, &format!("target path does not exist: {target}"));
+        return 1;
+    }
+
+    let files = if target_path.is_file() {
+        if stdout
+            && target_path
+                .extension()
+                .map_or(true, |ext| !ext.eq_ignore_ascii_case("du"))
+        {
+            warn(c, &format!("file {target:?} does not have a .du extension"));
+        }
+        vec![target_path.to_path_buf()]
+    } else {
+        if stdout {
+            fail(c, "cannot use --stdout when formatting a directory");
+            return 1;
+        }
+        let mut list = Vec::new();
+        if let Err(err) = collect_du_files(target_path, &mut list) {
+            fail(c, &format!("failed to traverse directory {target}: {err}"));
+            return 1;
+        }
+        list.sort();
+        if list.is_empty() {
+            println!("{}No .du files found in {target}.{}", c.dim, c.reset);
+            return 0;
+        }
+        list
+    };
+
+    let mut changed_count = 0;
+    let mut error_count = 0;
+
+    for path in &files {
+        let content = match std::fs::read_to_string(path) {
+            Ok(s) => s,
+            Err(err) => {
+                report_file_error(c, &path.to_string_lossy(), &err);
+                error_count += 1;
+                continue;
+            }
+        };
+
+        let formatted = match format_source(&content) {
+            Ok(f) => f,
+            Err(err) => {
+                report_compile_error(c, &path.to_string_lossy(), content.as_bytes(), &err);
+                error_count += 1;
+                continue;
+            }
+        };
+
+        if stdout {
+            print!("{formatted}");
+            return if error_count > 0 { 1 } else { 0 };
+        }
+
+        if formatted != content {
+            changed_count += 1;
+            if check {
+                println!(
+                    "  {}needs formatting:{} {}",
+                    c.yellow,
+                    c.reset,
+                    path.display()
+                );
+            } else {
+                if let Err(err) = std::fs::write(path, formatted.as_bytes()) {
+                    report_file_error(c, &path.to_string_lossy(), &err);
+                    error_count += 1;
+                    continue;
+                }
+                println!("  {}formatted{} {}", c.green, c.reset, path.display());
+            }
+        }
+    }
+
+    if check {
+        if changed_count > 0 {
+            eprintln!(
+                "\n{}✗ {changed_count} file(s) require formatting. Run `docup fmt` to update.{}",
+                c.red, c.reset
+            );
+            return 1;
+        }
+        if error_count == 0 {
+            println!(
+                "\n{}{}✓ All files are properly formatted.{}",
+                c.bold, c.green, c.reset
+            );
+        }
+    } else if error_count == 0 {
+        if changed_count > 0 {
+            println!(
+                "\n{}{}✓ Successfully formatted {changed_count} file(s).{}",
+                c.bold, c.green, c.reset
+            );
+        } else {
+            println!(
+                "{}All files already follow canonical style. Nothing to change.{}",
+                c.dim, c.reset
+            );
+        }
+    }
+
+    if error_count > 0 {
+        1
+    } else {
+        0
+    }
+}
+
+fn collect_du_files(dir: &Path, list: &mut Vec<PathBuf>) -> Result<(), std::io::Error> {
+    if !dir.is_dir() {
+        return Ok(());
+    }
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+
+        // Skip hidden directories and standard build/dependency folders
+        if file_name.starts_with('.')
+            || file_name == "target"
+            || file_name == "node_modules"
+            || file_name == "dist"
+        {
+            continue;
+        }
+
+        if path.is_dir() {
+            collect_du_files(&path, list)?;
+        } else if path
+            .extension()
+            .map_or(false, |ext| ext.eq_ignore_ascii_case("du"))
+        {
+            list.push(path);
+        }
+    }
+    Ok(())
 }
 
 fn inject_live_reload(html: &str) -> String {

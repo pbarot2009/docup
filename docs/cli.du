@@ -1,6 +1,8 @@
 h(2, id: "cli") { 2. Command line }
 
-p { The binary is named code{docup}. Commands: }
+p {
+    The binary is named code{docup}. Commands:
+}
 
 codeblock(lang: "text", file: "usage", line_numbers: true) {!
 docup build <input.du> [flags]
@@ -9,44 +11,60 @@ docup version
 docup help
 !}
 
-p { code{docup -v} and code{docup --version} print the same string as code{docup version}. code{docup -h} and code{docup --help} print usage. Any other command name is an error. }
+p {
+    code{docup -v} and code{docup --version} print the same string as
+    code{docup version}. code{docup -h} and code{docup --help} print usage. Any
+    other command name is an error.
+}
 
-p { Color in the terminal is on when stdout is a terminal and code{NO_COLOR} is unset. Otherwise ANSI codes are omitted. }
+p {
+    Color in the terminal is on when stdout is a terminal and code{NO_COLOR} is
+    unset. Otherwise ANSI codes are omitted.
+}
 
 h(3, id: "flags") { 2.1 Flags }
 
 table {
-  row(header: true) {
-    cell { Flag }
-    cell { Meaning }
-  }
-  row {
-    cell { code{-o}, code{--output} }
-    cell { Output HTML path. Default is the input path with the extension changed to .html. If the input has no extension, code{.html} is appended. }
-  }
-  row {
-    cell { code{-s}, code{--style} }
-    cell { Path to a CSS file. Contents are copied into code{<style id="docup-custom-css">}. }
-  }
-  row {
-    cell { code{-p}, code{--port} }
-    cell { Port for the watch-mode server. Default 8080. Must parse as a u16. }
-  }
-  row {
-    cell { code{-V}, code{--verbose} }
-    cell { Print elapsed time for each build stage. }
-  }
-  row {
-    cell { code{-q}, code{--quiet} }
-    cell { Hide stage progress and the success summary. }
-  }
+    row(header: true) {
+        cell { Flag }
+        cell { Meaning }
+    }
+    row {
+        cell { code{-o}, code{--output} }
+        cell { Output HTML path. Default is the input path with the extension changed to .html. If the input has no extension, code{.html} is appended. }
+    }
+    row {
+        cell { code{-s}, code{--style} }
+        cell { Path to a CSS file. Contents are copied into code{<style id="docup-custom-css">}. }
+    }
+    row {
+        cell { code{-p}, code{--port} }
+        cell { Port for the watch-mode server. Default 8080. Must parse as a u16. }
+    }
+    row {
+        cell { code{-V}, code{--verbose} }
+        cell { Print elapsed time for each build stage. }
+    }
+    row {
+        cell { code{-q}, code{--quiet} }
+        cell { Hide stage progress and the success summary. }
+    }
 }
 
-p { code{--verbose} and code{--quiet} together are an error. A flag that expects a value and does not get one is an error. Unknown flags are an error. Only one input path is accepted. }
+p {
+    code{--verbose} and code{--quiet} together are an error. A flag that expects
+    a value and does not get one is an error. Unknown flags are an error. Only
+    one input path is accepted.
+}
 
 h(3, id: "build") { 2.2 build }
 
-p { Compiles once and writes the HTML file. A missing or unreadable input file is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If the input does not use a .du extension, the compiler prints a warning and continues. }
+p {
+    Compiles once and writes the HTML file. A missing or unreadable input file
+    is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If
+    the input does not use a .du extension, the compiler prints a warning and
+    continues.
+}
 
 codeblock(lang: "text") {!
 docup build report.du
@@ -56,38 +74,54 @@ docup build report.du --verbose
 
 h(3, id: "watch") { 2.3 watch }
 
-p { Compiles once, writes the output file, then binds code{127.0.0.1:<port>}. It polls watched files every 250 ms. On change it rebuilds. A failed rebuild leaves the last page in place and keeps watching. }
+p {
+    Compiles once, writes the output file, then binds code{127.0.0.1:<port>}. It
+    polls watched files every 250 ms. On change it rebuilds. A failed rebuild
+    leaves the last page in place and keeps watching.
+}
 
-p { If the first compile fails, the server still starts. The page body is a short HTML error placeholder until a later compile succeeds. }
+p {
+    If the first compile fails, the server still starts. The page body is a
+    short HTML error placeholder until a later compile succeeds.
+}
 
 codeblock(lang: "text") {!
 docup watch report.du
 docup watch report.du --port 3000
 !}
 
-p { Watched paths are the root source file, every successfully resolved include, and the code{--style} file if one was given. }
+p {
+    Watched paths are the root source file, every successfully resolved include,
+    and the code{--style} file if one was given.
+}
 
 h(3, id: "dev-server") { 2.4 Dev server }
 
-p { The watch server accepts GET only. Other methods return 405. }
-
-table {
-  row(header: true) {
-    cell { Path }
-    cell { Response }
-  }
-  row {
-    cell { code{/}, code{/index.html} }
-    cell { Current compiled HTML, with a live-reload EventSource script inserted before code{</body>}. }
-  }
-  row {
-    cell { code{/docup-events} }
-    cell { Server-sent events. A rebuild writes code{data: reload}. }
-  }
-  row {
-    cell { any other path }
-    cell { File under the input file's directory, if it exists. Otherwise 404. }
-  }
+p {
+    The watch server accepts GET only. Other methods return 405.
 }
 
-p { Asset Content-Type is chosen from the file extension: html, css, js, json, png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf. Anything else is code{application/octet-stream}. }
+table {
+    row(header: true) {
+        cell { Path }
+        cell { Response }
+    }
+    row {
+        cell { code{/}, code{/index.html} }
+        cell { Current compiled HTML, with a live-reload EventSource script inserted before code{</body>}. }
+    }
+    row {
+        cell { code{/docup-events} }
+        cell { Server-sent events. A rebuild writes code{data: reload}. }
+    }
+    row {
+        cell { any other path }
+        cell { File under the input file's directory, if it exists. Otherwise 404. }
+    }
+}
+
+p {
+    Asset Content-Type is chosen from the file extension: html, css, js, json,
+    png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf. Anything else is
+    code{application/octet-stream}.
+}
