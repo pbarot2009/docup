@@ -26,8 +26,8 @@
 - [Build from Source](#build-from-source)
 - [Example Document](#example-document)
 - [Usage](#usage)
-- [Features (v0.2.0)](#features-v020)
-- [Roadmap: v0.3.0](#roadmap-v030)
+- [Features (v0.3.0-dev)](#features-v030-dev)
+- [Roadmap](#roadmap)
 - [Documentation](#documentation)
 - [Important Links](#important-links)
 - [Contributing](#contributing)
@@ -103,11 +103,16 @@ docup build hello.du --quiet
 docup watch hello.du
 docup watch hello.du --port 3000
 
+docup fmt
+docup fmt docs/index.du --check
+docup new mysite --theme textbook
+docup init --yes
+
 docup version
 docup help
 ```
 
-`build` compiles once. `watch` rebuilds on change and serves `127.0.0.1:8080` by default.
+`build` compiles once. `watch` rebuilds on change and serves `127.0.0.1:8080` by default. `fmt` rewrites `.du` files. `new` and `init` write a starter project.
 
 Flags:
 
@@ -123,47 +128,53 @@ Flags:
 
 ---
 
-## Features (v0.2.0)
+## Features (v0.3.0-dev)
 
 - [x] Metadata (`meta`) — `title` required when `meta` is present; also `lang`, `theme`, `author`, `version`, `description`, `keywords`, `canonical`, `image`, `stylesheet`
 - [x] Headings (`h(1)`–`h(6)`, `id` / `class`)
 - [x] Paragraphs (`p`)
-- [x] Inlines: `b`, `i`, `strike`, `code`, `m`, `link`, `fn`
+- [x] Inlines: `b`, `i`, `strike`, `code`, `m`, `link`, `fn`, `br`
 - [x] Code blocks (`codeblock`) — `lang`, `file`, `line_numbers`, `highlight`
 - [x] Horizontal rule (`hr`)
-- [x] Lists (`list`, `item`) — unordered, `ordered: true`, nestable
+- [x] Lists (`list`, `item`) — unordered, `ordered: true`, `start: N`, nestable
 - [x] Task lists (`task`, `done`)
-- [x] Blockquotes (`quote`, nestable)
-- [x] Images (`image`)
-- [x] Tables (`table`, `row`, `cell`, `header`)
-- [x] Callouts (`callout`) — `note`, `tip`, `warning`, `danger`
+- [x] Blockquotes (`quote`, nestable) — `cite`, `author`
+- [x] Images (`image`) — `alt`, `href`
+- [x] Figures (`figure`) — `alt`, `caption`
+- [x] Tables (`table`, `row`, `cell`) — `caption`, `header`, `colspan`, `rowspan`
+- [x] Callouts (`callout`) — `note`, `tip`, `warning`, `danger`, custom `title`
+- [x] Definition lists (`deflist`, `term`, `desc`)
+- [x] Collapse blocks (`details`, `summary`, `open`)
 - [x] Raw HTML (`raw`)
 - [x] Display math (`math`) and inline math (`m`)
 - [x] Table of contents (`toc`)
 - [x] Footnotes (`footnote`, `fn`)
 - [x] Includes (`include`)
+- [x] Themes — `textbook`, `default`, `sepia`, `nord`, `solarized`
 - [x] Custom CSS (`--style` and meta `stylesheet`)
 - [x] Watch mode with live reload
+- [x] Formatter (`docup fmt`)
+- [x] Project scaffold (`docup new`, `docup init`)
 
 Language reference: `docs/index.du` in this repo.
 
 ---
 
-## Roadmap: v0.3.0
+## Roadmap
 
 Language:
 
-- [ ] `list(ordered: true, start: N)` — ordered list start index
-- [ ] `br {}` — explicit line break inside prose
-- [ ] Prose escapes — `\{`, `\}`, `\!` so reserved characters are literal outside strings
-- [ ] `image("src", href: "url", alt: "...")` — image wrapped in a link
-- [ ] `figure("src", alt: "...", caption: "...")` — image plus caption
-- [ ] `quote(cite: "url", author: "name")` — attribution on a blockquote
-- [ ] `callout(type: "note", title: "...")` — custom callout title
-- [ ] `table(caption: "...")` — table caption
-- [ ] `cell(colspan: N, rowspan: N)` — merged cells
-- [ ] `deflist { term { } desc { } }` — definition list
-- [ ] `details { summary { } ... }` — collapse block
+- [x] `list(ordered: true, start: N)` — ordered list start index
+- [x] `br {}` — explicit line break inside prose
+- [x] Prose escapes — `\{`, `\}`, `\!` so reserved characters are literal outside strings
+- [x] `image("src", href: "url", alt: "...")` — image wrapped in a link
+- [x] `figure("src", alt: "...", caption: "...")` — image plus caption
+- [x] `quote(cite: "url", author: "name")` — attribution on a blockquote
+- [x] `callout(type: "note", title: "...")` — custom callout title
+- [x] `table(caption: "...")` — table caption
+- [x] `cell(colspan: N, rowspan: N)` — merged cells
+- [x] `deflist { term { } desc { } }` — definition list
+- [x] `details { summary { } ... }` — collapse block
 - [ ] `columns { col { } col { } }` — side-by-side columns
 - [ ] `sup { }` / `sub { }` — superscript and subscript
 - [ ] `mark { }` — highlight span
@@ -176,7 +187,7 @@ Language:
 
 Compiler and output:
 
-- [ ] `docup fmt` — rewrite a `.du` file with stable layout
+- [x] `docup fmt` — rewrite a `.du` file with stable layout
 - [ ] `docup ast` — print the document AST as JSON
 - [ ] `docup build --fragment` — emit body HTML only, no page shell
 - [ ] Multipage build — one output HTML per root `.du` in a directory
