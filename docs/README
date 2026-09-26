@@ -2,6 +2,7 @@ Root file: index.du
 
   docup build index.du
   docup watch index.du
+  docup fmt .
 
 Other .du files are included from index.du or from a child of it.
 The banner is images/banner.png.

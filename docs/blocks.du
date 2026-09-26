@@ -2,33 +2,20 @@ h(2, id: "blocks") { 5. Blocks }
 
 h(3, id: "heading") { 5.1 h }
 
-p {
-    Heading. Level is a number in parentheses and must be 1 through 6. The body
-    is prose.
-}
+p { Heading. Level is a number in parentheses and must be 1 through 6. The body is prose. }
 
 codeblock(lang: "text") {!
 h(1) { Title }
 h(2, id: "install", class: "section") { Install }
 !}
 
-p {
-    Optional attributes after the level are name/string pairs. The generator
-    writes code{id} and code{class}. Other keys are stored and not written.
-}
+p { Optional attributes after the level are name/string pairs. The generator writes code{id} and code{class}. Other keys are stored and not written. }
 
-p {
-    If you omit code{id}, the generator builds one from the heading text: ASCII
-    letters and digits kept in lowercase, spaces / hyphens / underscores turned
-    into a single hyphen, other characters dropped, trailing hyphens stripped.
-    An empty result becomes code{section}. Duplicate slugs get a numeric suffix.
-}
+p { If you omit code{id}, the generator builds one from the heading text: ASCII letters and digits kept in lowercase, spaces / hyphens / underscores turned into a single hyphen, other characters dropped, trailing hyphens stripped. An empty result becomes code{section}. Duplicate slugs get a numeric suffix. }
 
 h(3, id: "paragraph") { 5.2 p }
 
-p {
-    A paragraph. Body is prose: text plus inline elements.
-}
+p { A paragraph. Body is prose: text plus inline elements. }
 
 codeblock(lang: "text") {!
 p { One paragraph. Use another p block for the next one. }
@@ -36,9 +23,7 @@ p { One paragraph. Use another p block for the next one. }
 
 h(3, id: "hr") { 5.3 hr }
 
-p {
-    Horizontal rule. Empty body.
-}
+p { Horizontal rule. Empty body. }
 
 codeblock(lang: "text") {!
 hr {}
@@ -46,12 +31,7 @@ hr {}
 
 h(3, id: "toc-block") { 5.4 toc }
 
-p {
-    Table of contents. Empty body. The generator fills it from every heading in
-    the finished document, after includes are resolved. Headings are listed in
-    source order with links to their ids. If there are no headings, the block
-    emits nothing.
-}
+p { Table of contents. Empty body. The generator fills it from every heading in the finished document, after includes are resolved. Headings are listed in source order with links to their ids. If there are no headings, the block emits nothing. }
 
 codeblock(lang: "text") {!
 toc {}
@@ -59,15 +39,10 @@ toc {}
 
 h(3, id: "raw") { 5.5 raw }
 
-p {
-    Unescaped HTML. Header name code{raw}, then a raw scope (section 3.5).
-}
+p { Unescaped HTML. Header name code{raw}, then a raw scope (section 3.5). }
 
 codeblock(lang: "text") {!
 raw
 !}
 
-p {
-    Follow that header with a raw scope. Nothing inside the scope is lexed as
-    DocUP.
-}
+p { Follow that header with a raw scope. Nothing inside the scope is lexed as DocUP. }

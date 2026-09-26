@@ -1,15 +1,12 @@
 h(2, id: "meta") { 4. meta }
 
-p {
-    Optional. At most one per document. If present it must contain
-    title.fn("required-title")
-}
+p { Optional. At most one per document. If present it must contain title.fn(required-title) }
 
 codeblock(lang: "text", file: "meta.du") {!
 meta {
   title: "Required when meta is present",
   lang: "en",
-  theme: "light",
+  theme: "textbook",
   author: "Name",
   version: "0.2.0",
   description: "One-line summary",
@@ -20,54 +17,49 @@ meta {
 }
 !}
 
-p {
-    Keys the generator uses:
-}
+p { Keys the generator uses: }
 
 table {
-    row(header: true) {
-        cell { Key }
-        cell { Effect }
-    }
-    row {
-        cell { title }
-        cell { Document title and Open Graph / Twitter title. Required if meta exists. }
-    }
-    row {
-        cell { lang }
-        cell { code{lang} on code{<html>}. Default code{en}. }
-    }
-    row {
-        cell { theme }
-        cell { code{data-theme} on code{<html>}. Use code{light} or code{dark} to lock the palette. }
-    }
-    row {
-        cell { author, version }
-        cell { code{<meta name>} tags. }
-    }
-    row {
-        cell { description }
-        cell { description, og:description, twitter:description. }
-    }
-    row {
-        cell { keywords }
-        cell { code{<meta name="keywords">}. }
-    }
-    row {
-        cell { canonical }
-        cell { canonical link and og:url. }
-    }
-    row {
-        cell { image }
-        cell { og:image and twitter:image. This is not the content image block. }
-    }
-    row {
-        cell { stylesheet }
-        cell { Extra code{<link rel="stylesheet">} in head. Separate from code{--style}. }
-    }
+  row(header: true) {
+    cell { Key }
+    cell { Effect }
+  }
+  row {
+    cell { title }
+    cell { Document title and Open Graph / Twitter title. Required if meta exists. }
+  }
+  row {
+    cell { lang }
+    cell { code{lang} on code{<html>}. Default code{en}. }
+  }
+  row {
+    cell { theme }
+    cell { Named page theme and the code{data-theme} attribute. See section 4.1. }
+  }
+  row {
+    cell { author, version }
+    cell { code{<meta name>} tags. }
+  }
+  row {
+    cell { description }
+    cell { description, og:description, twitter:description. }
+  }
+  row {
+    cell { keywords }
+    cell { code{<meta name="keywords">}. }
+  }
+  row {
+    cell { canonical }
+    cell { canonical link and og:url. }
+  }
+  row {
+    cell { image }
+    cell { og:image and twitter:image. This is not the content image block. }
+  }
+  row {
+    cell { stylesheet }
+    cell { Extra code{<link rel="stylesheet">} in head. Separate from code{--style}. }
+  }
 }
 
-p {
-    Values are strings. A second meta block is a parse error. Other keys are
-    kept in the AST and ignored by the generator.
-}
+p { Values are strings. A second meta block is a parse error. Other keys are kept in the AST and ignored by the generator. code{fmt} writes known keys in this order: title, author, version, theme, lang, description, keywords, canonical, image, stylesheet, then any other keys alphabetically. }

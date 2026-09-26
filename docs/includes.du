@@ -1,52 +1,28 @@
 h(2, id: "includes") { 15. Includes }
 
-p {
-    Splice another .du file into the current document. Two spellings:
-}
+p { Splice another .du file into the current document. Two spellings: }
 
 codeblock(lang: "text") {!
 include "path/to/file.du"
 include("path/to/file.du")
 !}
 
-p {
-    The path is relative to the file that contains the statement, not to the
-    process working directory.
-}
+p { The path is relative to the file that contains the statement, not to the process working directory. }
 
-p {
-    Resolution:
-}
+p { Resolution: }
 
 list(ordered: true) {
-    item { Join the path to the parent file's directory. }
-    item { Canonicalize. Failure is an error on the include statement. }
-    item {
-        Reject the path if it is already on the current include stack (cycle).
-    }
-    item { Read, lex, parse the child. }
-    item { Resolve includes inside the child. }
-    item {
-        Append the child's blocks to the parent. Child meta is
-        discarded.fn("include-meta")
-    }
-    item {
-        Pop the child from the stack so the same file may be included from a
-        different branch.
-    }
+  item { Join the path to the parent file's directory. }
+  item { Canonicalize. Failure is an error on the include statement. }
+  item { Reject the path if it is already on the current include stack (cycle). }
+  item { Read, lex, parse the child. }
+  item { Resolve includes inside the child. }
+  item { Append the child's blocks to the parent. Child meta is discarded.fn(include-meta) }
+  item { Pop the child from the stack so the same file may be included from a different branch. }
 }
 
-p {
-    An empty path is a semantic error if the statement survives until analysis.
-    A missing file fails earlier, during resolution.
-}
+p { An empty path is a semantic error if the statement survives until analysis. A missing file fails earlier, during resolution. }
 
-p {
-    Watch mode adds every successfully resolved include to the watch set.
-}
+p { Watch mode adds every successfully resolved include to the watch set. }
 
-p {
-    This document is one HTML file built from several .du files. index.du holds
-    meta, the banner, the title, the toc, the includes, and the footnote
-    definitions.
-}
+p { This document is one HTML file built from several .du files. index.du holds meta, the banner, the title, the toc, the includes, and the footnote definitions. }

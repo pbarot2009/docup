@@ -1,41 +1,30 @@
 h(2, id: "source-layout") { 3. Source layout }
 
-p {
-    A document is a sequence of top-level blocks. The first token of each block
-    is an identifier: the block type. After the last block the file ends.
-    Anything else at top level is a parse error.
-}
+p { A document is a sequence of top-level blocks. The first token of each block is an identifier: the block type. After the last block the file ends. Anything else at top level is a parse error. }
 
-p {
-    Allowed top-level names:
-}
+p { Allowed top-level names: }
 
 list {
-    item { code{meta} }
-    item { code{h} }
-    item { code{p} }
-    item { code{codeblock} }
-    item { code{hr} }
-    item { code{list} }
-    item { code{quote} }
-    item { code{image} }
-    item { code{table} }
-    item { code{callout} }
-    item { code{raw} }
-    item { code{math} }
-    item { code{toc} }
-    item { code{footnote} }
-    item { code{include} }
+  item { code{meta} }
+  item { code{h} }
+  item { code{p} }
+  item { code{codeblock} }
+  item { code{hr} }
+  item { code{list} }
+  item { code{quote} }
+  item { code{image} }
+  item { code{table} }
+  item { code{callout} }
+  item { code{raw} }
+  item { code{math} }
+  item { code{toc} }
+  item { code{footnote} }
+  item { code{include} }
 }
 
 h(3, id: "comments") { 3.1 Comments }
 
-p {
-    Line comments start with code{//} and run to the end of the line. Block
-    comments are code{/* ... */} and may span lines. An unclosed block comment
-    is a lex error. Comments are skipped in the token stream. They are not
-    skipped inside raw scopes, inline code, or inline math.
-}
+p { Line comments start with code{//} and run to the end of the line. Block comments are code{/* ... */} and may span lines. An unclosed block comment is a lex error. Comments are skipped in the token stream. They are not skipped inside raw scopes, inline code, or inline math. }
 
 codeblock(lang: "text", file: "comments.du") {!
 // a whole line
@@ -45,80 +34,86 @@ p { visible /* hidden */ text }
 
 h(3, id: "strings-and-numbers") { 3.2 Strings and numbers }
 
-p {
-    String literals use double quotes. The only escape is a backslash before a
-    quote: code{\"} inserts a quote. An unclosed string is a lex error.
+p { String literals use double quotes. An unclosed string is a lex error. Escapes inside strings: }
+
+table {
+  row(header: true) {
+    cell { Sequence }
+    cell { Result }
+  }
+  row {
+    cell { backslash quote }
+    cell { a quote }
+  }
+  row {
+    cell { two backslashes }
+    cell { a backslash }
+  }
+  row {
+    cell { backslash n }
+    cell { newline }
+  }
+  row {
+    cell { backslash t }
+    cell { tab }
+  }
+  row {
+    cell { backslash r }
+    cell { CR }
+  }
 }
 
-p {
-    Bare integers are tokens. Heading level is the only place the grammar
-    requires a number.
-}
+p { Any other character after a backslash is kept as that backslash plus the character. }
+
+p { Bare integers are tokens. Heading level is the only place the grammar requires a number. }
 
 h(3, id: "identifiers") { 3.3 Identifiers }
 
-p {
-    An identifier starts with an ASCII letter or underscore. Later characters
-    may be letters, digits, or underscore.
-}
+p { An identifier starts with an ASCII letter or underscore. Later characters may be letters, digits, or underscore. }
 
-p {
-    In two raw contexts the scanner also accepts hyphen: footnote ids written
-    without quotes, and attribute names inside link parentheses. Quoted footnote
-    ids may contain any string bytes.
-}
+p { In two raw contexts the scanner also accepts hyphen: footnote ids written without quotes, and attribute names inside link parentheses. Quoted footnote ids may contain any string bytes. }
 
 h(3, id: "whitespace") { 3.4 Whitespace }
 
-p {
-    Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a
-    single space. Leading and trailing spaces on a body are trimmed. Line breaks
-    in source do not become line breaks in HTML unless you use a codeblock, a
-    raw block, or explicit HTML.
-}
+p { Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a single space. Leading and trailing spaces on a body are trimmed. Line breaks in source do not become line breaks in HTML unless you use a codeblock, a raw block, or explicit HTML. }
 
 h(3, id: "raw-scopes") { 3.5 Raw scopes }
 
-p {
-    code{codeblock}, code{raw}, and code{math} take a body that starts with
-    brace-bang and ends at the first bang-brace from that point. The body is not
-    tokenized.
-}
+p { code{codeblock}, code{raw}, and code{math} take a body that starts with brace-bang and ends at the first unescaped bang-brace from that point. The body is not tokenized as DocUP. }
 
-p {
-    If the first line after the opener is only spaces, tabs, or CR, that line is
-    dropped. Trailing spaces and newlines are dropped. Empty content after that
-    trim is a semantic error.
-}
+p { If the first line after the opener is only spaces, tabs, or CR, that line is dropped. Trailing spaces and newlines are dropped. Empty content after that trim is a semantic error. }
 
-p {
-    Because the closer is the first bang-brace, a raw scope used as an example
-    inside another raw scope cannot contain that closer.
+p { To put a bang-brace in the body, escape it: }
+
+list {
+  item { backslash, bang, brace — stored as bang-brace }
+  item { bang, backslash, brace — stored as bang-brace }
+  item { two backslashes, bang, brace — stored as backslash, bang, brace }
 }
 
 h(3, id: "attributes") { 3.6 Attribute lists }
 
-p {
-    Many blocks take a parenthesized list after the name:
-}
+p { Many blocks take a parenthesized list after the name: }
 
 codeblock(lang: "text") {!
 name(key: "value", flag: true, "positional")
 !}
 
-p {
-    A named field is an identifier, a colon, then a string or the identifiers
-    code{true} / code{false}. A string code{"true"} is also accepted where the
-    generator compares against the text code{true}.
+p { A named field is an identifier, a colon, then a string or the identifiers code{true} / code{false}. A string code{"true"} is also accepted where the generator compares against the text code{true}. }
+
+p { A bare string is a positional argument. Entries may be separated by commas. An empty code{()} is valid where the list is optional. }
+
+p { Which keys are read depends on the block. Unknown keys do not fail the parse. Heading attributes after the level are name/string pairs only; booleans are not accepted there. }
+
+h(3, id: "prose-escapes") { 3.7 Prose escapes }
+
+p { In paragraph-like text, a backslash before one of these characters emits that character and does not start syntax: }
+
+list {
+  item { backslash brace-open — a literal open brace }
+  item { backslash brace-close — a literal close brace }
+  item { backslash bang — a literal bang }
+  item { two backslashes — a literal backslash }
 }
 
-p {
-    A bare string is a positional argument. Entries may be separated by commas.
-    An empty code{()} is valid where the list is optional.
-}
-
-p {
-    Which keys are read depends on the block. Unknown keys do not fail the
-    parse. Heading attributes after the level are name/string pairs only;
-    booleans are not accepted there.
-}
+p { Inside inline code, backslash-brace is unescaped to a brace and does not change brace depth. Inside inline math, backslash-brace is kept so KaTeX still sees it. }

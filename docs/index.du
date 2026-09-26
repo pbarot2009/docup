@@ -1,77 +1,46 @@
 meta {
-    title: "DocUP Documentation",
-    author: "DocUP",
-    version: "0.2.0",
-    theme: "light",
-    lang: "en",
-    description: "Compiler and language reference for DocUP.",
-    keywords: "docup, markup, html, compiler, .du",
-    image: "images/banner.png"
+  title: "DocUP Documentation",
+  lang: "en",
+  author: "DocUP",
+  version: "0.2.0",
+  description: "Compiler and language reference for DocUP.",
+  keywords: "docup, markup, html, compiler, .du",
+  theme: "textbook",
+  image: "images/banner.png"
 }
 
 image("images/banner.png", alt: "DocUP")
 
 h(1, id: "docup") { DocUP }
 
-p {
-    DocUP is a compiler. It reads a b{.du} file and writes a single HTML5
-    document. The format is block-based: every top-level construct is a named
-    block with optional attributes and a body. This document is written in that
-    format.
-}
+p { DocUP is a compiler. It reads a b{.du} file and writes a single HTML5 document. The format is block-based: every top-level construct is a named block with optional attributes and a body. This document is written in that format. }
 
-p {
-    Compiler version code{0.2.0}.
-}
+p { Compiler version code{0.2.0}. }
 
 toc {}
 
 include "intro.du"
-
 include "cli.du"
-
 include "source-layout.du"
-
 include "meta.du"
-
+include "themes.du"
 include "blocks.du"
-
 include "inlines.du"
-
 include "lists-and-quotes.du"
-
 include "code-and-math.du"
-
 include "tables-and-media.du"
-
 include "callouts.du"
-
 include "footnotes.du"
-
 include "includes.du"
-
 include "semantics.du"
-
 include "examples.du"
 
-footnote(id: "required-title") {
-    If a document contains a meta block, that block must include a title field.
-    A document with no meta block is valid; the generated page title then
-    defaults to "DocUP Document".
-}
+footnote(id: "required-title") { If a document contains a meta block, that block must include a title field. A document with no meta block is valid; the generated page title then defaults to "DocUP Document". }
 
-footnote(id: "include-meta") {
-    An included file may contain its own meta block. The compiler parses it,
-    then drops it. Only the included file's blocks are spliced into the parent.
-}
+footnote(id: "include-meta") { An included file may contain its own meta block. The compiler parses it, then drops it. Only the included file's blocks are spliced into the parent. }
 
-footnote(id: "item-nest") {
-    After a nested list is parsed inside an item, the item must close. Text
-    after that nested list is a parse error. The same rule applies to a nested
-    quote inside a quote.
-}
+footnote(id: "item-nest") { After a nested list is parsed inside an item, the item must close. Text after that nested list is a parse error. The same rule applies to a nested quote inside a quote. }
 
-footnote(id: "shared-depth") {
-    Inlines, nested lists, and nested quotes share one depth counter. The cap is
-    64 for the combination, not 64 of each.
-}
+footnote(id: "shared-depth") { Inlines, nested lists, and nested quotes share one depth counter. The cap is 64 for the combination, not 64 of each. }
+
+footnote(id: "theme-attr") { The generator writes the raw theme string onto code{data-theme}. Palette lock to light or dark only happens when that string is exactly code{light} or code{dark}. Named themes such as code{textbook} still follow prefers-color-scheme for the dark variant unless you also force light or dark. }

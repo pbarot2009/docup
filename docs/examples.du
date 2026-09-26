@@ -21,21 +21,23 @@ hr {}
 h(3, id: "full-example") { 17.2 Features in this document }
 
 list {
-    item { meta, including title and the optional fields the generator reads }
-    item { headings with explicit ids and one class }
-    item { paragraphs }
-    item { toc }
-    item { lists, ordered lists, tasks, nested lists }
-    item { quotes and a nested quote }
-    item { tables, including a header row and an included fragment }
-    item { the banner image }
-    item { callouts of all four kinds }
-    item { codeblock with lang, file, line numbers, and highlight ranges }
-    item { raw HTML }
-    item { display math and inline math }
-    item { footnote references and definitions }
-    item { include, both from the root file and from a child file }
-    item { line comments }
+  item { meta, including title and the optional fields the generator reads }
+  item { headings with explicit ids and one class }
+  item { paragraphs }
+  item { toc }
+  item { lists, ordered lists, tasks, nested lists }
+  item { quotes and a nested quote }
+  item { tables, including a header row and an included fragment }
+  item { the banner image }
+  item { callouts of all four kinds }
+  item { codeblock with lang, file, line numbers, and highlight ranges }
+  item { raw HTML }
+  item { display math and inline math }
+  item { footnote references and definitions }
+  item { include, both from the root file and from a child file }
+  item { line comments }
+  item { named theme (textbook) }
+  item { CLI coverage for fmt, new, and init }
 }
 
 raw {!
@@ -48,45 +50,36 @@ raw {!
 h(3, id: "limits") { 17.3 Limits }
 
 list {
-    item { One meta block. }
-    item { Include cycles are rejected. }
-    item { Inline, list, and quote nesting share a cap of 64. }
-    item { Nested list or quote must be the last child of its parent body. }
-    item { No block inside a paragraph. A list inside a p body is plain text. }
-    item { Child-file meta is not merged. }
-    item { A raw scope ends at the first bang-brace. }
+  item { One meta block. }
+  item { Include cycles are rejected. }
+  item { Inline, list, and quote nesting share a cap of 64. }
+  item { Nested list or quote must be the last child of its parent body. }
+  item { No block inside a paragraph. A list inside a p body is plain text. }
+  item { Child-file meta is not merged. }
+  item { A raw scope ends at the first unescaped bang-brace. }
 }
 
 h(3, id: "build-these-pages") { 17.4 Building these pages }
 
-p {
-    The root file is code{index.du}. From the docs directory:
-}
+p { The root file is code{index.du}. From the docs directory: }
 
 codeblock(lang: "text") {!
 docup build index.du
 docup build index.du -o index.html
 docup watch index.du --port 8080
+docup fmt index.du --check
 !}
 
-p {
-    Output defaults to code{index.html} next to the input.
-}
+p { Output defaults to code{index.html} next to the input. }
 
 h(4, id: "heading-levels") { Heading levels }
 
-p {
-    Levels 1 through 6 are valid. This section is level 4.
-}
+p { Levels 1 through 6 are valid. This section is level 4. }
 
 h(5, id: "heading-level-5") { Level 5 }
 
-p {
-    Level 5.
-}
+p { Level 5. }
 
 h(6, id: "heading-level-6") { Level 6 }
 
-p {
-    Level 6. Compiler version code{0.2.0}.
-}
+p { Level 6. Compiler version code{0.2.0}. }
