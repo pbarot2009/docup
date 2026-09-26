@@ -180,7 +180,8 @@ fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
     }
 
     w.push_str(" {!\n");
-    w.push_str(cb.raw_code.trim_end());
+    let escaped_raw = escape_raw_block_content(cb.raw_code.trim_end());
+    w.push_str(&escaped_raw);
     w.push('\n');
     w.push_str(&ind);
     w.push_str("!}");
@@ -409,7 +410,8 @@ fn format_raw(w: &mut String, r: &RawNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
     w.push_str("raw {!\n");
-    w.push_str(r.html.trim_end());
+    let escaped_raw = escape_raw_block_content(r.html.trim_end());
+    w.push_str(&escaped_raw);
     w.push('\n');
     w.push_str(&ind);
     w.push_str("!}");
@@ -419,7 +421,8 @@ fn format_math(w: &mut String, m: &MathBlockNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
     w.push_str("math {!\n");
-    w.push_str(m.latex.trim_end());
+    let escaped_raw = escape_raw_block_content(m.latex.trim_end());
+    w.push_str(&escaped_raw);
     w.push('\n');
     w.push_str(&ind);
     w.push_str("!}");
@@ -456,7 +459,9 @@ pub fn format_inlines(inlines: &[InlineNode]) -> String {
 
 fn format_inline_into(w: &mut String, inline: &InlineNode) {
     match &inline.kind {
-        InlineKind::Text(t) => w.push_str(t),
+        InlineKind::Text(t) => {
+            w.push_str(&escape_prose_text(t));
+        }
         InlineKind::Bold(children) => {
             w.push_str("b{");
             w.push_str(&format_inlines(children));
@@ -474,7 +479,7 @@ fn format_inline_into(w: &mut String, inline: &InlineNode) {
         }
         InlineKind::Code(code) => {
             w.push_str("code{");
-            w.push_str(code);
+            w.push_str(&escape_inline_code(code));
             w.push('}');
         }
         InlineKind::Math(math) => {
@@ -491,6 +496,72 @@ fn format_inline_into(w: &mut String, inline: &InlineNode) {
             w.push_str(&format!("fn(\"{}\")", escape_du_string(id)));
         }
     }
+}
+
+fn escape_raw_block_content(raw: &str) -> String {
+    let mut out = String::with_capacity(raw.len());
+    let bytes = raw.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' && i + 2 < bytes.len() && bytes[i + 1] == b'!' && bytes[i + 2] == b'}'
+        {
+            out.push_str("\\\\!}");
+            i += 3;
+        } else if bytes[i] == b'!' && i + 1 < bytes.len() && bytes[i + 1] == b'}' {
+            out.push_str("\\!}");
+            i += 2;
+        } else {
+            out.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+    out
+}
+
+fn escape_inline_code(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut depth: usize = 0;
+    let chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c == '{' {
+            depth += 1;
+            out.push(c);
+        } else if c == '}' {
+            if depth == 0 {
+                out.push('\\');
+                out.push('}');
+            } else {
+                depth -= 1;
+                out.push(c);
+            }
+        } else if c == '\\' {
+            if i + 1 < chars.len() && (chars[i + 1] == '{' || chars[i + 1] == '}') {
+                out.push('\\');
+                out.push(chars[i + 1]);
+                i += 1;
+            } else {
+                out.push(c);
+            }
+        } else {
+            out.push(c);
+        }
+        i += 1;
+    }
+    out
+}
+
+fn escape_prose_text(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '{' => out.push_str("\\{"),
+            '}' => out.push_str("\\}"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 fn wrap_text(text: &str, depth: usize, max_width: usize) -> String {
@@ -529,7 +600,6 @@ fn split_prose_words(text: &str) -> Vec<String> {
     let mut i = 0;
 
     while i < chars.len() {
-        // Keep code{...} and m{...} together as an atomic word
         if (text[i..].starts_with("code{") || text[i..].starts_with("m{"))
             && (cur.is_empty() || cur.ends_with(' '))
         {
@@ -540,6 +610,13 @@ fn split_prose_words(text: &str) -> Vec<String> {
             let mut depth = 1;
             while i < chars.len() && depth > 0 {
                 let c = chars[i];
+                if c == '\\' && i + 1 < chars.len() {
+                    cur.push(c);
+                    i += 1;
+                    cur.push(chars[i]);
+                    i += 1;
+                    continue;
+                }
                 if c == '{' {
                     depth += 1;
                 } else if c == '}' {
@@ -580,6 +657,9 @@ fn escape_du_string(s: &str) -> String {
         match c {
             '\\' => out.push_str("\\\\"),
             '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\t' => out.push_str("\\t"),
+            '\r' => out.push_str("\\r"),
             _ => out.push(c),
         }
     }
@@ -629,6 +709,16 @@ mod tests {
             formatted,
             "meta {\n    title: \"Test\",\n    author: \"Prathmesh\"\n}\n\nh(1) { Hello }\n"
         );
+    }
+
+    #[test]
+    fn test_format_raw_codeblock_escape() {
+        let src = r#"codeblock(lang: "zig") {!
+print("\nvalue: {\!}\n", .{val});
+!}
+"#;
+        let formatted = format_source(src).expect("must parse");
+        assert!(formatted.contains(r#"{\!}"#));
     }
 
     #[test]

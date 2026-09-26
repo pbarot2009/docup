@@ -19,8 +19,12 @@
   <meta name="generator" content="DocUP v0.2.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&amp;family=Google+Sans+Code:wght@300..800&amp;display=swap" rel="stylesheet">
-  <style>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100..900&family=Google+Sans+Code:wght@300..800&display=swap" rel="stylesheet">
+  <style>:root {
+  --font-body: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-code: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+}
+
 :root {
   --bg: #ffffff;
   --text: #24292f;
@@ -99,20 +103,23 @@
   --callout-danger: #cf222e;
 }
 
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0 auto;
   max-width: 760px;
   padding: 2.5rem 1.25rem 4rem;
-  font-family: "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body, "Google Sans Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif);
   font-size: 16px;
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-* {
-  box-sizing: border-box;
-}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.25;
@@ -128,6 +135,7 @@ h3 { font-size: 1.25em; }
 h4 { font-size: 1.1em; }
 h5 { font-size: 1em; }
 h6 { font-size: 0.9em; color: var(--text-muted); }
+
 p {
   margin: 0.8em 0;
   overflow-wrap: break-word;
@@ -140,19 +148,22 @@ a {
   overflow-wrap: break-word;
 }
 a:hover { text-decoration: underline; }
+
 code {
   background: var(--code-bg);
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
   font-size: 0.9em;
   overflow-wrap: break-word;
 }
+
 hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 2em 0;
 }
+
 ul, ol {
   margin: 0.8em 0;
   padding-left: 1.6em;
@@ -165,6 +176,7 @@ li.task-item { list-style: none; margin-left: -1.6em; }
 li.task-item input[type="checkbox"] {
   margin-right: 0.5em;
 }
+
 blockquote {
   margin: 1em 0;
   padding: 0 1em;
@@ -175,11 +187,13 @@ blockquote {
 blockquote blockquote {
   margin: 0.6em 0;
 }
+
 img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
 }
+
 .callout {
   margin: 1.2em 0;
   padding: 0.85em 1.2em;
@@ -205,11 +219,13 @@ img {
 .callout-body {
   overflow-wrap: break-word;
 }
+
 .math-block {
   margin: 1.2em 0;
   text-align: center;
   overflow-x: auto;
 }
+
 .toc {
   margin: 1.5em 0;
   padding: 1em 1.25em;
@@ -289,7 +305,7 @@ s { color: var(--text-muted); }
   border-bottom: 1px solid var(--border);
   font-size: 0.8em;
   color: var(--text-muted);
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
 }
 .codeblock-actions {
   display: flex;
@@ -324,7 +340,7 @@ s { color: var(--text-muted); }
   padding: 0;
   font-size: 0.9em;
   line-height: 1.5;
-  font-family: "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace;
+  font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
   overflow-wrap: normal;
   white-space: pre;
 }
@@ -392,6 +408,7 @@ s { color: var(--text-muted); }
   h3 { font-size: 1.15em; }
   th, td { padding: 0.4em 0.6em; }
 }
+
 </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>

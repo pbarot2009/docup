@@ -65,7 +65,7 @@ impl<'a> Lexer<'a> {
     }
 
     #[inline]
-    fn peek_at(&self, offset: usize) -> u8 {
+    pub fn peek_at(&self, offset: usize) -> u8 {
         if self.pos + offset >= self.src.len() {
             0
         } else {
@@ -193,7 +193,7 @@ impl<'a> Lexer<'a> {
     fn read_string(&mut self) -> Result<Token, LexError> {
         let start_line = self.line;
         let start_col = self.col;
-        self.advance();
+        self.advance(); // consume opening '"'
 
         let mut buf = Vec::new();
         loop {
@@ -209,10 +209,44 @@ impl<'a> Lexer<'a> {
                 self.advance();
                 break;
             }
-            if c == b'\\' && self.peek_at(1) == b'"' {
-                self.advance();
-                buf.push(self.advance());
-                continue;
+            if c == b'\\' {
+                let next = self.peek_at(1);
+                match next {
+                    b'"' => {
+                        self.advance();
+                        self.advance();
+                        buf.push(b'"');
+                        continue;
+                    }
+                    b'\\' => {
+                        self.advance();
+                        self.advance();
+                        buf.push(b'\\');
+                        continue;
+                    }
+                    b'n' => {
+                        self.advance();
+                        self.advance();
+                        buf.push(b'\n');
+                        continue;
+                    }
+                    b't' => {
+                        self.advance();
+                        self.advance();
+                        buf.push(b'\t');
+                        continue;
+                    }
+                    b'r' => {
+                        self.advance();
+                        self.advance();
+                        buf.push(b'\r');
+                        continue;
+                    }
+                    _ => {
+                        buf.push(self.advance());
+                        continue;
+                    }
+                }
             }
             buf.push(self.advance());
         }
@@ -235,24 +269,55 @@ impl<'a> Lexer<'a> {
     pub fn read_raw_until_bang_brace(&mut self) -> Result<(String, usize, usize), LexError> {
         let start_line = self.line;
         let start_col = self.col;
-        let slice = &self.src[self.pos..];
+        let mut buf = Vec::new();
 
-        let close_idx = slice.windows(2).position(|w| w == b"!}");
-        let Some(idx) = close_idx else {
-            return Err(LexError::new(
-                start_line,
-                start_col,
-                "unterminated raw scope, expected closing !}",
-            ));
-        };
+        while self.pos < self.src.len() {
+            // Check for escaped closing delimiter: \!}
+            if self.peek() == b'\\' {
+                if self.peek_at(1) == b'!' && self.peek_at(2) == b'}' {
+                    self.advance(); // consume '\'
+                    buf.push(self.advance()); // '!'
+                    buf.push(self.advance()); // '}'
+                    continue;
+                } else if self.peek_at(1) == b'\\'
+                    && self.peek_at(2) == b'!'
+                    && self.peek_at(3) == b'}'
+                {
+                    // '\\!}' -> literal '\!}'
+                    self.advance(); // consume first '\'
+                    buf.push(self.advance()); // '\'
+                    buf.push(self.advance()); // '!'
+                    buf.push(self.advance()); // '}'
+                    continue;
+                }
+            }
 
-        let raw = String::from_utf8_lossy(&self.src[self.pos..self.pos + idx]).into_owned();
-        for _ in 0..(idx + 2) {
-            self.advance();
+            // Check for escaped closing delimiter: !\}
+            if self.peek() == b'!' {
+                if self.peek_at(1) == b'\\' && self.peek_at(2) == b'}' {
+                    self.advance(); // consume '!'
+                    self.advance(); // consume '\'
+                    buf.push(b'!');
+                    buf.push(self.advance()); // '}'
+                    continue;
+                } else if self.peek_at(1) == b'}' {
+                    // Unescaped closing delimiter: !}
+                    self.advance(); // '!'
+                    self.advance(); // '}'
+                    let raw = String::from_utf8_lossy(&buf).into_owned();
+                    let trimmed = trim_raw_block(&raw);
+                    return Ok((trimmed, start_line, start_col));
+                }
+            }
+
+            buf.push(self.advance());
         }
 
-        let trimmed = trim_raw_block(&raw);
-        Ok((trimmed, start_line, start_col))
+        Err(LexError::new(
+            start_line,
+            start_col,
+            "unterminated raw scope, expected closing !}",
+        ))
     }
 
     #[inline]
@@ -338,10 +403,35 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    pub fn read_balanced_braces(&mut self) -> String {
+    pub fn read_balanced_braces(&mut self, is_math: bool) -> String {
         let mut buf = Vec::new();
         let mut depth = 1;
         while self.pos < self.src.len() {
+            if self.peek() == b'\\' {
+                let next = self.peek_at(1);
+                if next == b'{' || next == b'}' {
+                    if is_math {
+                        // Math blocks (KaTeX) require \{ and \} preserved for literal braces
+                        buf.push(self.advance());
+                        buf.push(self.advance());
+                    } else {
+                        // Code blocks unescape \{ -> { and \} -> } without changing depth
+                        self.advance();
+                        buf.push(self.advance());
+                    }
+                    continue;
+                } else if next == b'\\' {
+                    if is_math {
+                        buf.push(self.advance());
+                        buf.push(self.advance());
+                    } else {
+                        self.advance();
+                        buf.push(self.advance());
+                    }
+                    continue;
+                }
+            }
+
             let c = self.peek();
             if c == b'{' {
                 depth += 1;
@@ -368,6 +458,17 @@ impl<'a> Lexer<'a> {
         let mut buf = Vec::new();
         while self.pos < self.src.len() {
             let c = self.peek();
+
+            // Prose escapes: \{, \}, \!, and \\ emit literal characters
+            if c == b'\\' {
+                let next = self.peek_at(1);
+                if next == b'{' || next == b'}' || next == b'!' || next == b'\\' {
+                    self.advance(); // consume '\'
+                    buf.push(self.advance()); // push '{', '}', '!', or '\'
+                    continue;
+                }
+            }
+
             if c == b'}' {
                 break;
             }

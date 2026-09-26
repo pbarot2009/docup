@@ -440,12 +440,13 @@ impl<'a> Parser<'a> {
         self.lex.consume_lbrace()?;
 
         if ident == "code" || ident == "m" {
-            let raw = self.lex.read_balanced_braces();
+            let is_math = ident == "m";
+            let raw = self.lex.read_balanced_braces(is_math);
             self.lex.consume_rbrace()?;
-            let kind = if ident == "code" {
-                InlineKind::Code(raw)
-            } else {
+            let kind = if is_math {
                 InlineKind::Math(raw)
+            } else {
+                InlineKind::Code(raw)
             };
             return Ok(InlineNode::new(line, col, kind));
         }
@@ -803,7 +804,7 @@ impl<'a> Parser<'a> {
         let line = self.cur.line;
         let col = self.cur.col;
         self.next()?; // consume 'table'
-        let _ = self.parse_attrs()?; // table-level attrs ignored in Phase 1
+        let _ = self.parse_attrs()?;
         self.expect(TokenType::LBrace, "'{' after table")?;
 
         let mut rows = Vec::new();
