@@ -1,7 +1,8 @@
 use crate::ast::{
-    BlockNode, CalloutNode, CodeBlockNode, DocumentNode, FootnoteDefNode, HeadingNode, ImageNode,
-    IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode,
-    ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TableNode,
+    BlockNode, CalloutNode, CodeBlockNode, DefListEntry, DefListNode, DetailsNode, DocumentNode,
+    FigureNode, FootnoteDefNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode,
+    ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
+    RawNode, RowNode, TableNode,
 };
 use crate::errors::ParseError;
 use crate::parser::Parser;
@@ -108,6 +109,9 @@ fn format_block(w: &mut String, block: &BlockNode, depth: usize) {
         }
         BlockNode::Footnote(f) => format_footnote(w, f, depth),
         BlockNode::Include(inc) => format_include(w, inc, depth),
+        BlockNode::Figure(f) => format_figure(w, f, depth),
+        BlockNode::DefList(d) => format_deflist(w, d, depth),
+        BlockNode::Details(d) => format_details(w, d, depth),
     }
 }
 
@@ -190,7 +194,9 @@ fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
 fn format_list(w: &mut String, l: &ListNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    if l.ordered {
+    if l.ordered && l.start > 1 {
+        w.push_str(&format!("list(ordered: true, start: {}) {{\n", l.start));
+    } else if l.ordered {
         w.push_str("list(ordered: true) {\n");
     } else {
         w.push_str("list {\n");
@@ -295,7 +301,20 @@ fn format_item(w: &mut String, item: &ItemNode, depth: usize) {
 fn format_quote(w: &mut String, q: &QuoteNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    w.push_str("quote {\n");
+    let mut attrs = Vec::new();
+    if !q.cite.is_empty() {
+        attrs.push(format!("cite: \"{}\"", escape_du_string(&q.cite)));
+    }
+    if !q.author.is_empty() {
+        attrs.push(format!("author: \"{}\"", escape_du_string(&q.author)));
+    }
+    if attrs.is_empty() {
+        w.push_str("quote {\n");
+    } else {
+        w.push_str("quote(");
+        w.push_str(&attrs.join(", "));
+        w.push_str(") {\n");
+    }
 
     let mut pending_inlines = Vec::new();
     let mut wrote_child = false;
@@ -352,13 +371,25 @@ fn format_image(w: &mut String, img: &ImageNode, depth: usize) {
         w.push_str(&escape_du_string(&img.alt));
         w.push('"');
     }
+    if !img.href.is_empty() {
+        w.push_str(", href: \"");
+        w.push_str(&escape_du_string(&img.href));
+        w.push('"');
+    }
     w.push(')');
 }
 
 fn format_table(w: &mut String, t: &TableNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    w.push_str("table {\n");
+    if t.caption.is_empty() {
+        w.push_str("table {\n");
+    } else {
+        w.push_str(&format!(
+            "table(caption: \"{}\") {{\n",
+            escape_du_string(&t.caption)
+        ));
+    }
 
     for (row_idx, row) in t.rows.iter().enumerate() {
         if row_idx > 0 {
@@ -385,7 +416,20 @@ fn format_row(w: &mut String, row: &RowNode, depth: usize) {
     for cell in &row.cells {
         let text = format_inlines(&cell.children);
         w.push_str(&cell_ind);
-        w.push_str("cell { ");
+        w.push_str("cell");
+        let mut cell_attrs = Vec::new();
+        if cell.colspan > 1 {
+            cell_attrs.push(format!("colspan: {}", cell.colspan));
+        }
+        if cell.rowspan > 1 {
+            cell_attrs.push(format!("rowspan: {}", cell.rowspan));
+        }
+        if !cell_attrs.is_empty() {
+            w.push('(');
+            w.push_str(&cell_attrs.join(", "));
+            w.push(')');
+        }
+        w.push_str(" { ");
         w.push_str(&text);
         w.push_str(" }\n");
     }
@@ -397,7 +441,15 @@ fn format_row(w: &mut String, row: &RowNode, depth: usize) {
 fn format_callout(w: &mut String, c: &CalloutNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    w.push_str(&format!("callout(type: \"{}\") {{\n", c.kind.as_str()));
+    if c.title.trim().is_empty() {
+        w.push_str(&format!("callout(type: \"{}\") {{\n", c.kind.as_str()));
+    } else {
+        w.push_str(&format!(
+            "callout(type: \"{}\", title: \"{}\") {{\n",
+            c.kind.as_str(),
+            escape_du_string(&c.title)
+        ));
+    }
     let text = format_inlines(&c.children);
     let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
     w.push_str(&wrapped);
@@ -494,6 +546,9 @@ fn format_inline_into(w: &mut String, inline: &InlineNode) {
         }
         InlineKind::FootnoteRef(id) => {
             w.push_str(&format!("fn(\"{}\")", escape_du_string(id)));
+        }
+        InlineKind::Break => {
+            w.push_str("br {}");
         }
     }
 }
@@ -593,6 +648,11 @@ fn wrap_text(text: &str, depth: usize, max_width: usize) -> String {
     lines.join("\n")
 }
 
+fn starts_with_chars(chars: &[char], i: usize, pat: &str) -> bool {
+    let pat: Vec<char> = pat.chars().collect();
+    chars.get(i..).is_some_and(|rest| rest.starts_with(&pat))
+}
+
 fn split_prose_words(text: &str) -> Vec<String> {
     let mut words = Vec::new();
     let mut cur = String::new();
@@ -600,10 +660,10 @@ fn split_prose_words(text: &str) -> Vec<String> {
     let mut i = 0;
 
     while i < chars.len() {
-        if (text[i..].starts_with("code{") || text[i..].starts_with("m{"))
+        if (starts_with_chars(&chars, i, "code{") || starts_with_chars(&chars, i, "m{"))
             && (cur.is_empty() || cur.ends_with(' '))
         {
-            let is_code = text[i..].starts_with("code{");
+            let is_code = starts_with_chars(&chars, i, "code{");
             let tag_len = if is_code { 5 } else { 2 };
             cur.push_str(if is_code { "code{" } else { "m{" });
             i += tag_len;
@@ -695,6 +755,75 @@ fn format_line_ranges(lines: &[usize]) -> String {
     }
 
     ranges.join(",")
+}
+
+fn format_figure(w: &mut String, f: &FigureNode, depth: usize) {
+    let ind = indent_str(depth);
+    w.push_str(&ind);
+    w.push_str("figure(\"");
+    w.push_str(&escape_du_string(&f.src));
+    w.push('"');
+    if !f.alt.is_empty() {
+        w.push_str(", alt: \"");
+        w.push_str(&escape_du_string(&f.alt));
+        w.push('"');
+    }
+    if !f.caption.is_empty() {
+        w.push_str(", caption: \"");
+        w.push_str(&escape_du_string(&f.caption));
+        w.push('"');
+    }
+    w.push(')');
+}
+
+fn format_deflist(w: &mut String, d: &DefListNode, depth: usize) {
+    let ind = indent_str(depth);
+    w.push_str(&ind);
+    w.push_str("deflist {\n");
+    for (i, entry) in d.entries.iter().enumerate() {
+        if i > 0 {
+            w.push('\n');
+        }
+        match entry {
+            DefListEntry::Term { children, .. } => {
+                w.push_str(&indent_str(depth + 1));
+                w.push_str("term { ");
+                w.push_str(&format_inlines(children));
+                w.push_str(" }");
+            }
+            DefListEntry::Desc { children, .. } => {
+                w.push_str(&indent_str(depth + 1));
+                w.push_str("desc { ");
+                w.push_str(&format_inlines(children));
+                w.push_str(" }");
+            }
+        }
+    }
+    w.push('\n');
+    w.push_str(&ind);
+    w.push('}');
+}
+
+fn format_details(w: &mut String, d: &DetailsNode, depth: usize) {
+    let ind = indent_str(depth);
+    w.push_str(&ind);
+    if d.open {
+        w.push_str("details(open: true) {\n");
+    } else {
+        w.push_str("details {\n");
+    }
+    w.push_str(&indent_str(depth + 1));
+    w.push_str("summary { ");
+    w.push_str(&format_inlines(&d.summary));
+    w.push_str(" }\n");
+    if !d.children.is_empty() {
+        let text = format_inlines(&d.children);
+        let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
+        w.push_str(&wrapped);
+        w.push('\n');
+    }
+    w.push_str(&ind);
+    w.push('}');
 }
 
 #[cfg(test)]

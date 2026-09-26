@@ -1,6 +1,8 @@
 h(2, id: "tables") { 11. Tables }
 
-p { A table is rows. A row is cells. A cell body is prose. }
+p {
+    A table is rows. A row is cells. A cell body is prose.
+}
 
 codeblock(lang: "text") {!
 table {
@@ -19,26 +21,57 @@ table {
 }
 !}
 
-p { Rules checked after parse: }
-
-list {
-  item { At least one row. }
-  item { Each row has at least one cell. }
-  item { Every row has the same number of cells. }
+p {
+    Rules checked after parse:
 }
 
-p { code{row(header: true)} emits code{<th>} instead of code{<td>}. Table-level attributes are parsed and ignored. }
+list {
+    item { At least one row. }
+    item { Each row has at least one cell. }
+    item { Every row has the same number of cells. }
+}
+
+p {
+    code{row(header: true)} emits code{<th>} instead of code{<td>}.
+    code{table(caption: "...")} writes a caption.
+    code{cell(colspan: 2, rowspan: 2)} sets HTML span attributes. Column counts
+    are the sum of colspan values on each row; those sums must match.
+}
 
 include "fragments/sample-table.du"
 
 h(2, id: "images") { 12. Images }
 
-p { No body. First argument is the source URL or path. Optional code{alt} is a string. Other named attributes after that are parsed and ignored. }
+p {
+    No body. First argument is the source URL or path. Optional code{alt} and
+    code{href}. A non-empty href wraps the image in a link.
+}
 
 codeblock(lang: "text") {!
 image("images/banner.png", alt: "DocUP")
+image("images/banner.png", alt: "DocUP", href: "https://example.com")
 !}
 
-p { An empty source is a semantic error. In watch mode the server maps request paths onto files next to the root input. Relative paths in the compiled HTML are resolved by the browser against the HTML file. }
+h(3, id: "figure") { 12.1 figure }
 
-p { The banner at the top of this page is that block. }
+p {
+    Image plus caption.
+}
+
+codeblock(lang: "text") {!
+figure("images/banner.png", alt: "DocUP", caption: "The DocUP banner")
+!}
+
+p {
+    An empty source is a semantic error.
+}
+
+p {
+    An empty source is a semantic error. In watch mode the server maps request
+    paths onto files next to the root input. Relative paths in the compiled HTML
+    are resolved by the browser against the HTML file.
+}
+
+p {
+    The banner at the top of this page is that block.
+}

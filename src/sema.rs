@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    BlockNode, DocumentNode, InlineKind, InlineNode, ItemChild, ListNode, MetaNode, QuoteChild,
-    TableNode,
+    BlockNode, DefListNode, DetailsNode, DocumentNode, FigureNode, InlineKind, InlineNode,
+    ItemChild, ListNode, MetaNode, QuoteChild, TableNode,
 };
 use crate::errors::SemaError;
 
@@ -116,6 +116,9 @@ fn analyze_block(
             }
             Ok(())
         }
+        BlockNode::Figure(f) => analyze_figure(f),
+        BlockNode::DefList(d) => analyze_deflist(d, footnote_defs),
+        BlockNode::Details(d) => analyze_details(d, footnote_defs),
     }
 }
 
@@ -128,6 +131,13 @@ fn analyze_list(
             list.line,
             list.col,
             "list must contain at least one item",
+        ));
+    }
+    if list.start < 1 {
+        return Err(SemaError::new(
+            list.line,
+            list.col,
+            "list start must be 1 or greater",
         ));
     }
     for item in &list.items {
@@ -156,23 +166,37 @@ fn analyze_table(
                 "row must contain at least one cell",
             ));
         }
+        let mut row_width = 0usize;
+        for cell in &row.cells {
+            if cell.colspan < 1 {
+                return Err(SemaError::new(
+                    cell.line,
+                    cell.col,
+                    "cell colspan must be 1 or greater",
+                ));
+            }
+            if cell.rowspan < 1 {
+                return Err(SemaError::new(
+                    cell.line,
+                    cell.col,
+                    "cell rowspan must be 1 or greater",
+                ));
+            }
+            row_width += cell.colspan;
+            analyze_inlines(&cell.children, footnote_defs)?;
+        }
         match width {
-            None => width = Some(row.cells.len()),
-            Some(w) if w != row.cells.len() => {
+            None => width = Some(row_width),
+            Some(w) if w != row_width => {
                 return Err(SemaError::new(
                     row.line,
                     row.col,
                     format!(
-                        "row has {} cells, expected {} to match the table's other rows",
-                        row.cells.len(),
-                        w
+                        "row spans {row_width} columns, expected {w} to match the table's other rows"
                     ),
                 ));
             }
             _ => {}
-        }
-        for cell in &row.cells {
-            analyze_inlines(&cell.children, footnote_defs)?;
         }
     }
     Ok(())
@@ -233,6 +257,7 @@ fn analyze_inline(
             }
             analyze_inlines(children, footnote_defs)
         }
+        InlineKind::Break => Ok(()),
         InlineKind::FootnoteRef(id) => {
             if !footnote_defs.contains_key(id) {
                 return Err(SemaError::new(
@@ -244,4 +269,53 @@ fn analyze_inline(
             Ok(())
         }
     }
+}
+
+
+fn analyze_figure(f: &FigureNode) -> Result<(), SemaError> {
+    if f.src.is_empty() {
+        return Err(SemaError::new(
+            f.line,
+            f.col,
+            "figure is missing a source URL",
+        ));
+    }
+    Ok(())
+}
+
+fn analyze_deflist(
+    d: &DefListNode,
+    footnote_defs: &HashMap<String, (usize, usize)>,
+) -> Result<(), SemaError> {
+    if d.entries.is_empty() {
+        return Err(SemaError::new(
+            d.line,
+            d.col,
+            "deflist must contain at least one term or desc",
+        ));
+    }
+    for entry in &d.entries {
+        match entry {
+            crate::ast::DefListEntry::Term { children, .. }
+            | crate::ast::DefListEntry::Desc { children, .. } => {
+                analyze_inlines(children, footnote_defs)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn analyze_details(
+    d: &DetailsNode,
+    footnote_defs: &HashMap<String, (usize, usize)>,
+) -> Result<(), SemaError> {
+    if d.summary.is_empty() {
+        return Err(SemaError::new(
+            d.line,
+            d.col,
+            "details is missing a summary block",
+        ));
+    }
+    analyze_inlines(&d.summary, footnote_defs)?;
+    analyze_inlines(&d.children, footnote_defs)
 }

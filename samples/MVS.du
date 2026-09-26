@@ -4,7 +4,9 @@ meta {
     version: "1.0.0"
 }
 
-p { Assume we are working with this custom struct: }
+p {
+    Assume we are working with this custom struct:
+}
 
 codeblock(lang: "tinoc") {!
 type Buffer struct {
@@ -17,9 +19,14 @@ hr {}
 
 h(1) { Read-Only (Default / None) }
 
-p { The caller retains full ownership. The function gets a read-only view and cannot modify the variable. }
+p {
+    The caller retains full ownership. The function gets a read-only view and
+    cannot modify the variable.
+}
 
-p { b{i{Syntax Exmaple:}} }
+p {
+    b{i{Syntax Exmaple:}}
+}
 
 codeblock(lang: "tinoc") {!
 // Function Definition (no keyword before 'buf')
@@ -35,7 +42,9 @@ fn main() void {
 }
 !}
 
-p { b{i{Transplied C:}} }
+p {
+    b{i{Transplied C:}}
+}
 
 codeblock(lang: "c") {!
 // Emits const + restrict pointer so GCC/Clang can aggressively optimize
@@ -53,16 +62,22 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} Modifying code{buf} inside code{print_info} triggers a compile error before C code is ever generated.
+    b{Compiler Guarantee:} Modifying code{buf} inside code{print_info} triggers
+    a compile error before C code is ever generated.
 }
 
 hr {}
 
 h(1) { In-Place Mutation (code{mut}) }
 
-p { The function receives exclusive mutable access to an existing variable in the caller's scope. }
+p {
+    The function receives exclusive mutable access to an existing variable in
+    the caller's scope.
+}
 
-p { b{i{Syntax Example:}} }
+p {
+    b{i{Syntax Example:}}
+}
 
 codeblock(lang: "tinoc") {!
 // Function Definition
@@ -78,7 +93,9 @@ fn main() void {
 }
 !}
 
-p { b{i{Transplied C:}} }
+p {
+    b{i{Transplied C:}}
+}
 
 codeblock(lang: "c") {!
 // Emits mutable restrict pointer (guarantees no pointer aliasing)
@@ -96,16 +113,22 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} The call site must pass a code{var} binding. Passing a code{let} variable to code{mut} is a compile error.
+    b{Compiler Guarantee:} The call site must pass a code{var} binding. Passing
+    a code{let} variable to code{mut} is a compile error.
 }
 
 hr {}
 
 h(1) { Ownership Move / Consume (code{move}) }
 
-p { The caller surrenders ownership of the variable to the function. The function takes responsibility for destroying the resource when it exits. }
+p {
+    The caller surrenders ownership of the variable to the function. The
+    function takes responsibility for destroying the resource when it exits.
+}
 
-p { b{i{Syntax Exmaple:}} }
+p {
+    b{i{Syntax Exmaple:}}
+}
 
 codeblock {!
 // Function Definition
@@ -123,7 +146,9 @@ fn main() {
 }
 !}
 
-p { b{i{Transplied C:}} }
+p {
+    b{i{Transplied C:}}
+}
 
 codeblock(lang: "c") {!
 void consume_buffer(Buffer buf) {
@@ -145,16 +170,23 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee}: After code{move my_buf}, the variable code{my_buf} is marked as invalidated in the compiler AST. Any subsequent access to code{my_buf} causes a compile-time error.
+    b{Compiler Guarantee}: After code{move my_buf}, the variable code{my_buf} is
+    marked as invalidated in the compiler AST. Any subsequent access to
+    code{my_buf} causes a compile-time error.
 }
 
 hr {}
 
 h(1) { Initialize / Out (code{set}) }
 
-p { The function receives uninitialized memory provided by the caller and b{must} populate it before returning. }
+p {
+    The function receives uninitialized memory provided by the caller and
+    b{must} populate it before returning.
+}
 
-p { b{i{Syntax Example:}} }
+p {
+    b{i{Syntax Example:}}
+}
 
 codeblock(lang: "tinoc") {!
 // Function Definition
@@ -174,7 +206,9 @@ fn main() void {
 }
 !}
 
-p { b{i{Transplied C:}} }
+p {
+    b{i{Transplied C:}}
+}
 
 codeblock(lang: "c") {!
 void init_default(Buffer* restrict buf, uintptr_t cap) {
@@ -192,7 +226,9 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} The compiler verifies that every field in code{buf} is assigned inside code{init_default}. Returning without initializing code{buf} triggers a compile error.
+    b{Compiler Guarantee:} The compiler verifies that every field in code{buf}
+    is assigned inside code{init_default}. Returning without initializing
+    code{buf} triggers a compile error.
 }
 
 hr {}
@@ -239,7 +275,9 @@ table {
 
 h(2) { Complete Example }
 
-p { Here is how all 4 modes look working together in a single pipeline: }
+p {
+    Here is how all 4 modes look working together in a single pipeline:
+}
 
 codeblock(lang: "tinoc") {!
 fn main() void {
@@ -260,7 +298,9 @@ fn main() void {
 }
 !}
 
-p { b{i{Transpiled C:}} }
+p {
+    b{i{Transpiled C:}}
+}
 
 codeblock(lang: "c") {!
 int main() {
@@ -274,4 +314,3 @@ int main() {
     return 0;
 }
 !}
-

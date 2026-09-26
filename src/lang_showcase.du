@@ -1,15 +1,16 @@
 meta {
-  title: "DocUP 65-Language Highlighting Verification",
-  lang: "en",
-  theme: "dark",
-  author: "DocUP Engine",
-  version: "0.2.0"
+    title: "DocUP 65-Language Highlighting Verification",
+    author: "DocUP Engine",
+    version: "0.2.0",
+    theme: "dark",
+    lang: "en"
 }
 
 h(1) { Complete 65-Language Syntax Highlighting Test Suite }
 
 p {
-  This suite validates tokenization, keywords, types, strings, comments, and line numbering across all 65 supported languages.
+    This suite validates tokenization, keywords, types, strings, comments, and
+    line numbering across all 65 supported languages.
 }
 
 toc {}
@@ -18,7 +19,10 @@ hr {}
 
 h(2) { 1. Systems & Low-Level }
 
-p { Zig }
+p {
+    Zig
+}
+
 codeblock(lang: "zig", line_numbers: true) {!
 // Zig error-union and allocator
 const std = @import("std");
@@ -28,7 +32,10 @@ pub fn main() !void {
 }
 !}
 
-p { Odin }
+p {
+    Odin
+}
+
 codeblock(lang: "odin", line_numbers: true) {!
 // Odin procedure definition
 package main
@@ -37,7 +44,10 @@ Vector2 :: struct { x, y: f32 }
 main :: proc() { fmt.println("Odin ok", 42) }
 !}
 
-p { Nim }
+p {
+    Nim
+}
+
 codeblock(lang: "nim", line_numbers: true) {!
 #[ Nim block comment ]#
 import std/strformat
@@ -46,7 +56,10 @@ type State* = object
 proc run*(s: State): bool = true
 !}
 
-p { D }
+p {
+    D
+}
+
 codeblock(lang: "d", line_numbers: true) {!
 import std.stdio;
 void main() {
@@ -55,7 +68,10 @@ void main() {
 }
 !}
 
-p { Rust }
+p {
+    Rust
+}
+
 codeblock(lang: "rust", line_numbers: true) {!
 // Rust pattern matching
 pub fn check(val: Option<i32>) -> Result<u64, &'static str> {
@@ -63,7 +79,10 @@ pub fn check(val: Option<i32>) -> Result<u64, &'static str> {
 }
 !}
 
-p { C }
+p {
+    C
+}
+
 codeblock(lang: "c", line_numbers: true) {!
 #include <stdbool.h>
 typedef unsigned long size_t;
@@ -71,7 +90,10 @@ const int MAX_LIMIT = 512;
 bool init(char* buffer, size_t len);
 !}
 
-p { C++ }
+p {
+    C++
+}
+
 codeblock(lang: "cpp", line_numbers: true) {!
 #include <concepts>
 template<typename T>
@@ -79,7 +101,10 @@ concept Numeric = std::is_integral_v<T>;
 auto add(Numeric auto a, Numeric auto b) -> decltype(a + b) { return a + b; }
 !}
 
-p { Go }
+p {
+    Go
+}
+
 codeblock(lang: "go", line_numbers: true) {!
 package main
 func Worker(done chan bool, tasks map[string]int) {
@@ -92,7 +117,10 @@ hr {}
 
 h(2) { 2. Functional & Declarative }
 
-p { Haskell }
+p {
+    Haskell
+}
+
 codeblock(lang: "haskell", line_numbers: true) {!
 -- Haskell type signature and monad
 safeHead :: [a] -> Maybe a
@@ -100,14 +128,20 @@ safeHead [] = Nothing
 safeHead (x:_) = Just x
 !}
 
-p { OCaml }
+p {
+    OCaml
+}
+
 codeblock(lang: "ocaml", line_numbers: true) {!
 (* OCaml variant pattern *)
 type 'a tree = Leaf | Node of 'a * 'a tree * 'a tree
 let rec depth = function Leaf -> 0 | Node (_, l, r) -> 1 + max (depth l) (depth r)
 !}
 
-p { Elixir }
+p {
+    Elixir
+}
+
 codeblock(lang: "elixir", line_numbers: true) {!
 defmodule Calc do
   @impl true
@@ -115,21 +149,30 @@ defmodule Calc do
 end
 !}
 
-p { Erlang }
+p {
+    Erlang
+}
+
 codeblock(lang: "erlang", line_numbers: true) {!
 % Erlang actor loop
 loop() ->
     receive {msg, From} -> From ! ok, loop(); stop -> ok end.
 !}
 
-p { Clojure }
+p {
+    Clojure
+}
+
 codeblock(lang: "clojure", line_numbers: true) {!
 ;; Clojure thread-safe state
 (defn update-state [state-atom delta]
   (swap! state-atom + delta))
 !}
 
-p { F# }
+p {
+    F#
+}
+
 codeblock(lang: "fsharp", line_numbers: true) {!
 // F# Async workflow
 let fetchAsync (url: string) : Async<string> = async {
@@ -137,7 +180,10 @@ let fetchAsync (url: string) : Async<string> = async {
 }
 !}
 
-p { Common Lisp }
+p {
+    Common Lisp
+}
+
 codeblock(lang: "lisp", line_numbers: true) {!
 ;; Common Lisp defun
 (defun square (n)
@@ -145,14 +191,20 @@ codeblock(lang: "lisp", line_numbers: true) {!
   (* n n))
 !}
 
-p { Scheme }
+p {
+    Scheme
+}
+
 codeblock(lang: "scheme", line_numbers: true) {!
 ;; Scheme recursive factorial
 (define (fact n)
   (if (<= n 1) 1 (* n (fact (- n 1)))))
 !}
 
-p { Elm }
+p {
+    Elm
+}
+
 codeblock(lang: "elm", line_numbers: true) {!
 -- Elm model-view-update
 type Msg = Increment | Decrement
@@ -160,7 +212,10 @@ update : Msg -> Int -> Int
 update msg model = case msg of Increment -> model + 1; Decrement -> model - 1
 !}
 
-p { PureScript }
+p {
+    PureScript
+}
+
 codeblock(lang: "purescript", line_numbers: true) {!
 -- PureScript effectful computation
 module Main where
@@ -169,7 +224,10 @@ main :: Effect Unit
 main = pure unit
 !}
 
-p { Standard ML }
+p {
+    Standard ML
+}
+
 codeblock(lang: "sml", line_numbers: true) {!
 (* SML signature and structure *)
 signature QUEUE = sig type 'a queue val empty : 'a queue end;
@@ -180,7 +238,10 @@ hr {}
 
 h(2) { 3. JVM, Mobile & Enterprise }
 
-p { Java }
+p {
+    Java
+}
+
 codeblock(lang: "java", line_numbers: true) {!
 package com.demo;
 public record Point(int x, int y) {
@@ -188,7 +249,10 @@ public record Point(int x, int y) {
 }
 !}
 
-p { Kotlin }
+p {
+    Kotlin
+}
+
 codeblock(lang: "kotlin", line_numbers: true) {!
 // Kotlin coroutine flow
 fun fetchEvents(): Flow<String> = flow {
@@ -197,21 +261,30 @@ fun fetchEvents(): Flow<String> = flow {
 }
 !}
 
-p { Scala }
+p {
+    Scala
+}
+
 codeblock(lang: "scala", line_numbers: true) {!
 sealed trait Expr
 case class Number(n: Int) extends Expr
 case class Sum(e1: Expr, e2: Expr) extends Expr
 !}
 
-p { C# }
+p {
+    C#
+}
+
 codeblock(lang: "csharp", line_numbers: true) {!
 using System.Threading.Tasks;
 public record User(int Id, string Name);
 public async Task<User> FetchAsync() => await Task.FromResult(new User(1, "docup"));
 !}
 
-p { Swift }
+p {
+    Swift
+}
+
 codeblock(lang: "swift", line_numbers: true) {!
 actor BankStore {
     private var balance: Double = 0.0
@@ -219,7 +292,10 @@ actor BankStore {
 }
 !}
 
-p { Dart }
+p {
+    Dart
+}
+
 codeblock(lang: "dart", line_numbers: true) {!
 Future<String> fetchData() async {
     final result = await Future.delayed(Duration(seconds: 1), () => "payload");
@@ -227,21 +303,30 @@ Future<String> fetchData() async {
 }
 !}
 
-p { Groovy }
+p {
+    Groovy
+}
+
 codeblock(lang: "groovy", line_numbers: true) {!
 def static calculate(int x, int y = 10) {
     return (x * y) + 42
 }
 !}
 
-p { Apex }
+p {
+    Apex
+}
+
 codeblock(lang: "apex", line_numbers: true) {!
 public with sharing class LeadProcessor {
     public static void run(List<Lead> leads) { update leads; }
 }
 !}
 
-p { Visual Basic }
+p {
+    Visual Basic
+}
+
 codeblock(lang: "vb", line_numbers: true) {!
 ' VB.NET Module
 Module App
@@ -255,14 +340,20 @@ hr {}
 
 h(2) { 4. Scripting & Dynamic Languages }
 
-p { Python }
+p {
+    Python
+}
+
 codeblock(lang: "python", line_numbers: true) {!
 # Python async generator
 async def produce(n: int) -> list[int]:
     return [i * 2 for i in range(n) if i % 2 == 0]
 !}
 
-p { Ruby }
+p {
+    Ruby
+}
+
 codeblock(lang: "ruby", line_numbers: true) {!
 # Ruby module definition
 module Cacheable
@@ -272,7 +363,10 @@ module Cacheable
 end
 !}
 
-p { PHP }
+p {
+    PHP
+}
+
 codeblock(lang: "php", line_numbers: true) {!
 <?php
 declare(strict_types=1);
@@ -281,7 +375,10 @@ readonly class Config {
 }
 !}
 
-p { Perl }
+p {
+    Perl
+}
+
 codeblock(lang: "perl", line_numbers: true) {!
 # Perl package subroutine
 package Data::Handler;
@@ -289,7 +386,10 @@ use strict;
 sub process { my ($self, $val) = @_; return$val // 0; }
 !}
 
-p { Lua }
+p {
+    Lua
+}
+
 codeblock(lang: "lua", line_numbers: true) {!
 -- Lua closure counter
 local function createCounter(start)
@@ -298,7 +398,10 @@ local function createCounter(start)
 end
 !}
 
-p { R }
+p {
+    R
+}
+
 codeblock(lang: "r", line_numbers: true) {!
 # R statistical function
 calc_mean <- function(vec) {
@@ -307,7 +410,10 @@ calc_mean <- function(vec) {
 }
 !}
 
-p { Julia }
+p {
+    Julia
+}
+
 codeblock(lang: "julia", line_numbers: true) {!
 # Julia parametric struct
 struct Point{T <: Real}
@@ -316,7 +422,10 @@ struct Point{T <: Real}
 end
 !}
 
-p { Crystal }
+p {
+    Crystal
+}
+
 codeblock(lang: "crystal", line_numbers: true) {!
 # Crystal typed class
 class Worker
@@ -329,13 +438,19 @@ hr {}
 
 h(2) { 5. Web, Markup & Config }
 
-p { JavaScript }
+p {
+    JavaScript
+}
+
 codeblock(lang: "javascript", line_numbers: true) {!
 const stream = await fetch("/api/data");
 const { results } = await stream.json();
 !}
 
-p { TypeScript }
+p {
+    TypeScript
+}
+
 codeblock(lang: "typescript", line_numbers: true) {!
 interface Config<T extends object> {
     readonly endpoint: string;
@@ -343,7 +458,10 @@ interface Config<T extends object> {
 }
 !}
 
-p { HTML }
+p {
+    HTML
+}
+
 codeblock(lang: "html", line_numbers: true) {!
 <!DOCTYPE html>
 <html lang="en">
@@ -351,7 +469,10 @@ codeblock(lang: "html", line_numbers: true) {!
 </html>
 !}
 
-p { XML }
+p {
+    XML
+}
+
 codeblock(lang: "xml", line_numbers: true) {!
 <!-- XML configuration -->
 <server port="8080" secure="true">
@@ -359,7 +480,10 @@ codeblock(lang: "xml", line_numbers: true) {!
 </server>
 !}
 
-p { CSS }
+p {
+    CSS
+}
+
 codeblock(lang: "css", line_numbers: true) {!
 :root {
   --theme-pad: 12px;
@@ -368,7 +492,10 @@ codeblock(lang: "css", line_numbers: true) {!
 }
 !}
 
-p { SCSS }
+p {
+    SCSS
+}
+
 codeblock(lang: "scss", line_numbers: true) {!
 $primary-color: #0969da;
 @mixin card($border: 1px) {
@@ -376,7 +503,10 @@ $primary-color: #0969da;
 }
 !}
 
-p { JSON }
+p {
+    JSON
+}
+
 codeblock(lang: "json", line_numbers: true) {!
 {
   "name": "docup",
@@ -386,7 +516,10 @@ codeblock(lang: "json", line_numbers: true) {!
 }
 !}
 
-p { YAML }
+p {
+    YAML
+}
+
 codeblock(lang: "yaml", line_numbers: true) {!
 # YAML config
 server:
@@ -395,7 +528,10 @@ server:
   retries: 3
 !}
 
-p { TOML }
+p {
+    TOML
+}
+
 codeblock(lang: "toml", line_numbers: true) {!
 # Cargo TOML
 [package]
@@ -404,7 +540,10 @@ version = "0.2.0"
 line_numbers = true
 !}
 
-p { INI }
+p {
+    INI
+}
+
 codeblock(lang: "ini", line_numbers: true) {!
 ; INI settings
 [database]
@@ -413,14 +552,20 @@ port = 5432
 ssl = on
 !}
 
-p { GraphQL }
+p {
+    GraphQL
+}
+
 codeblock(lang: "graphql", line_numbers: true) {!
 query GetUserData($userId: ID!) {
   user(id: $userId) { id username role }
 }
 !}
 
-p { Markdown }
+p {
+    Markdown
+}
+
 codeblock(lang: "markdown", line_numbers: true) {!
 <!-- Markdown comment -->
 # Title of Page
@@ -431,7 +576,10 @@ hr {}
 
 h(2) { 6. Shell, Build & DevOps }
 
-p { Bash }
+p {
+    Bash
+}
+
 codeblock(lang: "bash", line_numbers: true) {!
 #!/usr/bin/env bash
 set -e
@@ -439,14 +587,20 @@ readonly TARGET_DIR="./dist"
 for file in "$TARGET_DIR"/*.tar.gz; do echo "Extracting $file"; done
 !}
 
-p { PowerShell }
+p {
+    PowerShell
+}
+
 codeblock(lang: "powershell", line_numbers: true) {!
 <# PowerShell script #>
 param([string]$Env = "Production", [int]$Nodes = 5)
 Write-Host "Running in $Env with$Nodes nodes"
 !}
 
-p { Batch }
+p {
+    Batch
+}
+
 codeblock(lang: "batch", line_numbers: true) {!
 :: Batch script setup
 @echo off
@@ -454,7 +608,10 @@ set RUN_MODE=release
 if exist build\ rd /s /q build\
 !}
 
-p { Dockerfile }
+p {
+    Dockerfile
+}
+
 codeblock(lang: "dockerfile", line_numbers: true) {!
 FROM alpine:latest AS base
 WORKDIR /app
@@ -462,7 +619,10 @@ COPY . .
 ENTRYPOINT ["/bin/sh"]
 !}
 
-p { Makefile }
+p {
+    Makefile
+}
+
 codeblock(lang: "makefile", line_numbers: true) {!
 # Makefile rule
 CC ?= clang
@@ -470,7 +630,10 @@ build:
 	$(CC) -O2 -o bin/app src/main.c
 !}
 
-p { CMake }
+p {
+    CMake
+}
+
 codeblock(lang: "cmake", line_numbers: true) {!
 # CMake build definition
 cmake_minimum_required(VERSION 3.20)
@@ -478,7 +641,10 @@ project(DocUP LANGUAGES CXX)
 add_executable(docup src/main.cpp)
 !}
 
-p { Terraform / HCL }
+p {
+    Terraform / HCL
+}
+
 codeblock(lang: "terraform", line_numbers: true) {!
 # Terraform AWS provider
 provider "aws" { region = "us-east-1" }
@@ -489,7 +655,10 @@ hr {}
 
 h(2) { 7. Databases & Blockchain }
 
-p { SQL }
+p {
+    SQL
+}
+
 codeblock(lang: "sql", line_numbers: true) {!
 -- SQL case-insensitive query
 SELECT u.id, COUNT(o.id) AS total
@@ -500,7 +669,10 @@ GROUP BY u.id
 LIMIT 20;
 !}
 
-p { Solidity }
+p {
+    Solidity
+}
+
 codeblock(lang: "solidity", line_numbers: true) {!
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
@@ -514,7 +686,10 @@ hr {}
 
 h(2) { 8. Hardware Description & Assembly }
 
-p { x86_64 / ARM Assembly }
+p {
+    x86_64 / ARM Assembly
+}
+
 codeblock(lang: "assembly", line_numbers: true) {!
 ; Assembly routine
 section .text
@@ -525,7 +700,10 @@ _start:
     syscall
 !}
 
-p { VHDL }
+p {
+    VHDL
+}
+
 codeblock(lang: "vhdl", line_numbers: true) {!
 -- VHDL Entity
 library IEEE;
@@ -535,7 +713,10 @@ entity mux is
 end mux;
 !}
 
-p { Verilog }
+p {
+    Verilog
+}
+
 codeblock(lang: "verilog", line_numbers: true) {!
 // Verilog module
 module counter(input wire clk, input wire rst, output reg [3:0] q);
@@ -544,7 +725,10 @@ module counter(input wire clk, input wire rst, output reg [3:0] q);
 endmodule
 !}
 
-p { SystemVerilog }
+p {
+    SystemVerilog
+}
+
 codeblock(lang: "systemverilog", line_numbers: true) {!
 // SystemVerilog interface
 interface BusIf(input logic clk);
@@ -558,7 +742,10 @@ hr {}
 
 h(2) { 9. Classical & Scientific }
 
-p { COBOL }
+p {
+    COBOL
+}
+
 codeblock(lang: "cobol", line_numbers: true) {!
 *> COBOL display program
 IDENTIFICATION DIVISION.
@@ -568,7 +755,10 @@ PROCEDURE DIVISION.
     STOP RUN.
 !}
 
-p { Fortran }
+p {
+    Fortran
+}
+
 codeblock(lang: "fortran", line_numbers: true) {!
 ! Modern Fortran loop
 program test
@@ -580,7 +770,10 @@ program test
 end program test
 !}
 
-p { Pascal }
+p {
+    Pascal
+}
+
 codeblock(lang: "pascal", line_numbers: true) {!
 // Pascal program
 program Test;
@@ -591,7 +784,10 @@ begin
 end.
 !}
 
-p { Ada }
+p {
+    Ada
+}
+
 codeblock(lang: "ada", line_numbers: true) {!
 -- Ada procedure
 with Ada.Text_IO;

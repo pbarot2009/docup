@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode,
-    FootnoteDefNode, HRNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode,
-    ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
-    RawNode, RowNode, TOCNode, TableNode,
+    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DefListEntry,
+    DefListNode, DetailsNode, DocumentNode, FigureNode, FootnoteDefNode, HRNode, HeadingNode,
+    ImageNode, IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode, MathBlockNode,
+    MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TOCNode, TableNode,
 };
 use crate::errors::{LexError, ParseError};
 use crate::lexer::{Lexer, Token, TokenType};
@@ -56,7 +56,7 @@ impl<'a> Parser<'a> {
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include), got {:?}",
+                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include, figure, deflist, details), got {:?}",
                     self.cur.value
                 )));
             }
@@ -122,6 +122,18 @@ impl<'a> Parser<'a> {
                 "include" => {
                     let include = self.parse_include()?;
                     doc.blocks.push(BlockNode::Include(include));
+                }
+                "figure" => {
+                    let figure = self.parse_figure()?;
+                    doc.blocks.push(BlockNode::Figure(figure));
+                }
+                "deflist" => {
+                    let deflist = self.parse_deflist()?;
+                    doc.blocks.push(BlockNode::DefList(deflist));
+                }
+                "details" => {
+                    let details = self.parse_details()?;
+                    doc.blocks.push(BlockNode::Details(details));
                 }
                 _ => {
                     return Err(self.errorf(format!("unknown block type {:?}", self.cur.value)));
@@ -218,8 +230,13 @@ impl<'a> Parser<'a> {
             self.next()?;
             return Ok(v);
         }
+        if self.cur.token_type == TokenType::Number {
+            let v = self.cur.value.clone();
+            self.next()?;
+            return Ok(v);
+        }
         Err(self.errorf(format!(
-            "expected string or boolean value, got {:?}",
+            "expected string, boolean, or number value, got {:?}",
             self.cur.value
         )))
     }
@@ -278,6 +295,7 @@ impl<'a> Parser<'a> {
         self.next()?; // consume 'callout'
         let (attrs, _) = self.parse_attrs()?;
         let kind_str = attrs.get("type").map(|s| s.as_str()).unwrap_or("note");
+        let title = attrs.get("title").cloned().unwrap_or_default();
         let kind = match CalloutKind::parse(kind_str) {
             Some(k) => k,
             None => {
@@ -298,6 +316,7 @@ impl<'a> Parser<'a> {
             line,
             col,
             kind,
+            title,
             children,
         })
     }
@@ -438,6 +457,12 @@ impl<'a> Parser<'a> {
 
         self.lex.consume_ident_only(ident);
         self.lex.consume_lbrace()?;
+
+        if ident == "br" {
+            let children = self.parse_prose_until_rbrace()?;
+            let _ = children;
+            return Ok(InlineNode::new(line, col, InlineKind::Break));
+        }
 
         if ident == "code" || ident == "m" {
             let is_math = ident == "m";
@@ -594,10 +619,15 @@ impl<'a> Parser<'a> {
         }
         self.expect(TokenType::RBrace, "'}' to close list")?;
         let ordered = attrs.get("ordered").map(|v| v == "true").unwrap_or(false);
+        let start = attrs
+            .get("start")
+            .and_then(|s| s.parse::<usize>().ok())
+            .unwrap_or(1);
         Ok(ListNode {
             line,
             col,
             ordered,
+            start,
             items,
         })
     }
@@ -701,6 +731,9 @@ impl<'a> Parser<'a> {
         let line = self.cur.line;
         let col = self.cur.col;
         self.next()?; // consume 'quote'
+        let (attrs, _) = self.parse_attrs()?;
+        let cite = attrs.get("cite").cloned().unwrap_or_default();
+        let author = attrs.get("author").cloned().unwrap_or_default();
         if self.cur.token_type != TokenType::LBrace {
             return Err(self.errorf(format!(
                 "expected '{{' after quote, got {:?}",
@@ -711,6 +744,8 @@ impl<'a> Parser<'a> {
         Ok(QuoteNode {
             line,
             col,
+            cite,
+            author,
             children,
         })
     }
@@ -782,13 +817,16 @@ impl<'a> Parser<'a> {
         self.next()?; // consume '('
         let src_tok = self.expect(TokenType::String, "image source URL")?;
         let mut alt = String::new();
+        let mut href = String::new();
         while self.cur.token_type == TokenType::Comma {
             self.next()?;
             let key = self.expect(TokenType::Ident, "attribute name")?;
             self.expect(TokenType::Colon, "':'")?;
-            let val = self.expect(TokenType::String, "attribute value")?;
-            if key.value == "alt" {
-                alt = val.value;
+            let val = self.expect_attr_value()?;
+            match key.value.as_str() {
+                "alt" => alt = val,
+                "href" => href = val,
+                _ => {}
             }
         }
         self.expect(TokenType::RParen, "')'")?;
@@ -797,6 +835,7 @@ impl<'a> Parser<'a> {
             col,
             src: src_tok.value,
             alt,
+            href,
         })
     }
 
@@ -804,7 +843,8 @@ impl<'a> Parser<'a> {
         let line = self.cur.line;
         let col = self.cur.col;
         self.next()?; // consume 'table'
-        let _ = self.parse_attrs()?;
+        let (attrs, _) = self.parse_attrs()?;
+        let caption = attrs.get("caption").cloned().unwrap_or_default();
         self.expect(TokenType::LBrace, "'{' after table")?;
 
         let mut rows = Vec::new();
@@ -826,7 +866,12 @@ impl<'a> Parser<'a> {
                 "table must contain at least one row",
             ));
         }
-        Ok(TableNode { line, col, rows })
+        Ok(TableNode {
+            line,
+            col,
+            caption,
+            rows,
+        })
     }
 
     fn parse_row(&mut self) -> Result<RowNode, ParseError> {
@@ -861,6 +906,15 @@ impl<'a> Parser<'a> {
         let line = self.cur.line;
         let col = self.cur.col;
         self.next()?; // consume 'cell'
+        let (attrs, _) = self.parse_attrs()?;
+        let colspan = attrs
+            .get("colspan")
+            .and_then(|s| s.parse::<usize>().ok())
+            .unwrap_or(1);
+        let rowspan = attrs
+            .get("rowspan")
+            .and_then(|s| s.parse::<usize>().ok())
+            .unwrap_or(1);
         if self.cur.token_type != TokenType::LBrace {
             return Err(self.errorf(format!(
                 "expected '{{' after cell, got {:?}",
@@ -871,6 +925,130 @@ impl<'a> Parser<'a> {
         Ok(CellNode {
             line,
             col,
+            colspan,
+            rowspan,
+            children,
+        })
+    }
+
+    fn parse_figure(&mut self) -> Result<FigureNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'figure'
+        if self.cur.token_type != TokenType::LParen {
+            return Err(self.errorf(format!(
+                "expected '(' after figure, got {:?}",
+                self.cur.value
+            )));
+        }
+        self.next()?;
+        let src_tok = self.expect(TokenType::String, "figure source URL")?;
+        let mut alt = String::new();
+        let mut caption = String::new();
+        while self.cur.token_type == TokenType::Comma {
+            self.next()?;
+            let key = self.expect(TokenType::Ident, "attribute name")?;
+            self.expect(TokenType::Colon, "':'")?;
+            let val = self.expect_attr_value()?;
+            match key.value.as_str() {
+                "alt" => alt = val,
+                "caption" => caption = val,
+                _ => {}
+            }
+        }
+        self.expect(TokenType::RParen, "')'")?;
+        Ok(FigureNode {
+            line,
+            col,
+            src: src_tok.value,
+            alt,
+            caption,
+        })
+    }
+
+    fn parse_deflist(&mut self) -> Result<DefListNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'deflist'
+        self.expect(TokenType::LBrace, "'{' after deflist")?;
+        let mut entries = Vec::new();
+        while self.cur.token_type != TokenType::RBrace {
+            if self.cur.token_type != TokenType::Ident
+                || (self.cur.value != "term" && self.cur.value != "desc")
+            {
+                return Err(self.errorf(format!(
+                    "expected 'term' or 'desc' inside deflist, got {:?}",
+                    self.cur.value
+                )));
+            }
+            let is_term = self.cur.value == "term";
+            let eline = self.cur.line;
+            let ecol = self.cur.col;
+            self.next()?;
+            if self.cur.token_type != TokenType::LBrace {
+                return Err(self.errorf(format!(
+                    "expected '{{' after {}, got {:?}",
+                    if is_term { "term" } else { "desc" },
+                    self.cur.value
+                )));
+            }
+            let children = self.parse_prose_block()?;
+            if is_term {
+                entries.push(DefListEntry::Term {
+                    line: eline,
+                    col: ecol,
+                    children,
+                });
+            } else {
+                entries.push(DefListEntry::Desc {
+                    line: eline,
+                    col: ecol,
+                    children,
+                });
+            }
+        }
+        self.expect(TokenType::RBrace, "'}' to close deflist")?;
+        Ok(DefListNode {
+            line,
+            col,
+            entries,
+        })
+    }
+
+    fn parse_details(&mut self) -> Result<DetailsNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?; // consume 'details'
+        let (attrs, _) = self.parse_attrs()?;
+        let open = attrs.get("open").map(|v| v == "true").unwrap_or(false);
+        if self.cur.token_type != TokenType::LBrace {
+            return Err(self.errorf(format!(
+                "expected '{{' after details, got {:?}",
+                self.cur.value
+            )));
+        }
+        let mut summary = Vec::new();
+        let children;
+        if self.lex.at_raw_ident("summary") {
+            self.next()?; // Ident 'summary'
+            self.next()?; // consume 'summary'; cur should be '{'
+            if self.cur.token_type != TokenType::LBrace {
+                return Err(self.errorf(format!(
+                    "expected '{{' after summary, got {:?}",
+                    self.cur.value
+                )));
+            }
+            summary = self.parse_prose_block()?;
+            children = self.parse_prose_until_rbrace()?;
+            self.next()?;
+        } else {
+            children = self.parse_prose_block()?;
+        }
+        Ok(DetailsNode {
+            line,
+            col,
+            open,
+            summary,
             children,
         })
     }

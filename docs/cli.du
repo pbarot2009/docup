@@ -1,6 +1,8 @@
 h(2, id: "cli") { 2. Command line }
 
-p { The binary is named code{docup}. Commands: }
+p {
+    The binary is named code{docup}. Commands:
+}
 
 codeblock(lang: "text", file: "usage", line_numbers: true) {!
 docup build <input.du> [flags]
@@ -12,46 +14,62 @@ docup version
 docup help
 !}
 
-p { With no command, the compiler prints help and exits 1. code{docup -v}, code{docup --version}, and code{docup version} print the version string. code{docup -h}, code{docup --help}, and code{docup help} print usage. }
+p {
+    With no command, the compiler prints help and exits 1. code{docup -v},
+    code{docup --version}, and code{docup version} print the version string.
+    code{docup -h}, code{docup --help}, and code{docup help} print usage.
+}
 
-p { Color in the terminal is on when stdout is a terminal and code{NO_COLOR} is unset. Otherwise ANSI codes are omitted. }
+p {
+    Color in the terminal is on when stdout is a terminal and code{NO_COLOR} is
+    unset. Otherwise ANSI codes are omitted.
+}
 
 h(3, id: "flags") { 2.1 Shared flags }
 
-p { Used by code{build} and code{watch}: }
-
-table {
-  row(header: true) {
-    cell { Flag }
-    cell { Meaning }
-  }
-  row {
-    cell { code{-o}, code{--output} }
-    cell { Output HTML path. Default is the input path with the extension changed to .html. If the input has no extension, code{.html} is appended. }
-  }
-  row {
-    cell { code{-s}, code{--style} }
-    cell { Path to a CSS file. Contents are copied into code{<style id="docup-custom-css">}. }
-  }
-  row {
-    cell { code{-p}, code{--port} }
-    cell { Watch-mode port only. Default 8080. }
-  }
-  row {
-    cell { code{-v}, code{--verbose} }
-    cell { Print elapsed time for each build stage. On build and watch, code{-V} is accepted as an alias for code{-v}. }
-  }
-  row {
-    cell { code{-q}, code{--quiet} }
-    cell { Hide stage progress and the success summary. }
-  }
+p {
+    Used by code{build} and code{watch}:
 }
 
-p { code{--verbose} and code{--quiet} cannot be used together. }
+table {
+    row(header: true) {
+        cell { Flag }
+        cell { Meaning }
+    }
+    row {
+        cell { code{-o}, code{--output} }
+        cell { Output HTML path. Default is the input path with the extension changed to .html. If the input has no extension, code{.html} is appended. }
+    }
+    row {
+        cell { code{-s}, code{--style} }
+        cell { Path to a CSS file. Contents are copied into code{<style id="docup-custom-css">}. }
+    }
+    row {
+        cell { code{-p}, code{--port} }
+        cell { Watch-mode port only. Default 8080. }
+    }
+    row {
+        cell { code{-v}, code{--verbose} }
+        cell { Print elapsed time for each build stage. On build and watch, code{-V} is accepted as an alias for code{-v}. }
+    }
+    row {
+        cell { code{-q}, code{--quiet} }
+        cell { Hide stage progress and the success summary. }
+    }
+}
+
+p {
+    code{--verbose} and code{--quiet} cannot be used together.
+}
 
 h(3, id: "build") { 2.2 build }
 
-p { Compiles once and writes the HTML file. A missing or unreadable input file is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If the input does not use a .du extension, the compiler prints a warning and continues. }
+p {
+    Compiles once and writes the HTML file. A missing or unreadable input file
+    is a fatal error. An empty file (only ASCII whitespace) is a fatal error. If
+    the input does not use a .du extension, the compiler prints a warning and
+    continues.
+}
 
 codeblock(lang: "text") {!
 docup build report.du
@@ -61,45 +79,64 @@ docup build report.du --verbose
 
 h(3, id: "watch") { 2.3 watch }
 
-p { Compiles once, writes the output file, then binds code{127.0.0.1:<port>}. It polls watched files every 250 ms. On change it rebuilds. A failed rebuild leaves the last page in place and keeps watching. }
+p {
+    Compiles once, writes the output file, then binds code{127.0.0.1:<port>}. It
+    polls watched files every 250 ms. On change it rebuilds. A failed rebuild
+    leaves the last page in place and keeps watching.
+}
 
-p { If the first compile fails, the server still starts. The page body is a short HTML error placeholder until a later compile succeeds. }
+p {
+    If the first compile fails, the server still starts. The page body is a
+    short HTML error placeholder until a later compile succeeds.
+}
 
 codeblock(lang: "text") {!
 docup watch report.du
 docup watch report.du --port 3000
 !}
 
-p { Watched paths are the root source file, every successfully resolved include, and the code{--style} file if one was given. }
+p {
+    Watched paths are the root source file, every successfully resolved include,
+    and the code{--style} file if one was given.
+}
 
 h(3, id: "dev-server") { 2.4 Dev server }
 
-p { The watch server accepts GET only. Other methods return 405. }
-
-table {
-  row(header: true) {
-    cell { Path }
-    cell { Response }
-  }
-  row {
-    cell { code{/}, code{/index.html} }
-    cell { Current compiled HTML, with a live-reload EventSource script inserted before code{</body>}. }
-  }
-  row {
-    cell { code{/docup-events} }
-    cell { Server-sent events. A rebuild writes code{data: reload}. }
-  }
-  row {
-    cell { any other path }
-    cell { File under the input file's directory, if it exists. Otherwise 404. }
-  }
+p {
+    The watch server accepts GET only. Other methods return 405.
 }
 
-p { Asset Content-Type is chosen from the file extension: html, css, js, json, png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf. Anything else is code{application/octet-stream}. }
+table {
+    row(header: true) {
+        cell { Path }
+        cell { Response }
+    }
+    row {
+        cell { code{/}, code{/index.html} }
+        cell { Current compiled HTML, with a live-reload EventSource script inserted before code{</body>}. }
+    }
+    row {
+        cell { code{/docup-events} }
+        cell { Server-sent events. A rebuild writes code{data: reload}. }
+    }
+    row {
+        cell { any other path }
+        cell { File under the input file's directory, if it exists. Otherwise 404. }
+    }
+}
+
+p {
+    Asset Content-Type is chosen from the file extension: html, css, js, json,
+    png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf. Anything else is
+    code{application/octet-stream}.
+}
 
 h(3, id: "fmt") { 2.5 fmt }
 
-p { Parses a .du file and writes it back in canonical form. Default path is the current directory. }
+p {
+    Parses a .du file and writes it back in canonical form. Default path is the
+    current directory.
+}
 
 codeblock(lang: "text") {!
 docup fmt
@@ -110,34 +147,65 @@ docup fmt index.du --stdout
 !}
 
 list {
-  item { With no flags, files that differ are rewritten. }
-  item { code{--check} prints paths that need formatting and exits 1 if any do. Nothing is written. }
-  item { code{--stdout} prints one formatted file to stdout. It cannot be used on a directory. }
-  item { code{--check} and code{--stdout} cannot be used together. }
+    item { With no flags, files that differ are rewritten. }
+    item {
+        code{--check} prints paths that need formatting and exits 1 if any do.
+        Nothing is written.
+    }
+    item {
+        code{--stdout} prints one formatted file to stdout. It cannot be used on
+        a directory.
+    }
+    item { code{--check} and code{--stdout} cannot be used together. }
 }
 
-p { Directory walks skip hidden names and the folders code{target}, code{node_modules}, and code{dist}. Only files with a .du extension are formatted. }
+p {
+    Directory walks skip hidden names and the folders code{target},
+    code{node_modules}, and code{dist}. Only files with a .du extension are
+    formatted.
+}
 
-p { Canonical form: four-space indent, meta keys in a fixed order then alphabetical leftovers, blank line between top-level blocks, prose wrapped near 80 columns. code{fmt} parses first; a parse error is reported and that file is skipped. }
+p {
+    Canonical form: four-space indent, meta keys in a fixed order then
+    alphabetical leftovers, blank line between top-level blocks, prose wrapped
+    near 80 columns. code{fmt} parses first; a parse error is reported and that
+    file is skipped.
+}
 
 h(3, id: "new-cmd") { 2.6 new }
 
-p { Creates a directory and writes a starter project. The directory must not exist, or must be empty. }
+p {
+    Creates a directory and writes a starter project. The directory must not
+    exist, or must be empty.
+}
 
 codeblock(lang: "text") {!
 docup new my-doc
 docup new my-doc --title "Report" --author "Name" --theme textbook --desc "Notes" -y
 !}
 
-p { Flags: code{--title}, code{--author}, code{--theme}, code{--desc}, and code{-y} / code{--yes} to skip prompts. Without code{--yes}, and when stdin and stdout are terminals, the command asks for title, author, theme, description, and whether to include sample sections. }
+p {
+    Flags: code{--title}, code{--author}, code{--theme}, code{--desc}, and
+    code{-y} / code{--yes} to skip prompts. Without code{--yes}, and when stdin
+    and stdout are terminals, the command asks for title, author, theme,
+    description, and whether to include sample sections.
+}
 
 h(3, id: "init-cmd") { 2.7 init }
 
-p { Same files as code{new}, written into the current directory. Aborts if code{index.du} already exists. }
+p {
+    Same files as code{new}, written into the current directory. Aborts if
+    code{index.du} already exists.
+}
 
 codeblock(lang: "text") {!
 docup init
 docup init --theme nord -y
 !}
 
-p { Files written when missing: code{index.du}, code{style.css}, code{.gitignore}, code{README.md}. Theme names accepted by these commands: code{textbook}, code{default}, code{sepia}, code{nord}, code{solarized}. An unknown theme falls back to textbook. }
+p {
+    Files written when missing: code{index.du}, code{style.css},
+    code{.gitignore}, code{README.md}. Theme names accepted by these commands:
+    code{textbook}, code{default}, code{sepia}, code{nord}, code{solarized}. An
+    unknown theme falls back to textbook.
+}

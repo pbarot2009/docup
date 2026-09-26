@@ -1,44 +1,55 @@
 h(2, id: "codeblock") { 9. codeblock }
 
-p { Fenced source. After the attribute list, the body is a raw scope (section 3.5). }
+p {
+    Fenced source. After the attribute list, the body is a raw scope (section
+    3.5).
+}
 
 codeblock(lang: "text") {!
 codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5")
 !}
 
-p { Follow the attribute list with a raw scope. The live block in section 9 is the same construct. }
-
-p { Attributes: }
-
-table {
-  row(header: true) {
-    cell { Key }
-    cell { Type }
-    cell { Effect }
-  }
-  row {
-    cell { lang }
-    cell { string }
-    cell { Language label, code{language-*} class, and highlight grammar. Empty means no language class. }
-  }
-  row {
-    cell { file }
-    cell { string }
-    cell { Label in the header. }
-  }
-  row {
-    cell { line_numbers }
-    cell { boolean }
-    cell { Show line numbers. Default false. }
-  }
-  row {
-    cell { highlight }
-    cell { string }
-    cell { Line numbers to mark. Comma-separated items, each a number or an inclusive range written start-hyphen-end. }
-  }
+p {
+    Follow the attribute list with a raw scope. The live block in section 9 is
+    the same construct.
 }
 
-p { Content empty after trim is a semantic error. The output header always includes a Copy button. }
+p {
+    Attributes:
+}
+
+table {
+    row(header: true) {
+        cell { Key }
+        cell { Type }
+        cell { Effect }
+    }
+    row {
+        cell { lang }
+        cell { string }
+        cell { Language label, code{language-*} class, and highlight grammar. Empty means no language class. }
+    }
+    row {
+        cell { file }
+        cell { string }
+        cell { Label in the header. }
+    }
+    row {
+        cell { line_numbers }
+        cell { boolean }
+        cell { Show line numbers. Default false. }
+    }
+    row {
+        cell { highlight }
+        cell { string }
+        cell { Line numbers to mark. Comma-separated items, each a number or an inclusive range written start-hyphen-end. }
+    }
+}
+
+p {
+    Content empty after trim is a semantic error. The output header always
+    includes a Copy button.
+}
 
 codeblock(lang: "rust", file: "parse_heading.rs", line_numbers: true, highlight: "1,4-6") {!
 fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
@@ -52,32 +63,58 @@ fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
 }
 !}
 
-
 h(3, id: "highlight-langs") { 9.1 Highlight languages }
 
-p { code{lang} is normalized to a profile. Unknown names still get a generic highlighter (line comments with code{//} or code{#}, block comments, quoted strings). Aliases and extensions map to the same profile: code{rs} is rust, code{py} is python, code{c++} is cpp. }
-
-p { Profiles with keyword lists include: }
-
-list {
-  item { Systems: rust, c, cpp, go, zig, odin, nim, d, assembly }
-  item { Functional: haskell, ocaml, elixir, erlang, clojure, fsharp, lisp, scheme, elm, purescript, sml }
-  item { JVM and similar: java, kotlin, scala, csharp, swift, dart, groovy, apex, vb }
-  item { Scripting: python, ruby, php, perl, lua, r, julia, crystal }
-  item { Web: javascript, typescript, html, xml, css, scss, json, yaml, toml, ini, graphql, markdown }
-  item { Shell: bash, powershell, batch, dockerfile, makefile, cmake, terraform }
-  item { Data and hardware: sql, solidity, vhdl, verilog, systemverilog }
-  item { Classical: cobol, fortran, pascal, ada }
+p {
+    code{lang} is normalized to a profile. Unknown names still get a generic
+    highlighter (line comments with code{//} or code{#}, block comments, quoted
+    strings). Aliases and extensions map to the same profile: code{rs} is rust,
+    code{py} is python, code{c++} is cpp.
 }
 
-p { Tokens are marked as keyword, type, string, comment, or number. }
+p {
+    Profiles with keyword lists include:
+}
+
+list {
+    item { Systems: rust, c, cpp, go, zig, odin, nim, d, assembly }
+    item {
+        Functional: haskell, ocaml, elixir, erlang, clojure, fsharp, lisp,
+        scheme, elm, purescript, sml
+    }
+    item {
+        JVM and similar: java, kotlin, scala, csharp, swift, dart, groovy, apex,
+        vb
+    }
+    item { Scripting: python, ruby, php, perl, lua, r, julia, crystal }
+    item {
+        Web: javascript, typescript, html, xml, css, scss, json, yaml, toml,
+        ini, graphql, markdown
+    }
+    item {
+        Shell: bash, powershell, batch, dockerfile, makefile, cmake, terraform
+    }
+    item { Data and hardware: sql, solidity, vhdl, verilog, systemverilog }
+    item { Classical: cobol, fortran, pascal, ada }
+}
+
+p {
+    Tokens are marked as keyword, type, string, comment, or number.
+}
+
 h(2, id: "math") { 10. Math }
 
-p { Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags only if the document contains at least one math node. }
+p {
+    Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags
+    only if the document contains at least one math node.
+}
 
 h(3, id: "math-block") { 10.1 Display }
 
-p { Header line is code{math}, then a raw scope of LaTeX. Empty content is a semantic error. Output is wrapped as display math. }
+p {
+    Header line is code{math}, then a raw scope of LaTeX. Empty content is a
+    semantic error. Output is wrapped as display math.
+}
 
 math {!
 \int_{0}^{1} x \, dx = \frac{1}{2}
@@ -85,10 +122,16 @@ math {!
 
 h(3, id: "math-inline") { 10.2 Inline }
 
-p { code{m{...}} is a raw brace body. No nested inlines inside it. Backslash-brace is kept for KaTeX. In inline code the same sequence is unescaped to a brace. }
+p {
+    code{m{...}} is a raw brace body. No nested inlines inside it.
+    Backslash-brace is kept for KaTeX. In inline code the same sequence is
+    unescaped to a brace.
+}
 
 codeblock(lang: "text") {!
 p { The area is m{\frac{1}{2}}. }
 !}
 
-p { The area is m{\frac{1}{2}}. Einstein: m{E = mc^2}. }
+p {
+    The area is m{\frac{1}{2}}. Einstein: m{E = mc^2}.
+}

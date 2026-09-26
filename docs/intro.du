@@ -1,44 +1,65 @@
 h(2, id: "overview") { 1. Overview }
 
-p { A .du file is source. The compiler lexes it, parses it into an AST, checks semantic rules, then emits HTML. Watch mode rebuilds on change and serves the result on localhost. code{docup fmt} rewrites source. code{docup new} and code{docup init} write a starter project. }
+p {
+    A .du file is source. The compiler lexes it, parses it into an AST, checks
+    semantic rules, then emits HTML. Watch mode rebuilds on change and serves
+    the result on localhost. code{docup fmt} rewrites source. code{docup new}
+    and code{docup init} write a starter project.
+}
 
-p { Extra CSS can be injected with code{--style} or with a stylesheet field in meta. Those two paths are not the same. See section 1.3. }
+p {
+    Extra CSS can be injected with code{--style} or with a stylesheet field in
+    meta. Those two paths are not the same. See section 1.3.
+}
 
 h(3, id: "pipeline") { 1.1 Pipeline }
 
 list(ordered: true) {
-  item { Read the input file. }
-  item { Lex and parse into a document node. }
-  item { Resolve include statements, recursively. }
-  item { Run semantic checks. }
-  item { Generate HTML and write the output file. }
+    item { Read the input file. }
+    item { Lex and parse into a document node. }
+    item { Resolve include statements, recursively. }
+    item { Run semantic checks. }
+    item { Generate HTML and write the output file. }
 }
 
 h(3, id: "scope") { 1.2 Scope }
 
-p { This document covers every block and inline the compiler accepts, the CLI, themes, highlighting languages, include resolution, and the checks that run after parse. Keys that are parsed and then ignored are named as ignored. }
+p {
+    This document covers every block and inline the compiler accepts, the CLI,
+    themes, highlighting languages, include resolution, and the checks that run
+    after parse. Keys that are parsed and then ignored are named as ignored.
+}
 
 h(3, id: "generated-page") { 1.3 Generated page }
 
-p { The output is a complete HTML5 document. The generator always writes: }
-
-list {
-  item { code{<!DOCTYPE html>} and code{<html lang="...">} }
-  item { charset and viewport meta tags }
-  item { title, Open Graph, and Twitter tags derived from meta }
-  item { a generator meta tag using the compiler version }
-  item { font links chosen by the theme }
-  item { page CSS: font variables, the theme palette, base rules, and any theme-specific rules }
-  item { a copy-to-clipboard script for code blocks }
+p {
+    The output is a complete HTML5 document. The generator always writes:
 }
 
-p { Added only when needed: }
-
 list {
-  item { KaTeX CSS and scripts, if the document contains any math node }
-  item { a code{<link rel="stylesheet">} from meta field code{stylesheet} }
-  item { a code{<style id="docup-custom-css">} block from code{--style} }
-  item { code{data-theme} on code{<html>}, from meta field code{theme} }
+    item { code{<!DOCTYPE html>} and code{<html lang="...">} }
+    item { charset and viewport meta tags }
+    item { title, Open Graph, and Twitter tags derived from meta }
+    item { a generator meta tag using the compiler version }
+    item { font links chosen by the theme }
+    item {
+        page CSS: font variables, the theme palette, base rules, and any
+        theme-specific rules
+    }
+    item { a copy-to-clipboard script for code blocks }
 }
 
-p { Theme names and light/dark locking are section 4.1. }
+p {
+    Added only when needed:
+}
+
+list {
+    item { KaTeX CSS and scripts, if the document contains any math node }
+    item { a code{<link rel="stylesheet">} from meta field code{stylesheet} }
+    item { a code{<style id="docup-custom-css">} block from code{--style} }
+    item { code{data-theme} on code{<html>}, from meta field code{theme} }
+}
+
+p {
+    Theme names and light/dark locking are section 4.1.
+}

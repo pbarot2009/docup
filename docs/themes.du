@@ -1,49 +1,64 @@
 h(3, id: "themes") { 4.1 Themes }
 
-p { meta field code{theme} selects fonts, colors, and extra CSS. Matching is case-insensitive. }
+p {
+    meta field code{theme} selects fonts, colors, and extra CSS. Matching is
+    case-insensitive.
+}
 
 table {
-  row(header: true) {
-    cell { Name }
-    cell { Also accepted }
-    cell { Fonts }
-  }
-  row {
-    cell { textbook }
-    cell { latex, academic, book }
-    cell { Literata, Cascadia Code }
-  }
-  row {
-    cell { default }
-    cell { any other string, including light and dark }
-    cell { Google Sans Flex, Google Sans Code }
-  }
-  row {
-    cell { sepia }
-    cell { warm, editorial }
-    cell { Merriweather, JetBrains Mono }
-  }
-  row {
-    cell { nord }
-    cell { arctic }
-    cell { Inter, JetBrains Mono }
-  }
-  row {
-    cell { solarized }
-    cell { }
-    cell { Fira Sans, Fira Code }
-  }
+    row(header: true) {
+        cell { Name }
+        cell { Also accepted }
+        cell { Fonts }
+    }
+    row {
+        cell { textbook }
+        cell { latex, academic, book }
+        cell { Literata, Cascadia Code }
+    }
+    row {
+        cell { default }
+        cell { any other string, including light and dark }
+        cell { Google Sans Flex, Google Sans Code }
+    }
+    row {
+        cell { sepia }
+        cell { warm, editorial }
+        cell { Merriweather, JetBrains Mono }
+    }
+    row {
+        cell { nord }
+        cell { arctic }
+        cell { Inter, JetBrains Mono }
+    }
+    row {
+        cell { solarized }
+        cell {  }
+        cell { Fira Sans, Fira Code }
+    }
 }
 
-p { textbook also changes tables (booktabs-style rules, no vertical borders) and callout titles. }
+p {
+    textbook also changes tables (booktabs-style rules, no vertical borders) and
+    callout titles.
+}
 
-p { The same string is written to code{data-theme} on code{<html>}.fn(theme-attr) }
+p {
+    The same string is written to code{data-theme} on
+    code{<html>}.fn("theme-attr")
+}
 
 list {
-  item { code{light} — default theme, light palette locked. }
-  item { code{dark} — default theme, dark palette locked. }
-  item { a named theme — that theme's light palette by default; the dark palette still follows prefers-color-scheme. }
-  item { omitted — default theme, follows prefers-color-scheme. }
+    item { code{light} — default theme, light palette locked. }
+    item { code{dark} — default theme, dark palette locked. }
+    item {
+        a named theme — that theme's light palette by default; the dark
+        palette still follows prefers-color-scheme.
+    }
+    item { omitted — default theme, follows prefers-color-scheme. }
 }
 
-p { code{docup new} and code{docup init} accept the five names in the table. Unknown values there fall back to textbook. }
+p {
+    code{docup new} and code{docup init} accept the five names in the table.
+    Unknown values there fall back to textbook.
+}

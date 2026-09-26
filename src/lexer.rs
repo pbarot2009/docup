@@ -530,7 +530,7 @@ fn is_ident_cont(c: u8) -> bool {
 
 #[inline]
 fn is_brace_inline_keyword(s: &str) -> bool {
-    matches!(s, "b" | "i" | "code" | "strike" | "m")
+    matches!(s, "b" | "i" | "code" | "strike" | "m" | "br")
 }
 
 fn trim_raw_block(raw: &str) -> String {

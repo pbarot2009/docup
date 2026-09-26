@@ -18,7 +18,7 @@ use xarp::style::Styles;
 use xarp::{Arg, ArgAction, ArgMatches, Xarp, XarpError};
 
 /// DocUP compiler version reported by `docup version`, `docup -v`, and `docup --version`.
-pub const VERSION: &str = "0.2.0";
+pub const VERSION: &str = "0.3.0-dev";
 
 const LIVE_RELOAD_SCRIPT: &str = r#"  <script>
     (function() {

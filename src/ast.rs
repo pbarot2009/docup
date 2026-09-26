@@ -72,6 +72,7 @@ pub struct CalloutNode {
     pub line: usize,
     pub col: usize,
     pub kind: CalloutKind,
+    pub title: String,
     pub children: Vec<InlineNode>,
 }
 
@@ -115,6 +116,48 @@ pub struct IncludeNode {
     pub path: String,
 }
 
+/// Image with optional caption: `figure("src", alt: "...", caption: "...")`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FigureNode {
+    pub line: usize,
+    pub col: usize,
+    pub src: String,
+    pub alt: String,
+    pub caption: String,
+}
+
+/// Definition list: `deflist { term { } desc { } }`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DefListNode {
+    pub line: usize,
+    pub col: usize,
+    pub entries: Vec<DefListEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DefListEntry {
+    Term {
+        line: usize,
+        col: usize,
+        children: Vec<InlineNode>,
+    },
+    Desc {
+        line: usize,
+        col: usize,
+        children: Vec<InlineNode>,
+    },
+}
+
+/// Collapsible section: `details(open: true) { summary { } ... }`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DetailsNode {
+    pub line: usize,
+    pub col: usize,
+    pub open: bool,
+    pub summary: Vec<InlineNode>,
+    pub children: Vec<InlineNode>,
+}
+
 /// Enumeration of all top-level block constructs supported in DocUP.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BlockNode {
@@ -132,6 +175,9 @@ pub enum BlockNode {
     TOC(TOCNode),
     Footnote(FootnoteDefNode),
     Include(IncludeNode),
+    Figure(FigureNode),
+    DefList(DefListNode),
+    Details(DetailsNode),
 }
 
 impl BlockNode {
@@ -151,6 +197,9 @@ impl BlockNode {
             BlockNode::TOC(_) => "TOC",
             BlockNode::Footnote(_) => "Footnote",
             BlockNode::Include(_) => "Include",
+            BlockNode::Figure(_) => "Figure",
+            BlockNode::DefList(_) => "DefList",
+            BlockNode::Details(_) => "Details",
         }
     }
 }
@@ -198,6 +247,7 @@ pub struct ListNode {
     pub line: usize,
     pub col: usize,
     pub ordered: bool,
+    pub start: usize,
     pub items: Vec<ItemNode>,
 }
 
@@ -223,6 +273,8 @@ pub enum ItemChild {
 pub struct QuoteNode {
     pub line: usize,
     pub col: usize,
+    pub cite: String,
+    pub author: String,
     pub children: Vec<QuoteChild>,
 }
 
@@ -240,6 +292,7 @@ pub struct ImageNode {
     pub col: usize,
     pub src: String,
     pub alt: String,
+    pub href: String,
 }
 
 /// Table block: `table { row { cell { ... } } }`.
@@ -247,6 +300,7 @@ pub struct ImageNode {
 pub struct TableNode {
     pub line: usize,
     pub col: usize,
+    pub caption: String,
     pub rows: Vec<RowNode>,
 }
 
@@ -264,6 +318,8 @@ pub struct RowNode {
 pub struct CellNode {
     pub line: usize,
     pub col: usize,
+    pub colspan: usize,
+    pub rowspan: usize,
     pub children: Vec<InlineNode>,
 }
 
@@ -281,6 +337,7 @@ pub enum InlineKind {
     Strike(Vec<InlineNode>),
     Math(String),
     FootnoteRef(String),
+    Break,
 }
 
 /// An inline syntax tree element with position tracking.
@@ -314,6 +371,7 @@ impl InlineNode {
             InlineKind::Strike(_) => "Strike",
             InlineKind::Math(_) => "Math",
             InlineKind::FootnoteRef(_) => "FootnoteRef",
+            InlineKind::Break => "Break",
         }
     }
 

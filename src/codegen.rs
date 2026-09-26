@@ -1,8 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::ast::{
-    trim_inline_edges, BlockNode, CalloutKind, CodeBlockNode, DocumentNode, FootnoteDefNode,
-    InlineKind, InlineNode, ItemChild, ItemNode, ListNode, QuoteChild, TableNode,
+    trim_inline_edges, BlockNode, CalloutKind, CodeBlockNode, DefListEntry, DefListNode,
+    DetailsNode, DocumentNode, FigureNode, FootnoteDefNode, InlineKind, InlineNode, ItemChild,
+    ItemNode, ListNode, QuoteChild, TableNode,
 };
 use crate::highlight::{escape_html, escape_html_into, highlight_code};
 use crate::theme::ThemeKind;
@@ -234,14 +235,18 @@ s { color: var(--text-muted); }
 }
 .codeblock pre {
   margin: 0;
-  padding: 0.85em 1em;
+  padding: 0;
   overflow-x: auto;
   background: var(--code-bg);
 }
 .codeblock code {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(max-content, 100%);
+  justify-items: stretch;
+  box-sizing: content-box;
+  min-width: 100%;
   background: none;
-  padding: 0;
+  padding: 0.85em 0;
   font-size: 0.9em;
   line-height: 1.5;
   font-family: var(--font-code, "Google Sans Code", ui-monospace, SFMono-Regular, Consolas, Menlo, monospace);
@@ -250,13 +255,13 @@ s { color: var(--text-muted); }
 }
 .code-line {
   display: block;
+  box-sizing: border-box;
   min-height: 1.5em;
   line-height: 1.5;
+  padding: 0 1em;
 }
 .code-line.highlighted-line {
   background: rgba(88, 166, 255, 0.15);
-  margin: 0 -1em;
-  padding: 0 1em;
 }
 .line-numbers .code-line {
   counter-increment: line;
@@ -301,6 +306,45 @@ s { color: var(--text-muted); }
 .tok-string  { color: var(--tok-string); }
 .tok-comment { color: var(--tok-comment); font-style: italic; }
 .tok-number  { color: var(--tok-number); }
+
+
+figure {
+  margin: 1.2em 0;
+}
+figure img {
+  display: block;
+}
+figcaption {
+  margin-top: 0.4em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+dl {
+  margin: 0.8em 0;
+}
+dt {
+  font-weight: 600;
+  margin-top: 0.6em;
+}
+dd {
+  margin: 0.2em 0 0.6em 1.4em;
+}
+details {
+  margin: 1em 0;
+  padding: 0.6em 0.9em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+}
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.quote-attr {
+  margin-top: 0.4em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
 
 @media (max-width: 640px) {
   body {
@@ -552,7 +596,7 @@ fn inlines_to_plain_text(inlines: &[InlineNode]) -> String {
             | InlineKind::Italic(children)
             | InlineKind::Strike(children)
             | InlineKind::Link { children, .. } => out.push_str(&inlines_to_plain_text(children)),
-            InlineKind::FootnoteRef(_) => {}
+            InlineKind::FootnoteRef(_) | InlineKind::Break => {}
         }
     }
     out
@@ -605,9 +649,23 @@ fn collect_block_footnotes(
                 }
             }
         }
+        BlockNode::Details(d) => {
+            collect_inlines_footnotes(&d.summary, map, order);
+            collect_inlines_footnotes(&d.children, map, order);
+        }
+        BlockNode::DefList(d) => {
+            for entry in &d.entries {
+                match entry {
+                    DefListEntry::Term { children, .. } | DefListEntry::Desc { children, .. } => {
+                        collect_inlines_footnotes(children, map, order);
+                    }
+                }
+            }
+        }
         BlockNode::CodeBlock(_)
         | BlockNode::HR(_)
         | BlockNode::Image(_)
+        | BlockNode::Figure(_)
         | BlockNode::Raw(_)
         | BlockNode::Math(_)
         | BlockNode::TOC(_)
@@ -645,7 +703,7 @@ fn collect_inline_footnotes(
         | InlineKind::Link { children, .. } => {
             collect_inlines_footnotes(children, map, order);
         }
-        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::Math(_) => {}
+        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::Math(_) | InlineKind::Break => {}
     }
 }
 
@@ -686,26 +744,20 @@ fn render_block(
         BlockNode::CodeBlock(b) => render_code_block(w, b),
         BlockNode::HR(_) => w.push_str("<hr>\n"),
         BlockNode::List(b) => render_list(w, b, footnote_numbers),
-        BlockNode::Quote(b) => {
-            w.push_str("<blockquote>\n");
-            render_quote_body(w, &b.children, footnote_numbers);
-            w.push_str("</blockquote>\n");
-        }
-        BlockNode::Image(b) => {
-            w.push_str(&format!(
-                "<img src=\"{}\" alt=\"{}\">\n",
-                escape_html(&b.src),
-                escape_html(&b.alt)
-            ));
-        }
+        BlockNode::Quote(b) => render_quote(w, b, footnote_numbers),
+        BlockNode::Image(b) => render_image(w, b),
         BlockNode::Table(b) => render_table(w, b, footnote_numbers),
         BlockNode::Callout(c) => {
             let kind_str = c.kind.as_str();
-            let title = match c.kind {
-                CalloutKind::Note => "Note",
-                CalloutKind::Tip => "Tip",
-                CalloutKind::Warning => "Warning",
-                CalloutKind::Danger => "Danger",
+            let title = if !c.title.trim().is_empty() {
+                escape_html(&c.title)
+            } else {
+                match c.kind {
+                    CalloutKind::Note => "Note".to_string(),
+                    CalloutKind::Tip => "Tip".to_string(),
+                    CalloutKind::Warning => "Warning".to_string(),
+                    CalloutKind::Danger => "Danger".to_string(),
+                }
             };
             w.push_str(&format!("<div class=\"callout callout-{kind_str}\">\n"));
             w.push_str(&format!("  <div class=\"callout-title\">{title}</div>\n"));
@@ -723,6 +775,9 @@ fn render_block(
             w.push_str("\n\\]</div>\n");
         }
         BlockNode::TOC(_) => render_toc(w, heading_metas),
+        BlockNode::Figure(f) => render_figure(w, f),
+        BlockNode::DefList(d) => render_deflist(w, d, footnote_numbers),
+        BlockNode::Details(d) => render_details(w, d, footnote_numbers),
         BlockNode::Footnote(_) | BlockNode::Include(_) => {}
     }
 }
@@ -783,7 +838,11 @@ fn render_quote_body(
 
 fn render_list(w: &mut String, l: &ListNode, footnote_numbers: &HashMap<String, usize>) {
     let tag = if l.ordered { "ol" } else { "ul" };
-    w.push_str(&format!("<{tag}>\n"));
+    if l.ordered && l.start > 1 {
+        w.push_str(&format!("<{tag} start=\"{}\">\n", l.start));
+    } else {
+        w.push_str(&format!("<{tag}>\n"));
+    }
     for item in &l.items {
         render_item(w, item, footnote_numbers);
     }
@@ -821,11 +880,24 @@ fn render_item(w: &mut String, item: &ItemNode, footnote_numbers: &HashMap<Strin
 fn render_table(w: &mut String, t: &TableNode, footnote_numbers: &HashMap<String, usize>) {
     w.push_str("<div class=\"table-wrap\">\n");
     w.push_str("<table>\n");
+    if !t.caption.is_empty() {
+        w.push_str(&format!(
+            "  <caption>{}</caption>\n",
+            escape_html(&t.caption)
+        ));
+    }
     for row in &t.rows {
         w.push_str("  <tr>\n");
         let cell_tag = if row.header { "th" } else { "td" };
         for cell in &row.cells {
-            w.push_str(&format!("    <{cell_tag}>"));
+            let mut attrs = String::new();
+            if cell.colspan > 1 {
+                attrs.push_str(&format!(" colspan=\"{}\"", cell.colspan));
+            }
+            if cell.rowspan > 1 {
+                attrs.push_str(&format!(" rowspan=\"{}\"", cell.rowspan));
+            }
+            w.push_str(&format!("    <{cell_tag}{attrs}>"));
             render_inlines(w, &cell.children, footnote_numbers);
             w.push_str(&format!("</{cell_tag}>\n"));
         }
@@ -874,6 +946,9 @@ fn render_inlines(
                 w.push_str("<span class=\"math-inline\">\\(");
                 escape_html_into(val, w);
                 w.push_str("\\)</span>");
+            }
+            InlineKind::Break => {
+                w.push_str("<br>");
             }
             InlineKind::FootnoteRef(id) => {
                 let num = footnote_numbers.get(id).copied().unwrap_or(1);
@@ -1061,9 +1136,16 @@ fn block_has_math(block: &BlockNode) -> bool {
             .any(|r| r.cells.iter().any(|c| inlines_have_math(&c.children))),
         BlockNode::List(l) => list_has_math(l),
         BlockNode::Quote(q) => quote_has_math(&q.children),
+        BlockNode::DefList(d) => d.entries.iter().any(|e| match e {
+            DefListEntry::Term { children, .. } | DefListEntry::Desc { children, .. } => {
+                inlines_have_math(children)
+            }
+        }),
+        BlockNode::Details(d) => inlines_have_math(&d.summary) || inlines_have_math(&d.children),
         BlockNode::CodeBlock(_)
         | BlockNode::HR(_)
         | BlockNode::Image(_)
+        | BlockNode::Figure(_)
         | BlockNode::Raw(_)
         | BlockNode::TOC(_)
         | BlockNode::Include(_) => false,
@@ -1119,6 +1201,106 @@ fn inline_has_math(inline: &InlineNode) -> bool {
         | InlineKind::Italic(children)
         | InlineKind::Strike(children)
         | InlineKind::Link { children, .. } => inlines_have_math(children),
-        InlineKind::Text(_) | InlineKind::Code(_) | InlineKind::FootnoteRef(_) => false,
+        InlineKind::Text(_)
+        | InlineKind::Code(_)
+        | InlineKind::FootnoteRef(_)
+        | InlineKind::Break => false,
     }
+}
+
+fn render_quote(
+    w: &mut String,
+    q: &crate::ast::QuoteNode,
+    footnote_numbers: &HashMap<String, usize>,
+) {
+    if !q.cite.is_empty() {
+        w.push_str(&format!("<blockquote cite=\"{}\">\n", escape_html(&q.cite)));
+    } else {
+        w.push_str("<blockquote>\n");
+    }
+    render_quote_body(w, &q.children, footnote_numbers);
+    if !q.author.is_empty() || !q.cite.is_empty() {
+        w.push_str("  <p class=\"quote-attr\">");
+        if !q.author.is_empty() {
+            escape_html_into(&q.author, w);
+        }
+        if !q.cite.is_empty() {
+            if !q.author.is_empty() {
+                w.push_str(" \u{2014} ");
+            }
+            w.push_str(&format!(
+                "<a href=\"{}\">{}</a>",
+                escape_html(&q.cite),
+                escape_html(&q.cite)
+            ));
+        }
+        w.push_str("</p>\n");
+    }
+    w.push_str("</blockquote>\n");
+}
+
+fn render_image(w: &mut String, b: &crate::ast::ImageNode) {
+    let img = format!(
+        "<img src=\"{}\" alt=\"{}\">",
+        escape_html(&b.src),
+        escape_html(&b.alt)
+    );
+    if b.href.is_empty() {
+        w.push_str(&img);
+        w.push('\n');
+    } else {
+        w.push_str(&format!("<a href=\"{}\">{img}</a>\n", escape_html(&b.href)));
+    }
+}
+
+fn render_figure(w: &mut String, f: &FigureNode) {
+    w.push_str("<figure>\n");
+    w.push_str(&format!(
+        "  <img src=\"{}\" alt=\"{}\">\n",
+        escape_html(&f.src),
+        escape_html(&f.alt)
+    ));
+    if !f.caption.is_empty() {
+        w.push_str(&format!(
+            "  <figcaption>{}</figcaption>\n",
+            escape_html(&f.caption)
+        ));
+    }
+    w.push_str("</figure>\n");
+}
+
+fn render_deflist(w: &mut String, d: &DefListNode, footnote_numbers: &HashMap<String, usize>) {
+    w.push_str("<dl>\n");
+    for entry in &d.entries {
+        match entry {
+            DefListEntry::Term { children, .. } => {
+                w.push_str("  <dt>");
+                render_inlines(w, children, footnote_numbers);
+                w.push_str("</dt>\n");
+            }
+            DefListEntry::Desc { children, .. } => {
+                w.push_str("  <dd>");
+                render_inlines(w, children, footnote_numbers);
+                w.push_str("</dd>\n");
+            }
+        }
+    }
+    w.push_str("</dl>\n");
+}
+
+fn render_details(w: &mut String, d: &DetailsNode, footnote_numbers: &HashMap<String, usize>) {
+    if d.open {
+        w.push_str("<details open>\n");
+    } else {
+        w.push_str("<details>\n");
+    }
+    w.push_str("  <summary>");
+    render_inlines(w, &d.summary, footnote_numbers);
+    w.push_str("</summary>\n");
+    if !d.children.is_empty() {
+        w.push_str("  <p>");
+        render_inlines(w, &d.children, footnote_numbers);
+        w.push_str("</p>\n");
+    }
+    w.push_str("</details>\n");
 }

@@ -1,6 +1,8 @@
 h(2, id: "footnotes") { 14. Footnotes }
 
-p { A definition is a top-level block. A reference is an inline. }
+p {
+    A definition is a top-level block. A reference is an inline.
+}
 
 codeblock(lang: "text") {!
 p { See the rule.fn(required-title) }
@@ -8,18 +10,34 @@ p { See the rule.fn(required-title) }
 footnote(id: "required-title") { Title is required when meta is present. }
 !}
 
-p { The definition needs a non-empty code{id} attribute. The body is prose. }
-
-p { The reference is code{fn(id)} or a quoted string inside the parentheses. The identifier form allows letters, digits, underscore, and hyphen. }
-
-p { Checks: }
-
-list {
-  item { Duplicate definition ids are a semantic error. }
-  item { A reference whose id has no definition is a semantic error. }
-  item { Definitions with no references still appear in the footnotes section. }
+p {
+    The definition needs a non-empty code{id} attribute. The body is prose.
 }
 
-p { Numbering follows first-reference order in the document after includes are merged. Definitions that were never referenced are appended after that list. Output ids are code{fn-} plus the id, and code{fnref-} plus the id. }
+p {
+    The reference is code{fn(id)} or a quoted string inside the parentheses. The
+    identifier form allows letters, digits, underscore, and hyphen.
+}
 
-p { This page uses four definitions. Earlier sections reference the first three.fn(include-meta) }
+p {
+    Checks:
+}
+
+list {
+    item { Duplicate definition ids are a semantic error. }
+    item { A reference whose id has no definition is a semantic error. }
+    item {
+        Definitions with no references still appear in the footnotes section.
+    }
+}
+
+p {
+    Numbering follows first-reference order in the document after includes are
+    merged. Definitions that were never referenced are appended after that list.
+    Output ids are code{fn-} plus the id, and code{fnref-} plus the id.
+}
+
+p {
+    This page uses four definitions. Earlier sections reference the first
+    three.fn("include-meta")
+}
