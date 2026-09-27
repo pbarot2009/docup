@@ -3,7 +3,7 @@ meta {
   lang: "en",
   theme: "dark",
   author: "DocUP Engine",
-  version: "0.2.0"
+  version: "0.3.1"
 }
 
 h(1) { Complete 65-Language Syntax Highlighting Test Suite }
@@ -400,7 +400,7 @@ codeblock(lang: "toml", line_numbers: true) {!
 # Cargo TOML
 [package]
 name = "docup"
-version = "0.2.0"
+version = "0.3.1"
 line_numbers = true
 !}
 

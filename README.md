@@ -26,7 +26,7 @@
 - [Build from Source](#build-from-source)
 - [Example Document](#example-document)
 - [Usage](#usage)
-- [Features (v0.2.0)](#features-v020)
+- [Features (v0.3.1)](#features-v020)
 - [Roadmap: v0.3.0](#roadmap-v030)
 - [Documentation](#documentation)
 - [Important Links](#important-links)
@@ -123,7 +123,7 @@ Flags:
 
 ---
 
-## Features (v0.2.0)
+## Features (v0.3.1)
 
 - [x] Metadata (`meta`) — `title` required when `meta` is present; also `lang`, `theme`, `author`, `version`, `description`, `keywords`, `canonical`, `image`, `stylesheet`
 - [x] Headings (`h(1)`–`h(6)`, `id` / `class`)

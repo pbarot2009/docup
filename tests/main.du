@@ -3,7 +3,7 @@ meta {
   lang: "en",
   theme: "dark",
   author: "DocUP Core Team",
-  version: "0.2.0",
+  version: "0.3.1",
   description: "Comprehensive end-to-end test suite verifying AST parser, semantic analyzer, and HTML5 codegen.",
   keywords: "docup, compiler, test, ast, parser, html5, markdown"
 }

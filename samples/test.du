@@ -59,7 +59,7 @@ p { A task list of project milestones: }
 list(type: "task") {
     task(done: true) { Design the grammar }
     task(done: true) { Write the parser }
-    task(done: false) { Reach v0.2.0 }
+    task(done: false) { Reach v0.3.1 }
 }
 
 hr {}

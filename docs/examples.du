@@ -82,4 +82,4 @@ p { Level 5. }
 
 h(6, id: "heading-level-6") { Level 6 }
 
-p { Level 6. Compiler version code{0.2.0}. }
+p { Level 6. Compiler version code{0.3.1}. }

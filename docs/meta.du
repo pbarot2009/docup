@@ -8,7 +8,7 @@ meta {
   lang: "en",
   theme: "textbook",
   author: "Name",
-  version: "0.2.0",
+  version: "0.3.1",
   description: "One-line summary",
   keywords: "comma, separated",
   canonical: "https://example.com/page",

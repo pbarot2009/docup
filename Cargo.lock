@@ -3,8 +3,8 @@
 version = 4
 
 [[package]]
-name = "docup"
-version = "0.2.0"
+name = "docup-lang"
+version = "0.3.1"
 dependencies = [
  "xarp",
 ]
