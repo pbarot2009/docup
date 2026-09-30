@@ -79,7 +79,7 @@ p { Inside paragraph-like bodies, runs of space, tab, CR, and LF collapse to a s
 
 h(3, id: "raw-scopes") { 3.5 Raw scopes }
 
-p { code{codeblock}, code{raw}, and code{math} take a body that starts with brace-bang and ends at the first unescaped bang-brace from that point. The body is not tokenized as DocUP. }
+p { code{raw} and code{math} take a body that starts with brace-bang and ends at the first unescaped bang-brace from that point. code{codeblock} uses the same raw scope unless it has a code{src} attribute; then the body may be omitted and the file contents are loaded instead. The body is not tokenized as DocUP. }
 
 p { If the first line after the opener is only spaces, tabs, or CR, that line is dropped. Trailing spaces and newlines are dropped. Empty content after that trim is a semantic error. }
 

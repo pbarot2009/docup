@@ -8,7 +8,7 @@ use std::time::{Duration, Instant, SystemTime};
 
 use crate::ast::{BlockNode, DocumentNode};
 use crate::codegen::generate;
-use crate::errors::{source_snippet, PositionedError, SemaError};
+use crate::errors::{render_diagnostic, DocupError, PositionedError, SemaError, Span};
 use crate::fmt::format_source;
 use crate::init::{scaffold_init, scaffold_new, ProjectConfig};
 use crate::parser::Parser;
@@ -18,7 +18,7 @@ use xarp::style::Styles;
 use xarp::{Arg, ArgAction, ArgMatches, Xarp, XarpError};
 
 /// DocUP compiler version reported by `docup version`, `docup -v`, and `docup --version`.
-pub const VERSION: &str = "0.3.1";
+pub const VERSION: &str = "0.3.2";
 
 const LIVE_RELOAD_SCRIPT: &str = r#"  <script>
     (function() {
@@ -103,7 +103,7 @@ pub struct BuildResult {
 struct IncludeError {
     path: String,
     source: Vec<u8>,
-    error: SemaError,
+    error: DocupError,
 }
 
 /// Constructs the top-level application CLI definition with `xarp`.
@@ -641,10 +641,12 @@ fn run_fmt(c: Colors, target: &str, check: bool, stdout: bool) -> i32 {
         if stdout
             && target_path
                 .extension()
+                .and_then(|s| s.to_str())
                 .map_or(true, |ext| !ext.eq_ignore_ascii_case("du"))
         {
             warn(c, &format!("file {target:?} does not have a .du extension"));
         }
+
         vec![target_path.to_path_buf()]
     } else {
         if stdout {
@@ -768,6 +770,7 @@ fn collect_du_files(dir: &Path, list: &mut Vec<PathBuf>) -> Result<(), std::io::
             collect_du_files(&path, list)?;
         } else if path
             .extension()
+            .and_then(|s| s.to_str())
             .map_or(false, |ext| ext.eq_ignore_ascii_case("du"))
         {
             list.push(path);
@@ -948,7 +951,7 @@ fn compile_pipeline(c: Colors, opts: &Options) -> Result<BuildResult, ()> {
         }
     };
 
-    // Resolve modular includes
+    // Resolve modular includes and codeblock src paths
     let root_path = Path::new(&opts.input_path);
     let canonical_root = root_path
         .canonicalize()
@@ -1036,6 +1039,8 @@ fn resolve_document_includes(
     visited: &mut HashSet<PathBuf>,
     watched: &mut HashSet<PathBuf>,
 ) -> Result<(), IncludeError> {
+    resolve_codeblock_sources(file_path, source, doc, watched)?;
+
     let mut new_blocks = Vec::with_capacity(doc.blocks.len());
 
     for block in doc.blocks.drain(..) {
@@ -1048,10 +1053,13 @@ fn resolve_document_includes(
                     return Err(IncludeError {
                         path: file_path.to_string_lossy().into_owned(),
                         source: source.to_vec(),
-                        error: SemaError::new(
-                            inc.line,
-                            inc.col,
-                            format!("cannot resolve include path \"{}\": {err}", inc.path),
+                        error: DocupError::Sema(
+                            SemaError::at_span(
+                                Span::from_len(inc.line, inc.col, 7),
+                                format!("cannot resolve include path \"{}\": {err}", inc.path),
+                            )
+                            .with_note("include paths are relative to the file that contains the statement")
+                            .with_help("check that the path exists and is a .du file"),
                         ),
                     });
                 }
@@ -1061,10 +1069,12 @@ fn resolve_document_includes(
                 return Err(IncludeError {
                     path: file_path.to_string_lossy().into_owned(),
                     source: source.to_vec(),
-                    error: SemaError::new(
-                        inc.line,
-                        inc.col,
-                        format!("circular include detected for \"{}\"", inc.path),
+                    error: DocupError::Sema(
+                        SemaError::at_span(
+                            Span::from_len(inc.line, inc.col, 7),
+                            format!("circular include detected for \"{}\"", inc.path),
+                        )
+                        .with_note("an include stack cannot mention the same file twice"),
                     ),
                 });
             }
@@ -1078,11 +1088,10 @@ fn resolve_document_includes(
                     return Err(IncludeError {
                         path: file_path.to_string_lossy().into_owned(),
                         source: source.to_vec(),
-                        error: SemaError::new(
-                            inc.line,
-                            inc.col,
+                        error: DocupError::Sema(SemaError::at_span(
+                            Span::from_len(inc.line, inc.col, 7),
                             format!("cannot read include file \"{}\": {err}", inc.path),
-                        ),
+                        )),
                     });
                 }
             };
@@ -1093,7 +1102,7 @@ fn resolve_document_includes(
                     return Err(IncludeError {
                         path: canonical.to_string_lossy().into_owned(),
                         source: child_source,
-                        error: SemaError::new(err.line, err.col, err.message),
+                        error: DocupError::from(err),
                     });
                 }
             };
@@ -1104,7 +1113,7 @@ fn resolve_document_includes(
                     return Err(IncludeError {
                         path: canonical.to_string_lossy().into_owned(),
                         source: child_source,
-                        error: SemaError::new(err.line, err.col, err.message),
+                        error: DocupError::from(err),
                     });
                 }
             };
@@ -1122,10 +1131,93 @@ fn resolve_document_includes(
     Ok(())
 }
 
+fn resolve_codeblock_sources(
+    file_path: &Path,
+    source: &[u8],
+    doc: &mut DocumentNode,
+    watched: &mut HashSet<PathBuf>,
+) -> Result<(), IncludeError> {
+    let base_dir = file_path.parent().unwrap_or_else(|| Path::new("."));
+
+    for block in &mut doc.blocks {
+        let BlockNode::CodeBlock(cb) = block else {
+            continue;
+        };
+        if cb.src.trim().is_empty() {
+            continue;
+        }
+
+        let target_path = base_dir.join(cb.src.trim());
+        let canonical = match target_path.canonicalize() {
+            Ok(c) => c,
+            Err(err) => {
+                return Err(IncludeError {
+                    path: file_path.to_string_lossy().into_owned(),
+                    source: source.to_vec(),
+                    error: DocupError::Sema(
+                        SemaError::at_span(
+                            Span::from_len(cb.line, cb.col, 9),
+                            format!("cannot resolve codeblock src \"{}\": {err}", cb.src),
+                        )
+                        .with_note(
+                            "src paths are relative to the .du file that contains the codeblock",
+                        )
+                        .with_help("check the path, or write the source inline with `{! ... !}`"),
+                    ),
+                });
+            }
+        };
+
+        if !canonical.is_file() {
+            return Err(IncludeError {
+                path: file_path.to_string_lossy().into_owned(),
+                source: source.to_vec(),
+                error: DocupError::Sema(SemaError::at_span(
+                    Span::from_len(cb.line, cb.col, 9),
+                    format!("codeblock src \"{}\" is not a file", cb.src),
+                )),
+            });
+        }
+
+        let bytes = match std::fs::read(&canonical) {
+            Ok(b) => b,
+            Err(err) => {
+                return Err(IncludeError {
+                    path: file_path.to_string_lossy().into_owned(),
+                    source: source.to_vec(),
+                    error: DocupError::Sema(SemaError::at_span(
+                        Span::from_len(cb.line, cb.col, 9),
+                        format!("cannot read codeblock src \"{}\": {err}", cb.src),
+                    )),
+                });
+            }
+        };
+
+        cb.raw_code = String::from_utf8_lossy(&bytes).into_owned();
+
+        if cb.file.is_empty() {
+            if let Some(name) = canonical.file_name().and_then(|s| s.to_str()) {
+                cb.file = name.to_string();
+            }
+        }
+
+        if cb.language.is_empty() {
+            if let Some(ext) = canonical.extension().and_then(|s| s.to_str()) {
+                cb.language = crate::highlight::normalize_lang_name(ext);
+            }
+        }
+
+        watched.insert(canonical);
+    }
+
+    Ok(())
+}
+
 fn validate_extension(c: Colors, path: &str) {
     let p = Path::new(path);
     let is_du = p
         .extension()
+        .and_then(|s| s.to_str())
         .map(|ext| ext.eq_ignore_ascii_case("du"))
         .unwrap_or(false);
     if !is_du {
@@ -1186,13 +1278,24 @@ fn report_compile_error(
     source: &[u8],
     err: &(dyn PositionedError + 'static),
 ) {
-    let (line, col) = err.position();
-    eprintln!("{}✗ error:{} {err}", c.red, c.reset);
-    eprintln!("  {}--> {path}:{line}:{col}{}", c.cyan, c.reset);
-    let snippet = source_snippet(source, line, col);
-    if !snippet.is_empty() {
-        for l in snippet.lines() {
-            eprintln!("  {}{l}{}", c.yellow, c.reset);
+    let rendered = render_diagnostic(path, source, err);
+    for (i, line) in rendered.lines().enumerate() {
+        if i == 0 && line.starts_with("error:") {
+            eprintln!(
+                "{}{}error{}:{}",
+                c.bold,
+                c.red,
+                c.reset,
+                &line["error:".len()..]
+            );
+        } else if line.contains("-->") {
+            eprintln!("{}{}{}", c.cyan, line, c.reset);
+        } else if line.contains('^') {
+            eprintln!("{}{}{}", c.red, line, c.reset);
+        } else if line.trim_start().starts_with('=') {
+            eprintln!("{}{}{}", c.cyan, line, c.reset);
+        } else {
+            eprintln!("{line}");
         }
     }
 }

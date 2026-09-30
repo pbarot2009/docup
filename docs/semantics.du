@@ -17,7 +17,11 @@ table {
   }
   row {
     cell { empty codeblock / raw / math }
-    cell { trimmed content is empty }
+    cell { trimmed content is empty. For a codeblock with code{src}, this is the loaded file after resolution. }
+  }
+  row {
+    cell { codeblock src }
+    cell { code{src} cannot be resolved, is not a file, cannot be read, or is combined with a raw body }
   }
   row {
     cell { empty list }

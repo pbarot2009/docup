@@ -1,0 +1,41 @@
+h(2, id: "deflist") { 16. deflist }
+
+p {
+    Definition list. Children are code{term} and code{desc} only, in any order.
+    At least one entry is required.
+}
+
+codeblock(lang: "text") {!
+deflist {
+  term { code{build} }
+  desc { Compile once. }
+  term { code{watch} }
+  desc { Compile and serve. }
+}
+!}
+
+deflist {
+    term { code{start} }
+    desc { Ordered-list start index. }
+    term { code{href} }
+    desc { Link around an image. }
+}
+
+h(2, id: "details") { 17. details }
+
+p {
+    Collapsible block. A code{summary} child is required. Remaining prose is the
+    body. code{open: true} starts the block expanded.
+}
+
+codeblock(lang: "text") {!
+details {
+  summary { More }
+  Hidden until opened.
+}
+
+details(open: true) {
+  summary { Already open }
+  Visible on load.
+}
+!}

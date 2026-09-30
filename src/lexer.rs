@@ -32,6 +32,25 @@ impl Token {
             col,
         }
     }
+
+    /// Inclusive span covering this token in the source.
+    ///
+    /// String tokens store the decoded payload, so the span starts at the
+    /// opening quote and is an approximation of source width.
+    pub fn span(&self) -> crate::errors::Span {
+        use crate::errors::Span;
+        match self.token_type {
+            TokenType::Eof => Span::point(self.line, self.col),
+            TokenType::String => {
+                // opening quote + payload + closing quote (escapes may differ)
+                Span::from_len(self.line, self.col, self.value.chars().count() + 2)
+            }
+            _ => {
+                let len = self.value.chars().count().max(1);
+                Span::from_len(self.line, self.col, len)
+            }
+        }
+    }
 }
 
 pub struct Lexer<'a> {
@@ -74,11 +93,16 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn advance(&mut self) -> u8 {
+        if self.pos >= self.src.len() {
+            return 0;
+        }
         let c = self.src[self.pos];
         self.pos += 1;
         if c == b'\n' {
             self.line += 1;
             self.col = 1;
+        } else if is_utf8_continuation(c) {
+            // Continuation bytes belong to the scalar already counted.
         } else {
             self.col += 1;
         }
@@ -117,7 +141,9 @@ impl<'a> Lexer<'a> {
                             start_line,
                             start_col,
                             "unterminated block comment",
-                        ));
+                        )
+                        .primary_label("comment starts here")
+                        .with_help("close the comment with `*/`"));
                     }
                 }
                 _ => return Ok(()),
@@ -175,7 +201,9 @@ impl<'a> Lexer<'a> {
             b'"' => self.read_string(),
             _ if is_ident_start(c) => self.read_ident(),
             b'0'..=b'9' => self.read_number(),
-            _ => Err(self.errorf(format!("unexpected character {:?}", c as char))),
+            _ => Err(self
+                .errorf(format!("unexpected character `{}`", c as char))
+                .with_help("DocUP tokens are identifiers, strings, numbers, and `(){},: {!`")),
         }
     }
 
@@ -198,11 +226,11 @@ impl<'a> Lexer<'a> {
         let mut buf = Vec::new();
         loop {
             if self.pos >= self.src.len() {
-                return Err(LexError::new(
-                    start_line,
-                    start_col,
-                    "unterminated string literal",
-                ));
+                return Err(
+                    LexError::new(start_line, start_col, "unterminated string literal")
+                        .primary_label("string starts here")
+                        .with_help("add a closing double quote, or escape an inner quote"),
+                );
             }
             let c = self.peek();
             if c == b'"' {
@@ -316,8 +344,10 @@ impl<'a> Lexer<'a> {
         Err(LexError::new(
             start_line,
             start_col,
-            "unterminated raw scope, expected closing !}",
-        ))
+            "unterminated raw scope, expected closing `!}`",
+        )
+        .primary_label("raw scope starts here")
+        .with_help("close the scope with `!}`, or write `\\!}` to store a literal `!}`"))
     }
 
     #[inline]
@@ -516,6 +546,11 @@ impl<'a> Lexer<'a> {
             0
         }
     }
+}
+
+#[inline]
+fn is_utf8_continuation(c: u8) -> bool {
+    (c & 0b1100_0000) == 0b1000_0000
 }
 
 #[inline]

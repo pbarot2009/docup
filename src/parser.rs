@@ -6,7 +6,7 @@ use crate::ast::{
     ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
     RawNode, RowNode, TOCNode, TableNode,
 };
-use crate::errors::{LexError, ParseError};
+use crate::errors::{LexError, ParseError, Span};
 use crate::lexer::{Lexer, Token, TokenType};
 
 /// max_inline_depth bounds nested inline elements (e.g. b{i{b{...}}}) to prevent
@@ -15,7 +15,14 @@ const MAX_INLINE_DEPTH: usize = 64;
 
 impl From<LexError> for ParseError {
     fn from(err: LexError) -> Self {
-        ParseError::new(err.line, err.col, err.message)
+        let mut parsed = ParseError::at_span(
+            Span::new(err.line, err.col, err.end_line, err.end_col),
+            err.message.clone(),
+        );
+        parsed.notes = err.notes;
+        parsed.helps = err.helps;
+        parsed.labels = err.labels;
+        parsed
     }
 }
 
@@ -38,12 +45,19 @@ impl<'a> Parser<'a> {
     }
 
     fn errorf(&self, msg: impl Into<String>) -> ParseError {
-        ParseError::new(self.cur.line, self.cur.col, msg)
+        ParseError::at_span(self.cur.span(), msg)
+    }
+
+    fn error_at_lex(&self, msg: impl Into<String>) -> ParseError {
+        ParseError::at_span(Span::point(self.lex.line, self.lex.col), msg)
     }
 
     fn expect(&mut self, expected: TokenType, what: &str) -> Result<Token, ParseError> {
         if self.cur.token_type != expected {
-            return Err(self.errorf(format!("expected {what}, got {:?}", self.cur.value)));
+            return Err(self.errorf(format!(
+                "expected {what}, found {}",
+                token_desc(&self.cur)
+            )).with_help(format!("expected {what} here")));
         }
         let tok = self.cur.clone();
         self.next()?;
@@ -56,14 +70,14 @@ impl<'a> Parser<'a> {
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include), got {:?}",
-                    self.cur.value
+                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include), found {}",
+                    token_desc(&self.cur)
                 )));
             }
             match self.cur.value.as_str() {
                 "meta" => {
                     if doc.meta.is_some() {
-                        return Err(self.errorf("duplicate meta block"));
+                        return Err(self.errorf("duplicate meta block").with_help("only one `meta { }` is allowed per document"));
                     }
                     doc.meta = Some(self.parse_meta()?);
                 }
@@ -124,7 +138,7 @@ impl<'a> Parser<'a> {
                     doc.blocks.push(BlockNode::Include(include));
                 }
                 _ => {
-                    return Err(self.errorf(format!("unknown block type {:?}", self.cur.value)));
+                    return Err(self.errorf(format!("unknown block type {}", token_desc(&self.cur))).with_help("valid blocks are meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include"));
                 }
             }
         }
@@ -387,11 +401,7 @@ impl<'a> Parser<'a> {
                 children.push(InlineNode::text(text));
             }
             if self.lex.at_eof() {
-                return Err(ParseError::new(
-                    self.lex.line,
-                    self.lex.col,
-                    "unterminated block, expected '}'",
-                ));
+                return Err(self.error_at_lex("unterminated block, expected '}'"));
             }
             if let Some(ident) = self.lex.at_inline_start() {
                 let inline = self.parse_inline_raw(&ident)?;
@@ -479,11 +489,7 @@ impl<'a> Parser<'a> {
             self.lex.skip_raw_spaces();
             let attr_name = self.lex.read_raw_ident();
             if attr_name.is_empty() {
-                return Err(ParseError::new(
-                    self.lex.line,
-                    self.lex.col,
-                    "expected attribute name in link(...)",
-                ));
+                return Err(self.error_at_lex("expected attribute name in link(...)"));
             }
             self.lex.skip_raw_spaces();
             self.lex.consume_raw_byte(b':', "':' in link attribute")?;
@@ -512,11 +518,7 @@ impl<'a> Parser<'a> {
         } else {
             let ident = self.lex.read_raw_ident();
             if ident.is_empty() {
-                return Err(ParseError::new(
-                    self.lex.line,
-                    self.lex.col,
-                    "expected footnote identifier in fn(...)",
-                ));
+                return Err(self.error_at_lex("expected footnote identifier in fn(...)"));
             }
             ident
         };
@@ -530,14 +532,52 @@ impl<'a> Parser<'a> {
         let col = self.cur.col;
         self.next()?; // consume 'codeblock'
         let (mut attrs, _) = self.parse_attrs()?;
-        if self.cur.token_type != TokenType::RawScopeOpen {
-            return Err(self.errorf(format!(
-                "expected '{{!' to open raw code scope, got {:?}",
-                self.cur.value
-            )));
+        let src = attrs.remove("src").unwrap_or_default().trim().to_string();
+        let has_src = !src.is_empty();
+
+        let raw = if self.cur.token_type == TokenType::RawScopeOpen {
+            let (raw, _, _) = self.lex.read_raw_until_bang_brace()?;
+            self.next()?;
+            raw
+        } else if self.cur.token_type == TokenType::LBrace {
+            return Err(ParseError::at_span(
+                Span::from_len(line, col, 9),
+                "codeblock body must be a raw scope `{! ... !}`; a plain `{` is not valid",
+            )
+            .primary_label("this codeblock")
+            .label(self.cur.span(), "plain `{` starts a prose body, not a raw scope")
+            .with_help("use `{! ... !}` after the attribute list, or omit the body when `src` is set"));
+        } else if has_src {
+            String::new()
+        } else {
+            return Err(ParseError::at_span(
+                Span::from_len(line, col, 9),
+                format!(
+                    "expected `{{!` to start a raw code body, found {}",
+                    token_desc(&self.cur)
+                ),
+            )
+            .primary_label("missing `{! ... !}` body")
+            .label(
+                self.cur.span(),
+                format!("unexpected {}", token_desc(&self.cur)),
+            )
+            .with_note("a `codeblock` without `src` must be followed by a raw scope")
+            .with_help(
+                "write `codeblock(lang: rust) {! source !}` or `codeblock(src: path)`",
+            ));
+        };
+
+        if has_src && !raw.is_empty() {
+            return Err(ParseError::at_span(
+                Span::from_len(line, col, 9),
+                "codeblock cannot combine `src` with a raw body",
+            )
+            .primary_label("source loaded from `src`")
+            .with_note("use `src` or `{! ... !}`, not both")
+            .with_help("drop the raw body, or drop the `src` attribute"));
         }
-        let (raw, _, _) = self.lex.read_raw_until_bang_brace()?;
-        self.next()?;
+
         let language = attrs.remove("lang").unwrap_or_default();
         let file = attrs.remove("file").unwrap_or_default();
         let line_numbers = attrs
@@ -553,6 +593,7 @@ impl<'a> Parser<'a> {
             col,
             language,
             file,
+            src,
             raw_code: raw,
             line_numbers,
             highlight_lines,
@@ -650,11 +691,7 @@ impl<'a> Parser<'a> {
                 children.push(ItemChild::Inline(InlineNode::text(text)));
             }
             if self.lex.at_eof() {
-                return Err(ParseError::new(
-                    self.lex.line,
-                    self.lex.col,
-                    "unterminated item, expected '}'",
-                ));
+                return Err(self.error_at_lex("unterminated item, expected '}'"));
             }
             if let Some(ident) = self.lex.at_inline_start() {
                 let inline = self.parse_inline_raw(&ident)?;
@@ -664,11 +701,7 @@ impl<'a> Parser<'a> {
             if self.lex.at_raw_ident("list") {
                 self.depth += 1;
                 if self.depth > MAX_INLINE_DEPTH {
-                    return Err(ParseError::new(
-                        self.lex.line,
-                        self.lex.col,
-                        format!("lists nested too deeply (limit {MAX_INLINE_DEPTH})"),
-                    ));
+                    return Err(self.error_at_lex(format!("lists nested too deeply (limit {MAX_INLINE_DEPTH})")));
                 }
                 let nested_res = self.parse_nested_list();
                 self.depth -= 1;
@@ -723,11 +756,7 @@ impl<'a> Parser<'a> {
                 children.push(QuoteChild::Inline(InlineNode::text(text)));
             }
             if self.lex.at_eof() {
-                return Err(ParseError::new(
-                    self.lex.line,
-                    self.lex.col,
-                    "unterminated quote, expected '}'",
-                ));
+                return Err(self.error_at_lex("unterminated quote, expected '}'"));
             }
             if let Some(ident) = self.lex.at_inline_start() {
                 let inline = self.parse_inline_raw(&ident)?;
@@ -737,11 +766,7 @@ impl<'a> Parser<'a> {
             if self.lex.at_raw_ident("quote") {
                 self.depth += 1;
                 if self.depth > MAX_INLINE_DEPTH {
-                    return Err(ParseError::new(
-                        self.lex.line,
-                        self.lex.col,
-                        format!("quotes nested too deeply (limit {MAX_INLINE_DEPTH})"),
-                    ));
+                    return Err(self.error_at_lex(format!("quotes nested too deeply (limit {MAX_INLINE_DEPTH})")));
                 }
                 if let Err(e) = self.next() {
                     self.depth -= 1;
@@ -873,6 +898,16 @@ impl<'a> Parser<'a> {
             col,
             children,
         })
+    }
+}
+
+fn token_desc(tok: &Token) -> String {
+    match tok.token_type {
+        TokenType::Eof => "end of file".to_string(),
+        TokenType::String => format!("string \"{}\"", tok.value),
+        TokenType::RawScopeOpen => "`{!`".to_string(),
+        _ if tok.value.is_empty() => format!("{:?}", tok.token_type),
+        _ => format!("`{}`", tok.value),
     }
 }
 

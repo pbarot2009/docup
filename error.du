@@ -1,0 +1,55 @@
+meta {
+    title: "Codeblock error test",
+    author: "DocUP",
+    version: "0.3.2"
+}
+
+h(1) { Codeblock error test }
+
+p {
+    This file is meant to fail on purpose. Compile it with:
+    code{cargo run -- build error-codeblock.du}
+}
+
+// --- Active error ----------------------------------------------------------
+// codeblock has no `src` and no `{! ... !}` body.
+// The next token is this heading, so the parser should report:
+//   error[parse]: expected `{!` to start a raw code body, found `h`
+//   --> error-codeblock.du:<heading-line>:1
+//   = note: codeblock at <block-line>:1 has no `src` attribute, so it needs a `{! ... !}` body
+
+codeblock(lang: "rust", file: "broken.rs", line_numbers: true)
+
+h(2) { This heading is the unexpected token }
+
+p {
+    After you have seen that diagnostic, comment out the empty codeblock
+    above and uncomment ONE of the cases below to test the others.
+}
+
+// --- Case B: plain `{` instead of `{!` -------------------------------------
+// Expected: parse error, body must be a raw scope `{! ... !}`
+//
+// codeblock(lang: "text") {
+//     not a raw scope
+// }
+
+// --- Case C: `src` combined with a raw body --------------------------------
+// Expected: parse error, use src or `{! ... !}`, not both
+//
+// codeblock(src: "Cargo.toml") {!
+// fn mixed() {}
+// !}
+
+// --- Case D: `src` path does not exist -------------------------------------
+// Expected: semantic error while resolving src
+//   note: src paths are relative to this .du file
+//
+// codeblock(src: "this-file-does-not-exist.rs", line_numbers: true)
+
+// --- Case E: empty raw body ------------------------------------------------
+// Expected: semantic error, codeblock has empty content
+//
+// codeblock(lang: "rust") {!
+// !}
+

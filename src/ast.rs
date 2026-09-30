@@ -180,13 +180,18 @@ pub struct HRNode {
     pub col: usize,
 }
 
-/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {! ... !}`.
+/// Fenced raw code block: `codeblock(lang: "rust", file: "main.rs", src: "src/main.rs", line_numbers: true, highlight: "1,3-5") {! ... !}`.
+///
+/// Content comes from either a raw `{! ... !}` scope or the `src` attribute,
+/// which loads a file relative to the document that contains the block.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CodeBlockNode {
     pub line: usize,
     pub col: usize,
     pub language: String,
     pub file: String,
+    /// Path to load source from, relative to the enclosing .du file. Empty when unused.
+    pub src: String,
     pub raw_code: String,
     pub line_numbers: bool,
     pub highlight_lines: Vec<usize>,

@@ -17,7 +17,10 @@ pub use ast::{
 };
 pub use cmd::{run, VERSION};
 pub use codegen::{generate, PAGE_CSS};
-pub use errors::{source_snippet, DocupError, LexError, ParseError, PositionedError, SemaError};
+pub use errors::{
+    render_diagnostic, render_span_snippet, source_snippet, DocupError, Label, LexError, ParseError,
+    PositionedError, SemaError, Span,
+};
 pub use fmt::{format_document, format_source};
 pub use highlight::{highlight_code, normalize_lang_name};
 pub use init::{scaffold_init, scaffold_new, ProjectConfig, SUPPORTED_THEMES};

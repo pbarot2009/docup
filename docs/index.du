@@ -2,7 +2,7 @@ meta {
   title: "DocUP Documentation",
   lang: "en",
   author: "DocUP",
-  version: "0.3.1",
+  version: "0.3.2",
   description: "Compiler and language reference for DocUP.",
   keywords: "docup, markup, html, compiler, .du",
   theme: "textbook",
@@ -15,7 +15,7 @@ h(1, id: "docup") { DocUP }
 
 p { DocUP is a compiler. It reads a b{.du} file and writes a single HTML5 document. The format is block-based: every top-level construct is a named block with optional attributes and a body. This document is written in that format. }
 
-p { Compiler version code{0.3.1}. }
+p { Compiler version code{0.3.2}. }
 
 toc {}
 

@@ -70,7 +70,7 @@ docup watch report.du
 docup watch report.du --port 3000
 !}
 
-p { Watched paths are the root source file, every successfully resolved include, and the code{--style} file if one was given. }
+p { Watched paths are the root source file, every successfully resolved include, every successfully resolved codeblock code{src} file, and the code{--style} file if one was given. }
 
 h(3, id: "dev-server") { 2.4 Dev server }
 

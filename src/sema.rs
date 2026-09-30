@@ -4,7 +4,7 @@ use crate::ast::{
     BlockNode, DocumentNode, InlineKind, InlineNode, ItemChild, ListNode, MetaNode, QuoteChild,
     TableNode,
 };
-use crate::errors::SemaError;
+use crate::errors::{SemaError, Span};
 
 /// Analyze validates the document AST and returns a SemaError on the first
 /// semantic violation found.
@@ -18,11 +18,11 @@ pub fn analyze(doc: &DocumentNode) -> Result<(), SemaError> {
     for block in &doc.blocks {
         if let BlockNode::Footnote(f) = block {
             if footnote_defs.contains_key(&f.id) {
-                return Err(SemaError::new(
-                    f.line,
-                    f.col,
+                return Err(SemaError::at_span(
+                    Span::from_len(f.line, f.col, 8),
                     format!("duplicate footnote definition with id \"{}\"", f.id),
-                ));
+                )
+                .with_note("footnote ids must be unique in the finished document"));
             }
             footnote_defs.insert(f.id.clone(), (f.line, f.col));
         }
@@ -37,11 +37,11 @@ pub fn analyze(doc: &DocumentNode) -> Result<(), SemaError> {
 fn check_meta_fields(m: &MetaNode) -> Result<(), SemaError> {
     for required in ["title"] {
         if !m.fields.contains_key(required) {
-            return Err(SemaError::new(
-                m.line,
-                m.col,
-                format!("meta block is missing required field \"{required}\""),
-            ));
+            return Err(SemaError::at_span(
+                Span::from_len(m.line, m.col, 4),
+                format!("meta block is missing required field `{required}`"),
+            )
+            .with_help("add title: \"...\" inside the meta block"));
         }
     }
     Ok(())
@@ -54,22 +54,29 @@ fn analyze_block(
     match block {
         BlockNode::Heading(h) => {
             if h.level < 1 || h.level > 6 {
-                return Err(SemaError::new(
-                    h.line,
-                    h.col,
+                return Err(SemaError::at_span(
+                    Span::from_len(h.line, h.col, 1),
                     format!("heading level {} out of range, must be 1-6", h.level),
-                ));
+                )
+                .with_help("use `h(1)` through `h(6)`"));
             }
             analyze_inlines(&h.children, footnote_defs)
         }
         BlockNode::Paragraph(p) => analyze_inlines(&p.children, footnote_defs),
         BlockNode::CodeBlock(cb) => {
             if cb.raw_code.is_empty() {
-                return Err(SemaError::new(
-                    cb.line,
-                    cb.col,
+                let mut err = SemaError::at_span(
+                    Span::from_len(cb.line, cb.col, 9),
                     "codeblock has empty content",
-                ));
+                );
+                if !cb.src.is_empty() {
+                    err = err.with_note(format!("src \"{}\" resolved to an empty file", cb.src));
+                } else {
+                    err = err
+                        .with_note("a codeblock body cannot be empty after trimming")
+                        .with_help("put source inside `{! ... !}`, or set the src attribute");
+                }
+                return Err(err);
             }
             Ok(())
         }
@@ -78,11 +85,11 @@ fn analyze_block(
         BlockNode::Quote(q) => analyze_quote_children(&q.children, footnote_defs),
         BlockNode::Image(img) => {
             if img.src.is_empty() {
-                return Err(SemaError::new(
-                    img.line,
-                    img.col,
+                return Err(SemaError::at_span(
+                    Span::from_len(img.line, img.col, 5),
                     "image is missing a source URL",
-                ));
+                )
+                .with_help("write image(\"url\", alt: \"text\")"));
             }
             Ok(())
         }
@@ -124,11 +131,11 @@ fn analyze_list(
     footnote_defs: &HashMap<String, (usize, usize)>,
 ) -> Result<(), SemaError> {
     if list.items.is_empty() {
-        return Err(SemaError::new(
-            list.line,
-            list.col,
+        return Err(SemaError::at_span(
+            Span::from_len(list.line, list.col, 4),
             "list must contain at least one item",
-        ));
+        )
+        .with_help("add an `item { ... }` or `task(done: false) { ... }`"));
     }
     for item in &list.items {
         analyze_item_children(&item.children, footnote_defs)?;
@@ -141,11 +148,11 @@ fn analyze_table(
     footnote_defs: &HashMap<String, (usize, usize)>,
 ) -> Result<(), SemaError> {
     if t.rows.is_empty() {
-        return Err(SemaError::new(
-            t.line,
-            t.col,
+        return Err(SemaError::at_span(
+            Span::from_len(t.line, t.col, 5),
             "table must contain at least one row",
-        ));
+        )
+        .with_help("add `row { cell { ... } }` inside the table"));
     }
     let mut width: Option<usize> = None;
     for row in &t.rows {
@@ -225,21 +232,23 @@ fn analyze_inline(
         | InlineKind::Strike(children) => analyze_inlines(children, footnote_defs),
         InlineKind::Link { url, children } => {
             if url.is_empty() {
-                return Err(SemaError::new(
-                    inline.line,
-                    inline.col,
+                return Err(SemaError::at_span(
+                    Span::from_len(inline.line, inline.col, 4),
                     "link is missing a URL",
-                ));
+                )
+                .with_help("write `link(\"https://example.com\"){ text }`"));
             }
             analyze_inlines(children, footnote_defs)
         }
         InlineKind::FootnoteRef(id) => {
             if !footnote_defs.contains_key(id) {
-                return Err(SemaError::new(
-                    inline.line,
-                    inline.col,
-                    format!("unresolved footnote reference \"{id}\""),
-                ));
+                return Err(SemaError::at_span(
+                    Span::from_len(inline.line, inline.col, 2),
+                    format!("unresolved footnote reference `{id}`"),
+                )
+                .with_help(format!(
+                    "add `footnote(id: \"{id}\") {{ ... }}` at document level"
+                )));
             }
             Ok(())
         }

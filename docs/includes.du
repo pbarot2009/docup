@@ -25,4 +25,6 @@ p { An empty path is a semantic error if the statement survives until analysis. 
 
 p { Watch mode adds every successfully resolved include to the watch set. }
 
+p { code{include} splices parsed DocUP blocks. To show a source file inside a codeblock without parsing it as DocUP, use code{codeblock(src: "...")} instead (section 9). }
+
 p { This document is one HTML file built from several .du files. index.du holds meta, the banner, the title, the toc, the includes, and the footnote definitions. }

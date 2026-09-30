@@ -1,12 +1,16 @@
 h(2, id: "codeblock") { 9. codeblock }
 
-p { Fenced source. After the attribute list, the body is a raw scope (section 3.5). }
+p { Fenced source. Content comes from a raw scope (section 3.5) or from a file named by code{src}. Use one of those two forms, not both. }
 
 codeblock(lang: "text") {!
-codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5")
+codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {!
+fn main() {}
+\!}
+
+codeblock(lang: "rust", src: "fragments/sample.rs", line_numbers: true)
 !}
 
-p { Follow the attribute list with a raw scope. The live block in section 9 is the same construct. }
+p { The first form follows the attribute list with a raw scope. The second form loads a file and may omit the body. A plain code{{}} body is a parse error; the body, when present, must be a raw scope. }
 
 p { Attributes: }
 
@@ -19,12 +23,17 @@ table {
   row {
     cell { lang }
     cell { string }
-    cell { Language label, code{language-*} class, and highlight grammar. Empty means no language class. }
+    cell { Language label, code{language-*} class, and highlight grammar. Empty means no language class. If omitted and code{src} is set, the file extension is normalized to a language name. }
   }
   row {
     cell { file }
     cell { string }
-    cell { Label in the header. }
+    cell { Label in the header. If omitted and code{src} is set, the source file's base name is used. }
+  }
+  row {
+    cell { src }
+    cell { string }
+    cell { Path of a file to load as the block body. Relative to the .du file that contains the block, not the process working directory. }
   }
   row {
     cell { line_numbers }
@@ -38,7 +47,9 @@ table {
   }
 }
 
-p { Content empty after trim is a semantic error. The output header always includes a Copy button. }
+p { Resolution of code{src} matches include paths: join to the parent file's directory, canonicalize, then read. Failure is an error on the codeblock. Cycles are not a concern; the file is raw text and is not parsed as DocUP. Watch mode adds every successfully resolved code{src} file to the watch set. }
+
+p { Combining code{src} with a non-empty raw body is a parse error. Content empty after trim (including an empty loaded file) is a semantic error. The output header always includes a Copy button. }
 
 codeblock(lang: "rust", file: "parse_heading.rs", line_numbers: true, highlight: "1,4-6") {!
 fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
@@ -51,6 +62,10 @@ fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
     // ...
 }
 !}
+
+p { The next block loads code{fragments/sample.rs} through code{src}. Language and the header label are inferred from the path when you omit code{lang} and code{file}. }
+
+codeblock(src: "fragments/sample.rs", line_numbers: true)
 
 
 h(3, id: "highlight-langs") { 9.1 Highlight languages }

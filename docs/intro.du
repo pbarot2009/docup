@@ -10,6 +10,7 @@ list(ordered: true) {
   item { Read the input file. }
   item { Lex and parse into a document node. }
   item { Resolve include statements, recursively. }
+  item { Resolve codeblock src paths and load those files. }
   item { Run semantic checks. }
   item { Generate HTML and write the output file. }
 }

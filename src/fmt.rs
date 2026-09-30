@@ -163,6 +163,9 @@ fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
     if !cb.file.is_empty() {
         attrs.push(format!("file: \"{}\"", escape_du_string(&cb.file)));
     }
+    if !cb.src.is_empty() {
+        attrs.push(format!("src: \"{}\"", escape_du_string(&cb.src)));
+    }
     if cb.line_numbers {
         attrs.push("line_numbers: true".to_string());
     }
@@ -177,6 +180,10 @@ fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
         w.push('(');
         w.push_str(&attrs.join(", "));
         w.push(')');
+    }
+
+    if !cb.src.trim().is_empty() {
+        return;
     }
 
     w.push_str(" {!\n");
@@ -719,6 +726,16 @@ print("\nvalue: {\!}\n", .{val});
 "#;
         let formatted = format_source(src).expect("must parse");
         assert!(formatted.contains(r#"{\!}"#));
+    }
+
+    #[test]
+    fn test_format_codeblock_src_omits_body() {
+        let src = r#"codeblock(lang: "rust", src: "src/main.rs", line_numbers: true)"#;
+        let formatted = format_source(src).expect("must parse");
+        assert_eq!(
+            formatted,
+            "codeblock(lang: \"rust\", src: \"src/main.rs\", line_numbers: true)\n"
+        );
     }
 
     #[test]

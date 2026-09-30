@@ -30,7 +30,7 @@ list {
   item { tables, including a header row and an included fragment }
   item { the banner image }
   item { callouts of all four kinds }
-  item { codeblock with lang, file, line numbers, and highlight ranges }
+  item { codeblock with lang, file, src, line numbers, and highlight ranges }
   item { raw HTML }
   item { display math and inline math }
   item { footnote references and definitions }
@@ -82,4 +82,4 @@ p { Level 5. }
 
 h(6, id: "heading-level-6") { Level 6 }
 
-p { Level 6. Compiler version code{0.3.1}. }
+p { Level 6. Compiler version code{0.3.2}. }
