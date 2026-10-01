@@ -27,7 +27,7 @@
 - [Example Document](#example-document)
 - [Usage](#usage)
 - [Editor Support](#editor-support)
-- [Features (v0.3.1)](#features-v020)
+- [Features (v0.3.2)](#features-v020
 - [Roadmap: v0.3.0](#roadmap-v030)
 - [Documentation](#documentation)
 - [Important Links](#important-links)
@@ -131,6 +131,7 @@ Flags for `build` and `watch`:
 
 ---
 
+<<<<<<< HEAD
 ## Editor Support
 
 Syntax highlighting for `.du` files is provided by a tree-sitter grammar:
@@ -157,7 +158,7 @@ Neovim users can point `nvim-treesitter` at the same repository.
 
 ---
 
-## Features (v0.3.1)
+## Features (v0.3.2)
 
 - [x] Metadata (`meta`): `title` required when `meta` is present; also `lang`, `theme`, `author`, `version`, `description`, `keywords`, `canonical`, `image`, `stylesheet`
 - [x] Headings (`h(1)` to `h(6)`, `id` / `class`)
@@ -170,6 +171,8 @@ Neovim users can point `nvim-treesitter` at the same repository.
 - [x] Blockquotes (`quote`, nestable)
 - [x] Images (`image`)
 - [x] Tables (`table`, `row`, `cell`, `header`)
+- [x] Mermaid diagrams (`mermaid`)
+- [x] Charts and graphs (`chart`, `graph`): bar, line, and pie, drawn as SVG
 - [x] Callouts (`callout`): `note`, `tip`, `warning`, `danger`
 - [x] Raw HTML (`raw`)
 - [x] Display math (`math`) and inline math (`m`)

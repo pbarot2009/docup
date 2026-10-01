@@ -21,6 +21,9 @@ list {
     item { code{callout} }
     item { code{raw} }
     item { code{math} }
+    item { code{mermaid} }
+    item { code{chart} }
+    item { code{graph} }
     item { code{toc} }
     item { code{footnote} }
     item { code{include} }
@@ -110,11 +113,11 @@ p {
 h(3, id: "raw-scopes") { 3.5 Raw scopes }
 
 p {
-    code{raw} and code{math} take a body that starts with brace-bang and ends at
-    the first unescaped bang-brace from that point. code{codeblock} uses the
-    same raw scope unless it has a code{src} attribute; then the body may be
-    omitted and the file contents are loaded instead. The body is not tokenized
-    as DocUP.
+    code{raw}, code{math}, and code{mermaid} take a body that starts with
+    brace-bang and ends at the first unescaped bang-brace from that point.
+    code{codeblock} uses the same raw scope unless it has a code{src} attribute;
+    then the body may be omitted and the file contents are loaded instead. The
+    body is not tokenized as DocUP.
 }
 
 p {

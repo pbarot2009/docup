@@ -1,6 +1,6 @@
 [package]
 name = "docup-lang"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2024"
 authors = []
 description = "DocUP compiler: compiles .du documents to standalone HTML5"

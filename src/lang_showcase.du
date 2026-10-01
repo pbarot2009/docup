@@ -1,7 +1,7 @@
 meta {
     title: "DocUP 65-Language Highlighting Verification",
     author: "DocUP Engine",
-    version: "0.3.1",
+    version: "0.3.2",
     theme: "dark",
     lang: "en"
 }
@@ -446,7 +446,7 @@ codeblock(lang: "toml", line_numbers: true) {!
 # Cargo TOML
 [package]
 name = "docup"
-version = "0.3.1"
+version = "0.3.2"
 line_numbers = true
 !}
 

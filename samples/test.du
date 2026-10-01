@@ -63,7 +63,7 @@ p { A task list of project milestones: }
 list {
     task(done: true) { Design the grammar }
     task(done: true) { Write the parser }
-    task(done: false) { Reach v0.3.1 }
+    task(done: false) { Reach v0.3.2 }
 }
 
 hr {}
@@ -105,4 +105,53 @@ p {
     That's all 15 features: meta, headings, paragraphs, inline styling (bold,
     italic, code, strikethrough), codeblock, hr, list/item, link, quote, image,
     nested lists, nested quotes, task lists, and tables.
+}
+
+h(2, id: "diagrams") { Diagrams }
+
+mermaid(caption: "Build flow") {!
+flowchart LR
+  A[Parse] --> B[Check]
+  B --> C[HTML]
+!}
+
+chart(title: "Passes") {
+    row(header: true) {
+        cell { Step }
+        cell { Count }
+    }
+    row {
+        cell { parse }
+        cell { 3 }
+    }
+    row {
+        cell { fmt }
+        cell { 9 }
+    }
+}
+
+graph(title: "Time") {
+    row(header: true) {
+        cell { Step }
+        cell { ms }
+    }
+    row {
+        cell { lex }
+        cell { 4 }
+    }
+    row {
+        cell { parse }
+        cell { 6 }
+    }
+}
+
+chart(type: "pie", title: "Share") {
+    row {
+        cell { docs }
+        cell { 5 }
+    }
+    row {
+        cell { tests }
+        cell { 3 }
+    }
 }

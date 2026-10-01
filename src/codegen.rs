@@ -130,6 +130,51 @@ img {
   overflow-x: auto;
 }
 
+.diagram {
+  margin: 1.4em 0;
+}
+.diagram-frame {
+  overflow-x: auto;
+}
+.diagram svg.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.diagram .chart-title {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-body, sans-serif);
+}
+.diagram .chart-label {
+  fill: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-body, sans-serif);
+}
+.diagram .chart-grid {
+  stroke: var(--border-muted);
+  stroke-width: 1;
+}
+.diagram .chart-axis {
+  stroke: var(--text-muted);
+  stroke-width: 1.2;
+}
+.diagram figcaption {
+  margin-top: 0.45em;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  text-align: center;
+}
+.diagram pre.mermaid {
+  margin: 0;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8em 1em;
+  overflow-x: auto;
+}
+
 .toc {
   margin: 1.5em 0;
   padding: 1em 1.25em;
@@ -325,6 +370,12 @@ pub const KATEX_HEAD: &str = r#"  <link rel="stylesheet" href="https://cdn.jsdel
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 "#;
 
+pub const MERMAID_HEAD: &str = r#"  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, securityLevel: "strict" });
+  </script>
+"#;
+
 pub const COPY_SCRIPT: &str = r#"  <script>
     function copyCode(btn) {
       const code = btn.closest('.codeblock').querySelector('code').innerText;
@@ -465,6 +516,7 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
     let page_css = build_page_css(theme_kind);
 
     let katex_tags = if doc_has_math(doc) { KATEX_HEAD } else { "" };
+    let mermaid_tags = if doc_has_mermaid(doc) { MERMAID_HEAD } else { "" };
 
     let custom_style_tag = match custom_css {
         Some(css) if !css.trim().is_empty() => {
@@ -482,7 +534,7 @@ pub fn generate(doc: &DocumentNode, custom_css: Option<&str>) -> String {
   <title>{escaped_title}</title>
 {meta_tags}{font_head_tags}
   <style>{page_css}</style>
-{katex_tags}{stylesheet_link}{custom_style_tag}</head>
+{katex_tags}{mermaid_tags}{stylesheet_link}{custom_style_tag}</head>
 <body>
 {body}{COPY_SCRIPT}</body>
 </html>
@@ -583,6 +635,13 @@ fn collect_block_footnotes(
                 }
             }
         }
+        BlockNode::Chart(c) => {
+            for row in &c.rows {
+                for cell in &row.cells {
+                    collect_inlines_footnotes(&cell.children, map, order);
+                }
+            }
+        }
         BlockNode::List(l) => {
             for item in &l.items {
                 for child in &item.children {
@@ -610,6 +669,7 @@ fn collect_block_footnotes(
         | BlockNode::Image(_)
         | BlockNode::Raw(_)
         | BlockNode::Math(_)
+        | BlockNode::Mermaid(_)
         | BlockNode::TOC(_)
         | BlockNode::Footnote(_)
         | BlockNode::Include(_) => {}
@@ -722,9 +782,37 @@ fn render_block(
             escape_html_into(&m.latex, w);
             w.push_str("\n\\]</div>\n");
         }
+        BlockNode::Mermaid(m) => render_mermaid(w, m),
+        BlockNode::Chart(c) => render_chart(w, c),
         BlockNode::TOC(_) => render_toc(w, heading_metas),
         BlockNode::Footnote(_) | BlockNode::Include(_) => {}
     }
+}
+
+fn render_mermaid(w: &mut String, diagram: &crate::ast::MermaidNode) {
+    w.push_str("<figure class=\"diagram\">\n");
+    w.push_str("  <pre class=\"mermaid\">");
+    escape_html_into(&diagram.source, w);
+    w.push_str("</pre>\n");
+    if !diagram.caption.is_empty() {
+        w.push_str("  <figcaption>");
+        escape_html_into(&diagram.caption, w);
+        w.push_str("</figcaption>\n");
+    }
+    w.push_str("</figure>\n");
+}
+
+fn render_chart(w: &mut String, chart: &crate::ast::ChartNode) {
+    w.push_str("<figure class=\"diagram\">\n");
+    w.push_str("  ");
+    w.push_str(&crate::charts::render_chart_svg(chart));
+    w.push('\n');
+    if !chart.title.is_empty() {
+        w.push_str("  <figcaption>");
+        escape_html_into(&chart.title, w);
+        w.push_str("</figcaption>\n");
+    }
+    w.push_str("</figure>\n");
 }
 
 fn render_toc(w: &mut String, headings: &[HeadingMeta]) {
@@ -1044,6 +1132,12 @@ fn render_footnotes_section(
     w.push_str("</section>\n");
 }
 
+fn doc_has_mermaid(doc: &DocumentNode) -> bool {
+    doc.blocks
+        .iter()
+        .any(|b| matches!(b, BlockNode::Mermaid(_)))
+}
+
 fn doc_has_math(doc: &DocumentNode) -> bool {
     doc.blocks.iter().any(block_has_math)
 }
@@ -1065,6 +1159,8 @@ fn block_has_math(block: &BlockNode) -> bool {
         | BlockNode::HR(_)
         | BlockNode::Image(_)
         | BlockNode::Raw(_)
+        | BlockNode::Mermaid(_)
+        | BlockNode::Chart(_)
         | BlockNode::TOC(_)
         | BlockNode::Include(_) => false,
     }

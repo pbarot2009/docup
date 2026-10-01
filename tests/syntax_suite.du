@@ -1,7 +1,7 @@
 meta {
     title: "DocUP Advanced Syntax & Edge Cases",
     author: "DocUP Engineering",
-    version: "0.3.1",
+    version: "0.3.2",
     theme: "light",
     lang: "en",
     description: "Comprehensive stress test validating callout aliases, C/C++ highlighting, deep quotes, and table layouts."
@@ -87,7 +87,7 @@ p { Structured JSON validation: }
 codeblock(lang: "json", file: "package.json") {!
 {
   "name": "docup-toolchain",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "dependencies": {
     "katex": "^0.16.11"

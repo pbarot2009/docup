@@ -111,6 +111,18 @@ fn analyze_block(
             }
             Ok(())
         }
+        BlockNode::Mermaid(m) => {
+            if m.source.trim().is_empty() {
+                return Err(SemaError::new(
+                    m.line,
+                    m.col,
+                    "mermaid block has empty content",
+                )
+                .with_help("put a diagram inside `{! ... !}`"));
+            }
+            Ok(())
+        }
+        BlockNode::Chart(c) => analyze_chart(c),
         BlockNode::TOC(_) => Ok(()),
         BlockNode::Footnote(f) => analyze_inlines(&f.children, footnote_defs),
         BlockNode::Include(inc) => {
@@ -123,6 +135,15 @@ fn analyze_block(
             }
             Ok(())
         }
+    }
+}
+
+fn analyze_chart(chart: &crate::ast::ChartNode) -> Result<(), SemaError> {
+    match crate::charts::chart_data(chart) {
+        Ok(_) => Ok(()),
+        Err((line, col, message)) => Err(SemaError::new(line, col, message).with_help(
+            "use a label cell, then number cells, like row { cell { parse } cell { 3 } }",
+        )),
     }
 }
 

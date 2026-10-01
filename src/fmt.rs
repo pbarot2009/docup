@@ -1,7 +1,7 @@
 use crate::ast::{
-    BlockNode, CalloutNode, CodeBlockNode, DocumentNode, FootnoteDefNode, HeadingNode, ImageNode,
-    IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode,
-    ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TableNode,
+    BlockNode, CalloutNode, ChartNode, CodeBlockNode, DocumentNode, FootnoteDefNode, HeadingNode,
+    ImageNode, IncludeNode, InlineKind, InlineNode, ItemChild, ItemNode, ListNode, MathBlockNode,
+    MermaidNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TableNode,
 };
 use crate::errors::ParseError;
 use crate::parser::Parser;
@@ -103,6 +103,8 @@ fn format_block(w: &mut String, block: &BlockNode, depth: usize) {
         BlockNode::Callout(c) => format_callout(w, c, depth),
         BlockNode::Raw(r) => format_raw(w, r, depth),
         BlockNode::Math(m) => format_math(w, m, depth),
+        BlockNode::Mermaid(m) => format_mermaid(w, m, depth),
+        BlockNode::Chart(c) => format_chart(w, c, depth),
         BlockNode::TOC(_) => {
             w.push_str(&indent_str(depth));
             w.push_str("toc {}");
@@ -389,6 +391,53 @@ fn format_math(w: &mut String, math: &MathBlockNode, depth: usize) {
     w.push_str(&ind);
     w.push_str("math");
     write_raw_scope(w, &ind, &math.latex);
+}
+
+fn format_mermaid(w: &mut String, diagram: &MermaidNode, depth: usize) {
+    let ind = indent_str(depth);
+    w.push_str(&ind);
+    w.push_str("mermaid");
+    if !diagram.caption.is_empty() {
+        w.push_str("(caption: \"");
+        w.push_str(&escape_du_string(&diagram.caption));
+        w.push_str("\")");
+    }
+    write_raw_scope(w, &ind, &diagram.source);
+}
+
+fn format_chart(w: &mut String, chart: &ChartNode, depth: usize) {
+    let ind = indent_str(depth);
+    w.push_str(&ind);
+    if chart.as_graph {
+        w.push_str("graph");
+    } else {
+        w.push_str("chart");
+    }
+    let mut attrs = Vec::new();
+    let default_type = if chart.as_graph { "line" } else { "bar" };
+    if chart.kind.as_str() != default_type {
+        attrs.push(format!("type: \"{}\"", chart.kind.as_str()));
+    }
+    if !chart.title.is_empty() {
+        attrs.push(format!("title: \"{}\"", escape_du_string(&chart.title)));
+    }
+    if !attrs.is_empty() {
+        w.push('(');
+        w.push_str(&attrs.join(", "));
+        w.push(')');
+    }
+    w.push_str(" {\n");
+    for (i, row) in chart.rows.iter().enumerate() {
+        if i > 0 {
+            w.push('\n');
+        }
+        format_row(w, row, depth + 1);
+    }
+    if !chart.rows.is_empty() {
+        w.push('\n');
+    }
+    w.push_str(&ind);
+    w.push('}');
 }
 
 fn format_footnote(w: &mut String, note: &FootnoteDefNode, depth: usize) {
@@ -891,6 +940,26 @@ item { inner }
 quote { hello quote { nested } }
 "#;
         round_trip(src);
+    }
+
+    #[test]
+    fn test_diagram_round_trip() {
+        let src = r#"
+mermaid(caption: "Flow") {!
+flowchart LR
+  A-->B
+!}
+chart(type: "pie", title: "Share") {
+  row { cell { docs } cell { 5 } }
+}
+graph(title: "Time") {
+  row { cell { lex } cell { 4 } }
+}
+"#;
+        let formatted = round_trip(src);
+        assert!(formatted.contains("mermaid(caption: \"Flow\")"), "{formatted}");
+        assert!(formatted.contains("chart(type: \"pie\""), "{formatted}");
+        assert!(formatted.contains("graph(title: \"Time\")"), "{formatted}");
     }
 
     #[test]

@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod charts;
 pub mod cmd;
 pub mod codegen;
 pub mod errors;

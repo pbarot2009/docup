@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::ast::{
-    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, CodeBlockNode, DocumentNode,
-    FootnoteDefNode, HRNode, HeadingNode, ImageNode, IncludeNode, InlineKind, InlineNode,
-    ItemChild, ItemNode, ListNode, MathBlockNode, MetaNode, ParagraphNode, QuoteChild, QuoteNode,
-    RawNode, RowNode, TOCNode, TableNode,
+    trim_inline_edges, BlockNode, CalloutKind, CalloutNode, CellNode, ChartKind, ChartNode,
+    CodeBlockNode, DocumentNode, FootnoteDefNode, HRNode, HeadingNode, ImageNode, IncludeNode,
+    InlineKind, InlineNode, ItemChild, ItemNode, ListNode, MathBlockNode, MermaidNode, MetaNode,
+    ParagraphNode, QuoteChild, QuoteNode, RawNode, RowNode, TOCNode, TableNode,
 };
 use crate::errors::{LexError, ParseError, Span};
 use crate::lexer::{Lexer, Token, TokenType};
@@ -12,6 +12,7 @@ use crate::lexer::{Lexer, Token, TokenType};
 /// max_inline_depth bounds nested inline elements (e.g. b{i{b{...}}}) to prevent
 /// adversarial or deeply nested input from overflowing the stack.
 const MAX_INLINE_DEPTH: usize = 64;
+const VALID_BLOCKS: &str = "meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, mermaid, chart, graph, toc, footnote, include";
 
 impl From<LexError> for ParseError {
     fn from(err: LexError) -> Self {
@@ -70,7 +71,7 @@ impl<'a> Parser<'a> {
         while self.cur.token_type != TokenType::Eof {
             if self.cur.token_type != TokenType::Ident {
                 return Err(self.errorf(format!(
-                    "expected a top-level block (meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include), found {}",
+                    "expected a top-level block ({VALID_BLOCKS}), found {}",
                     token_desc(&self.cur)
                 )));
             }
@@ -125,6 +126,18 @@ impl<'a> Parser<'a> {
                     let math = self.parse_math()?;
                     doc.blocks.push(BlockNode::Math(math));
                 }
+                "mermaid" => {
+                    let diagram = self.parse_mermaid()?;
+                    doc.blocks.push(BlockNode::Mermaid(diagram));
+                }
+                "chart" => {
+                    let chart = self.parse_chart(ChartKind::Bar, false)?;
+                    doc.blocks.push(BlockNode::Chart(chart));
+                }
+                "graph" => {
+                    let chart = self.parse_chart(ChartKind::Line, true)?;
+                    doc.blocks.push(BlockNode::Chart(chart));
+                }
                 "toc" => {
                     let toc = self.parse_toc()?;
                     doc.blocks.push(BlockNode::TOC(toc));
@@ -138,7 +151,7 @@ impl<'a> Parser<'a> {
                     doc.blocks.push(BlockNode::Include(include));
                 }
                 _ => {
-                    return Err(self.errorf(format!("unknown block type {}", token_desc(&self.cur))).with_help("valid blocks are meta, h, p, codeblock, hr, list, quote, image, table, callout, raw, math, toc, footnote, include"));
+                    return Err(self.errorf(format!("unknown block type {}", token_desc(&self.cur))).with_help(format!("valid blocks are {VALID_BLOCKS}")));
                 }
             }
         }
@@ -351,6 +364,76 @@ impl<'a> Parser<'a> {
             line,
             col,
             latex: raw,
+        })
+    }
+
+    fn parse_mermaid(&mut self) -> Result<MermaidNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        self.next()?;
+        let (attrs, _) = self.parse_attrs()?;
+        let caption = attrs.get("caption").cloned().unwrap_or_default();
+        if self.cur.token_type != TokenType::RawScopeOpen {
+            return Err(self
+                .errorf(format!(
+                    "expected `{{!` to start a mermaid body, found {}",
+                    token_desc(&self.cur)
+                ))
+                .with_help("write `mermaid {! flowchart LR; A-->B !}`"));
+        }
+        let (source, _, _) = self.lex.read_raw_until_bang_brace()?;
+        self.next()?;
+        Ok(MermaidNode {
+            line,
+            col,
+            caption,
+            source,
+        })
+    }
+
+    fn parse_chart(
+        &mut self,
+        default_kind: ChartKind,
+        as_graph: bool,
+    ) -> Result<ChartNode, ParseError> {
+        let line = self.cur.line;
+        let col = self.cur.col;
+        let keyword = if as_graph { "graph" } else { "chart" };
+        self.next()?;
+        let (attrs, _) = self.parse_attrs()?;
+        let kind = if let Some(raw) = attrs.get("type") {
+            match ChartKind::parse(raw) {
+                Some(kind) => kind,
+                None => {
+                    return Err(self
+                        .errorf(format!("unknown {keyword} type `{raw}`"))
+                        .with_help("use type: \"bar\", type: \"line\", or type: \"pie\""));
+                }
+            }
+        } else {
+            default_kind
+        };
+        let title = attrs.get("title").cloned().unwrap_or_default();
+        self.expect(TokenType::LBrace, &format!("'{{' after {keyword}"))?;
+
+        let mut rows = Vec::new();
+        while self.cur.token_type != TokenType::RBrace {
+            if self.cur.token_type != TokenType::Ident || self.cur.value != "row" {
+                return Err(self.errorf(format!(
+                    "expected 'row' inside {keyword}, got {:?}",
+                    self.cur.value
+                )));
+            }
+            rows.push(self.parse_row()?);
+        }
+        self.expect(TokenType::RBrace, &format!("'}}' to close {keyword}"))?;
+        Ok(ChartNode {
+            line,
+            col,
+            kind,
+            title,
+            as_graph,
+            rows,
         })
     }
 

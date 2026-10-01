@@ -115,6 +115,54 @@ pub struct IncludeNode {
     pub path: String,
 }
 
+/// Mermaid diagram source: `mermaid(caption: "...") {! ... !}`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MermaidNode {
+    pub line: usize,
+    pub col: usize,
+    pub caption: String,
+    pub source: String,
+}
+
+/// Drawn chart kind. `bar` and `pie` are charts. `line` is a graph.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ChartKind {
+    Bar,
+    Line,
+    Pie,
+}
+
+impl ChartKind {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            ChartKind::Bar => "bar",
+            ChartKind::Line => "line",
+            ChartKind::Pie => "pie",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "bar" => Some(ChartKind::Bar),
+            "line" | "graph" => Some(ChartKind::Line),
+            "pie" => Some(ChartKind::Pie),
+            _ => None,
+        }
+    }
+}
+
+/// Chart or graph built from rows. Value cells must be numbers.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChartNode {
+    pub line: usize,
+    pub col: usize,
+    pub kind: ChartKind,
+    pub title: String,
+    /// True when the source keyword was `graph`, so fmt reprints that name.
+    pub as_graph: bool,
+    pub rows: Vec<RowNode>,
+}
+
 /// Enumeration of all top-level block constructs supported in DocUP.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BlockNode {
@@ -129,6 +177,8 @@ pub enum BlockNode {
     Callout(CalloutNode),
     Raw(RawNode),
     Math(MathBlockNode),
+    Mermaid(MermaidNode),
+    Chart(ChartNode),
     TOC(TOCNode),
     Footnote(FootnoteDefNode),
     Include(IncludeNode),
@@ -148,6 +198,8 @@ impl BlockNode {
             BlockNode::Callout(_) => "Callout",
             BlockNode::Raw(_) => "Raw",
             BlockNode::Math(_) => "Math",
+            BlockNode::Mermaid(_) => "Mermaid",
+            BlockNode::Chart(_) => "Chart",
             BlockNode::TOC(_) => "TOC",
             BlockNode::Footnote(_) => "Footnote",
             BlockNode::Include(_) => "Include",

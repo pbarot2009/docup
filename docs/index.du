@@ -44,6 +44,8 @@ include "code-and-math.du"
 
 include "tables-and-media.du"
 
+include "diagrams.du"
+
 include "callouts.du"
 
 include "footnotes.du"

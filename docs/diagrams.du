@@ -1,0 +1,122 @@
+h(2, id: "diagrams") { 11.5 Diagrams, charts, and graphs }
+
+p {
+    A mermaid block is a diagram source. A chart block and a graph block are
+    tables of numbers, and the compiler draws them as SVG in the HTML file.
+}
+
+h(3, id: "mermaid") { 11.5.1 mermaid }
+
+p {
+    The body is a raw scope, same as code{math}. Optional code{caption} is a
+    string. The page loads Mermaid only when a document has one of these blocks.
+}
+
+codeblock(lang: "text") {!
+mermaid(caption: "Build flow") {!
+flowchart LR
+  A[Parse] --> B[Format]
+  B --> C[HTML]
+\!}
+!}
+
+p { An empty body is a semantic error. }
+
+h(3, id: "chart") { 11.5.2 chart }
+
+p {
+    code{chart} defaults to code{type: "bar"}. code{graph} defaults to
+    code{type: "line"}. Both also accept code{pie}. Optional code{title} is the
+    figure title.
+}
+
+p {
+    The body is rows, same as a table. The first cell is the label. Later cells
+    are numbers. A header row names the series. Every row must have the same
+    number of cells, and a pie chart cannot use a negative or all-zero column.
+}
+
+codeblock(lang: "text") {!
+chart(type: "bar", title: "Passes") {
+  row(header: true) {
+    cell { Step }
+    cell { Count }
+  }
+  row { cell { parse } cell { 3 } }
+  row { cell { fmt } cell { 9 } }
+}
+
+graph(title: "Time") {
+  row(header: true) {
+    cell { Step }
+    cell { ms }
+  }
+  row { cell { lex } cell { 4 } }
+  row { cell { parse } cell { 6 } }
+}
+
+chart(type: "pie", title: "Share") {
+  row { cell { docs } cell { 5 } }
+  row { cell { tests } cell { 3 } }
+}
+!}
+
+p { The same blocks, drawn on this page: }
+
+mermaid(caption: "Build flow") {!
+flowchart LR
+  A[Parse] --> B[Format]
+  B --> C[HTML]
+!}
+
+chart(title: "Passes") {
+    row(header: true) {
+        cell { Step }
+        cell { Before }
+        cell { After }
+    }
+    row {
+        cell { parse }
+        cell { 3 }
+        cell { 8 }
+    }
+    row {
+        cell { fmt }
+        cell { 1 }
+        cell { 9 }
+    }
+}
+
+graph(title: "Time") {
+    row(header: true) {
+        cell { Step }
+        cell { ms }
+    }
+    row {
+        cell { lex }
+        cell { 4 }
+    }
+    row {
+        cell { parse }
+        cell { 6 }
+    }
+    row {
+        cell { gen }
+        cell { 5 }
+    }
+}
+
+chart(type: "pie", title: "Share") {
+    row {
+        cell { docs }
+        cell { 5 }
+    }
+    row {
+        cell { samples }
+        cell { 2 }
+    }
+    row {
+        cell { tests }
+        cell { 3 }
+    }
+}

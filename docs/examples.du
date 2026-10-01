@@ -28,6 +28,7 @@ list {
     item { lists, ordered lists, tasks, nested lists }
     item { quotes and a nested quote }
     item { tables, including a header row and an included fragment }
+    item { mermaid diagram, bar chart, line graph, and pie chart }
     item { the banner image }
     item { callouts of all four kinds }
     item { codeblock with lang, file, src, line numbers, and highlight ranges }
