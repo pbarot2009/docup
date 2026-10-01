@@ -14,12 +14,14 @@ deflist {
 }
 !}
 
+codeblock(lang: "text") {!
 deflist {
     term { code{start} }
     desc { Ordered-list start index. }
     term { code{href} }
     desc { Link around an image. }
 }
+!}
 
 h(2, id: "details") { 17. details }
 

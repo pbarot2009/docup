@@ -817,9 +817,9 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
 <p>If the first line after the opener is only spaces, tabs, or CR, that line is dropped. Trailing spaces and newlines are dropped. Empty content after that trim is a semantic error.</p>
 <p>To put a bang-brace in the body, escape it:</p>
 <ul>
-  <li>backslash, bang, brace — stored as bang-brace</li>
-  <li>bang, backslash, brace — stored as bang-brace</li>
-  <li>two backslashes, bang, brace — stored as backslash, bang, brace</li>
+  <li>backslash, bang, brace: stored as bang-brace</li>
+  <li>bang, backslash, brace: stored as bang-brace</li>
+  <li>two backslashes, bang, brace: stored as backslash, bang, brace</li>
 </ul>
 <h3 id="attributes">3.6 Attribute lists</h3>
 <p>Many blocks take a parenthesized list after the name:</p>
@@ -839,10 +839,10 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
 <h3 id="prose-escapes">3.7 Prose escapes</h3>
 <p>In paragraph-like text, a backslash before one of these characters emits that character and does not start syntax:</p>
 <ul>
-  <li>backslash brace-open — a literal open brace</li>
-  <li>backslash brace-close — a literal close brace</li>
-  <li>backslash bang — a literal bang</li>
-  <li>two backslashes — a literal backslash</li>
+  <li>backslash brace-open: a literal open brace</li>
+  <li>backslash brace-close: a literal close brace</li>
+  <li>backslash bang: a literal bang</li>
+  <li>two backslashes: a literal backslash</li>
 </ul>
 <p>Inside inline code, backslash-brace is unescaped to a brace and does not change brace depth. Inside inline math, backslash-brace is kept so KaTeX still sees it.</p>
 <h2 id="meta">4. meta</h2>
@@ -953,10 +953,10 @@ p { visible <span class="tok-comment">/* hidden */</span> text }</code></pre>
 <p>textbook also changes tables (booktabs-style rules, no vertical borders) and callout titles.</p>
 <p>The same string is written to <code>data-theme</code> on <code>&lt;html&gt;</code>.<sup class="footnote-ref"><a href="#fn-theme-attr" id="fnref-theme-attr">[2]</a></sup></p>
 <ul>
-  <li><code>light</code> — default theme, light palette locked.</li>
-  <li><code>dark</code> — default theme, dark palette locked.</li>
-  <li>a named theme — that theme&#39;s light palette by default; the dark palette still follows prefers-color-scheme.</li>
-  <li>omitted — default theme, follows prefers-color-scheme.</li>
+  <li><code>light</code>: default theme, light palette locked.</li>
+  <li><code>dark</code>: default theme, dark palette locked.</li>
+  <li>a named theme: that theme&#39;s light palette by default; the dark palette still follows prefers-color-scheme.</li>
+  <li>omitted: default theme, follows prefers-color-scheme.</li>
 </ul>
 <p><code>docup new</code> and <code>docup init</code> accept the five names in the table. Unknown values there fall back to textbook.</p>
 <h2 id="blocks">5. Blocks</h2>

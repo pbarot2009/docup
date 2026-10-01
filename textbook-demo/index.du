@@ -12,20 +12,24 @@ toc {}
 h(2, id: "introduction") { 1. Introduction }
 
 p {
-    This document was generated using code{docup} with the b{textbook} theme. DocUP compiles unambiguous markup into a standalone HTML5 file with zero dependencies.
+    This document was generated using code{docup} with the b{textbook} theme.
+    DocUP compiles unambiguous markup into a standalone HTML5 file with zero
+    dependencies.
 }
 
 callout(type: "tip") {
-    Start the live preview dev server with code{docup watch index.du} and edit this file in your favorite text editor.
+    Start the live preview dev server with code{docup watch index.du} and edit
+    this file in your favorite text editor.
 }
 
 h(2, id: "features") { 2. Document Features }
 
 p {
-    DocUP supports inline elements like b{bold}, i{italic}, inline code{let x = 42;}, and mathematical expressions such as m{e^{i\pi} + 1 = 0}.
+    DocUP supports inline elements like b{bold}, i{italic}, inline
+    code{let x = 42;}, and mathematical expressions such as m{e^{i\pi} + 1 = 0}.
 }
 
-codeblock(lang: "rust", file: "src/main.rs", line_numbers: true) {! 
+codeblock(lang: "rust", file: "src/main.rs", line_numbers: true) {!
 fn main() {
     println!("Hello from DocUP!");
 }
@@ -33,7 +37,7 @@ fn main() {
 
 h(3, id: "math") { 2.1 Mathematics }
 
-math {! 
+math {!
 \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
 !}
 

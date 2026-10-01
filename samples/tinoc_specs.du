@@ -74,7 +74,11 @@ const permissions = 0o7_5_5;
 const big_address = 0xFF80_0000_0000_0000;
 !}
 
-p { Compiler will infer the size of each integer literal, mostly default to code{i32} but if literal's size if more than code{i32} so it will go for code{i64}..code{i128}. }
+p {
+    Compiler will infer the size of each integer literal, mostly default to
+    code{i32} but if literal's size if more than code{i32} so it will go for
+    code{i64}..code{i128}.
+}
 
 p { For b{not comptime} known you must explit add type: }
 
@@ -104,7 +108,10 @@ const nanosecond = 0.000_000_001;
 const more_hex = 0x1234_5678.9ABC_CDEFp-10;
 !}
 
-p { b{Tinoc} does not has any special syntax for i{NaN}, i{Infinity (∞)}, i{Negetive Infinity (-∞)}. Use code{std.math} library for these. }
+p {
+    b{Tinoc} does not has any special syntax for i{NaN}, i{Infinity (∞)},
+    i{Negetive Infinity (-∞)}. Use code{std.math} library for these.
+}
 
 codeblock(lang: "tinoc") {!
 #import std.math;
@@ -416,7 +423,7 @@ fn <identifier>:(T, ...)(<param> <type>, ...) <type> {...}
 <identifier>();
 <identifier>(value, ...);
 <identifier>:T();
-// same for other 
+// same for other
 !}
 
 p { b{i{Example:}} }
@@ -448,7 +455,10 @@ hr {}
 
 h(1, id: "types") { Types }
 
-p { b{Tinoc} has a rich type system covering primitives, compounds, pointer/optional/error types, and heap-allocated collections. }
+p {
+    b{Tinoc} has a rich type system covering primitives, compounds,
+    pointer/optional/error types, and heap-allocated collections.
+}
 
 h(2, id: "primitive-types") { Primitive Types }
 
@@ -574,7 +584,10 @@ table {
 
 h(2, id: "string-type") { String Type }
 
-p { code{str} has no direct C primitive equivalent. It is represented as a C struct: }
+p {
+    code{str} has no direct C primitive equivalent. It is represented as a C
+    struct:
+}
 
 codeblock(lang: "c") {!
 typedef struct {
@@ -724,7 +737,9 @@ table {
     }
 }
 
-h(2, id: "heap-allocated-types") { Heap-Allocated Types (code{std.collections}) }
+h(2, id: "heap-allocated-types") {
+    Heap-Allocated Types (code{std.collections})
+}
 
 p { Generic syntax uses code{:T} and code{:(K, V)}. }
 
@@ -756,7 +771,10 @@ table {
     }
 }
 
-p { These are library types with no single C equivalent. They require manual implementation (dynamic arrays, hash tables, etc.) in plain C. }
+p {
+    These are library types with no single C equivalent. They require manual
+    implementation (dynamic arrays, hash tables, etc.) in plain C.
+}
 
 hr {}
 
@@ -997,7 +1015,10 @@ hr {}
 
 h(1, id: "if-else") { If / Else }
 
-p { b{Tinoc} uses code{if} and code{else} for conditional branching. No parentheses around the condition. }
+p {
+    b{Tinoc} uses code{if} and code{else} for conditional branching. No
+    parentheses around the condition.
+}
 
 p { b{i{Syntax:}} }
 
@@ -1066,7 +1087,7 @@ p { b{i{Example:}} }
 
 codeblock(lang: "tinoc") {!
 fn main() void {
-    // range loop — 0 to 9
+    // range loop: 0 to 9
     for 0..10 |i| {
         // i goes 0, 1, 2, ... 9
     }
@@ -1089,16 +1110,24 @@ p { b{i{Notes:}} }
 
 list {
     item { No parentheses around the range or collection. }
-    item { code{|i|} captures the loop variable, its not a closure, just binding syntax. }
+    item {
+        code{|i|} captures the loop variable, its not a closure, just binding
+        syntax.
+    }
     item { Range code{0..10} is exclusive on the right, iterates 0 through 9. }
-    item { code{break} exits the loop, code{continue} skips to the next iteration. }
+    item {
+        code{break} exits the loop, code{continue} skips to the next iteration.
+    }
 }
 
 hr {}
 
 h(1, id: "while") { While }
 
-p { b{Tinoc} uses code{while} for condition-based loops. code{while true} covers the infinite loop / do-while pattern. }
+p {
+    b{Tinoc} uses code{while} for condition-based loops. code{while true} covers
+    the infinite loop / do-while pattern.
+}
 
 p { b{i{Syntax:}} }
 
@@ -1122,7 +1151,7 @@ fn main() void {
         i += 1;
     }
 
-    // infinite loop — break to exit
+    // infinite loop: break to exit
     while true {
         if i == 20 {
             break;
@@ -1130,7 +1159,7 @@ fn main() void {
         i += 1;
     }
 
-    // do-while equivalent — run body first, check at end
+    // do-while equivalent: run body first, check at end
     while true {
         i += 1;
         if i >= 5 {
@@ -1145,15 +1174,23 @@ p { b{i{Notes:}} }
 list {
     item { No parentheses around the condition. }
     item { Braces are required. }
-    item { code{while true} replaces both infinite loops and do-while patterns from C. }
-    item { code{break} exits the loop, code{continue} skips to the next iteration. }
+    item {
+        code{while true} replaces both infinite loops and do-while patterns from
+        C.
+    }
+    item {
+        code{break} exits the loop, code{continue} skips to the next iteration.
+    }
 }
 
 hr {}
 
 h(1, id: "modules") { Modules }
 
-p { b{Tinoc} uses code{#import} for module resolution. The code{#} prefix marks module and preprocessor directives. }
+p {
+    b{Tinoc} uses code{#import} for module resolution. The code{#} prefix marks
+    module and preprocessor directives.
+}
 
 p { b{i{Syntax:}} }
 
@@ -1198,10 +1235,22 @@ fn main() void {
 p { b{i{Notes:}} }
 
 list {
-    item { code{#import} replaces C code{#include}; it uses semantic module resolution, not file text insertion. }
-    item { code{.*} wildcard imports all public exports from a module into the current scope. }
-    item { code{pub} keyword is used to declare a function/struct/enum/union/const etc. public for import. }
-    item { Without code{.*}, symbols are accessed via the last path segment (e.g. code{std.io} → code{io.println}). }
+    item {
+        code{#import} replaces C code{#include}; it uses semantic module
+        resolution, not file text insertion.
+    }
+    item {
+        code{.*} wildcard imports all public exports from a module into the
+        current scope.
+    }
+    item {
+        code{pub} keyword is used to declare a function/struct/enum/union/const
+        etc. public for import.
+    }
+    item {
+        Without code{.*}, symbols are accessed via the last path segment (e.g.
+        code{std.io} → code{io.println}).
+    }
 }
 
 p { .tnc is extension and Tinoc is lang name. }

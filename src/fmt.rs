@@ -22,35 +22,37 @@ const PREFERRED_META_KEYS: &[&str] = &[
 const INDENT: &str = "    ";
 const MAX_LINE_WIDTH: usize = 80;
 
-/// Parses source DocUP code and produces canonically formatted DocUP markup.
+/// Parse DocUP source and print it in the stable layout.
+///
+/// The result parses again to the same markup, so `fmt` then `fmt --check`
+/// agrees. Invalid source returns the parse error and is left unchanged.
 pub fn format_source(src: &str) -> Result<String, ParseError> {
     let mut parser = Parser::new(src.as_bytes())?;
     let doc = parser.parse_document()?;
     Ok(format_document(&doc))
 }
 
-/// Serializes an AST DocumentNode into canonical DocUP markup.
+/// Print a document node in the stable layout.
 pub fn format_document(doc: &DocumentNode) -> String {
     let mut out = String::new();
-    let mut has_previous_block = false;
+    let mut wrote = false;
 
     if let Some(ref meta) = doc.meta {
         format_meta(&mut out, meta);
-        has_previous_block = true;
+        wrote = true;
     }
 
     for block in &doc.blocks {
-        if has_previous_block {
+        if wrote {
             out.push_str("\n\n");
         }
         format_block(&mut out, block, 0);
-        has_previous_block = true;
+        wrote = true;
     }
 
     if !out.is_empty() && !out.ends_with('\n') {
         out.push('\n');
     }
-
     out
 }
 
@@ -59,8 +61,8 @@ fn format_meta(w: &mut String, meta: &MetaNode) {
 
     let mut keys: Vec<&String> = meta.fields.keys().collect();
     keys.sort_by(|a, b| {
-        let pos_a = PREFERRED_META_KEYS.iter().position(|k| k == *a);
-        let pos_b = PREFERRED_META_KEYS.iter().position(|k| k == *b);
+        let pos_a = PREFERRED_META_KEYS.iter().position(|k| k == a);
+        let pos_b = PREFERRED_META_KEYS.iter().position(|k| k == b);
         match (pos_a, pos_b) {
             (Some(ia), Some(ib)) => ia.cmp(&ib),
             (Some(_), None) => std::cmp::Ordering::Less,
@@ -86,13 +88,12 @@ fn format_meta(w: &mut String, meta: &MetaNode) {
 }
 
 fn format_block(w: &mut String, block: &BlockNode, depth: usize) {
-    let ind = indent_str(depth);
     match block {
         BlockNode::Heading(h) => format_heading(w, h, depth),
         BlockNode::Paragraph(p) => format_paragraph(w, p, depth),
         BlockNode::CodeBlock(cb) => format_codeblock(w, cb, depth),
         BlockNode::HR(_) => {
-            w.push_str(&ind);
+            w.push_str(&indent_str(depth));
             w.push_str("hr {}");
         }
         BlockNode::List(l) => format_list(w, l, depth),
@@ -103,7 +104,7 @@ fn format_block(w: &mut String, block: &BlockNode, depth: usize) {
         BlockNode::Raw(r) => format_raw(w, r, depth),
         BlockNode::Math(m) => format_math(w, m, depth),
         BlockNode::TOC(_) => {
-            w.push_str(&ind);
+            w.push_str(&indent_str(depth));
             w.push_str("toc {}");
         }
         BlockNode::Footnote(f) => format_footnote(w, f, depth),
@@ -113,42 +114,29 @@ fn format_block(w: &mut String, block: &BlockNode, depth: usize) {
 
 fn format_heading(w: &mut String, h: &HeadingNode, depth: usize) {
     let ind = indent_str(depth);
-    w.push_str(&ind);
-    w.push_str(&format!("h({})", h.level));
-
+    let mut head = format!("h({})", h.level);
     if !h.attrs.is_empty() {
-        w.truncate(w.len() - 1);
-        let mut sorted_keys: Vec<&String> = h.attrs.keys().collect();
-        sorted_keys.sort_by(|a, b| match (a.as_str(), b.as_str()) {
-            ("id", _) => std::cmp::Ordering::Less,
-            (_, "id") => std::cmp::Ordering::Greater,
-            ("class", _) => std::cmp::Ordering::Less,
-            (_, "class") => std::cmp::Ordering::Greater,
-            _ => a.cmp(b),
-        });
-
-        for key in sorted_keys {
-            let val = &h.attrs[key];
-            w.push_str(&format!(", {key}: \"{}\"", escape_du_string(val)));
+        head.pop();
+        let mut keys: Vec<&String> = h.attrs.keys().collect();
+        keys.sort_by(|a, b| attr_order(a, b));
+        for key in keys {
+            head.push_str(", ");
+            head.push_str(key);
+            head.push_str(": \"");
+            head.push_str(&escape_du_string(&h.attrs[key]));
+            head.push('"');
         }
-        w.push(')');
+        head.push(')');
     }
 
-    w.push_str(" { ");
-    w.push_str(&format_inlines(&h.children));
-    w.push_str(" }");
+    let body = format_inlines(&h.children);
+    write_prose_block(w, &ind, &head, &body);
 }
 
 fn format_paragraph(w: &mut String, p: &ParagraphNode, depth: usize) {
     let ind = indent_str(depth);
-    w.push_str(&ind);
-    w.push_str("p {\n");
-    let inner_text = format_inlines(&p.children);
-    let wrapped = wrap_text(&inner_text, depth + 1, MAX_LINE_WIDTH);
-    w.push_str(&wrapped);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push('}');
+    let body = format_inlines(&p.children);
+    write_prose_block(w, &ind, "p", &body);
 }
 
 fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
@@ -175,42 +163,40 @@ fn format_codeblock(w: &mut String, cb: &CodeBlockNode, depth: usize) {
             format_line_ranges(&cb.highlight_lines)
         ));
     }
-
     if !attrs.is_empty() {
         w.push('(');
         w.push_str(&attrs.join(", "));
         w.push(')');
     }
 
-    if !cb.src.trim().is_empty() {
+    // A src attribute loads the file. The raw body is omitted so the two
+    // sources cannot disagree after a format.
+    if !cb.src.is_empty() {
         return;
     }
 
-    w.push_str(" {!\n");
-    let escaped_raw = escape_raw_block_content(cb.raw_code.trim_end());
-    w.push_str(&escaped_raw);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push_str("!}");
+    write_raw_scope(w, &ind, &cb.raw_code);
 }
 
-fn format_list(w: &mut String, l: &ListNode, depth: usize) {
+fn format_list(w: &mut String, list: &ListNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    if l.ordered {
+    if list.ordered {
         w.push_str("list(ordered: true) {\n");
     } else {
         w.push_str("list {\n");
     }
 
-    for (i, item) in l.items.iter().enumerate() {
+    for (i, item) in list.items.iter().enumerate() {
         if i > 0 {
             w.push('\n');
         }
         format_item(w, item, depth + 1);
     }
 
-    w.push('\n');
+    if !list.items.is_empty() {
+        w.push('\n');
+    }
     w.push_str(&ind);
     w.push('}');
 }
@@ -223,125 +209,114 @@ fn format_item(w: &mut String, item: &ItemNode, depth: usize) {
         None => "item",
     };
 
-    let has_nested_list = item
+    let has_nested = item.children.iter().any(|c| matches!(c, ItemChild::List(_)));
+    if !has_nested {
+        let inlines = inline_only(&item.children);
+        let body = format_inlines(&inlines);
+        write_prose_block(w, &ind, tag, &body);
+        return;
+    }
+
+    w.push_str(&ind);
+    w.push_str(tag);
+    w.push_str(" {\n");
+
+    let mut pending = Vec::new();
+    let mut wrote = false;
+    for child in &item.children {
+        match child {
+            ItemChild::Inline(node) => pending.push(node.clone()),
+            ItemChild::List(nested) => {
+                if !pending.is_empty() {
+                    let body = format_inlines(&pending);
+                    if !body.is_empty() {
+                        w.push_str(&wrap_prose(&body, depth + 1, MAX_LINE_WIDTH));
+                        w.push('\n');
+                        wrote = true;
+                    }
+                    pending.clear();
+                }
+                if wrote {
+                    w.push('\n');
+                }
+                format_list(w, nested, depth + 1);
+                w.push('\n');
+                wrote = true;
+            }
+        }
+    }
+    if !pending.is_empty() {
+        let body = format_inlines(&pending);
+        if !body.is_empty() {
+            if wrote {
+                w.push('\n');
+            }
+            w.push_str(&wrap_prose(&body, depth + 1, MAX_LINE_WIDTH));
+            w.push('\n');
+        }
+    }
+
+    w.push_str(&ind);
+    w.push('}');
+}
+
+fn format_quote(w: &mut String, quote: &QuoteNode, depth: usize) {
+    let ind = indent_str(depth);
+    let has_nested = quote
         .children
         .iter()
-        .any(|c| matches!(c, ItemChild::List(_)));
+        .any(|c| matches!(c, QuoteChild::Quote(_)));
 
-    if !has_nested_list {
-        let inlines: Vec<InlineNode> = item
+    if !has_nested {
+        let inlines: Vec<InlineNode> = quote
             .children
             .iter()
             .filter_map(|c| match c {
-                ItemChild::Inline(n) => Some(n.clone()),
-                ItemChild::List(_) => None,
+                QuoteChild::Inline(n) => Some(n.clone()),
+                QuoteChild::Quote(_) => None,
             })
             .collect();
-
-        let inline_text = format_inlines(&inlines);
-        if ind.len() + tag.len() + 5 + inline_text.len() <= MAX_LINE_WIDTH
-            && !inline_text.contains('\n')
-        {
-            w.push_str(&ind);
-            w.push_str(tag);
-            w.push_str(" { ");
-            w.push_str(&inline_text);
-            w.push_str(" }");
-            return;
-        }
-
-        w.push_str(&ind);
-        w.push_str(tag);
-        w.push_str(" {\n");
-        let wrapped = wrap_text(&inline_text, depth + 1, MAX_LINE_WIDTH);
-        w.push_str(&wrapped);
-        w.push('\n');
-        w.push_str(&ind);
-        w.push('}');
-    } else {
-        w.push_str(&ind);
-        w.push_str(tag);
-        w.push_str(" {\n");
-
-        let mut pending_inlines = Vec::new();
-        for child in &item.children {
-            match child {
-                ItemChild::Inline(node) => {
-                    pending_inlines.push(node.clone());
-                }
-                ItemChild::List(nested) => {
-                    if !pending_inlines.is_empty() {
-                        let text = format_inlines(&pending_inlines);
-                        let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-                        w.push_str(&wrapped);
-                        w.push('\n');
-                        pending_inlines.clear();
-                    }
-                    format_list(w, nested, depth + 1);
-                    w.push('\n');
-                }
-            }
-        }
-
-        if !pending_inlines.is_empty() {
-            let text = format_inlines(&pending_inlines);
-            let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-            w.push_str(&wrapped);
-            w.push('\n');
-        }
-
-        if w.ends_with("\n\n") {
-            w.pop();
-        }
-
-        w.push_str(&ind);
-        w.push('}');
+        let body = format_inlines(&inlines);
+        write_prose_block(w, &ind, "quote", &body);
+        return;
     }
-}
 
-fn format_quote(w: &mut String, q: &QuoteNode, depth: usize) {
-    let ind = indent_str(depth);
     w.push_str(&ind);
     w.push_str("quote {\n");
 
-    let mut pending_inlines = Vec::new();
-    let mut wrote_child = false;
-
-    for child in &q.children {
+    let mut pending = Vec::new();
+    let mut wrote = false;
+    for child in &quote.children {
         match child {
-            QuoteChild::Inline(node) => {
-                pending_inlines.push(node.clone());
-            }
+            QuoteChild::Inline(node) => pending.push(node.clone()),
             QuoteChild::Quote(nested) => {
-                if !pending_inlines.is_empty() {
-                    if wrote_child {
+                if !pending.is_empty() {
+                    let body = format_inlines(&pending);
+                    if !body.is_empty() {
+                        w.push_str(&wrap_prose(&body, depth + 1, MAX_LINE_WIDTH));
                         w.push('\n');
+                        wrote = true;
                     }
-                    let text = format_inlines(&pending_inlines);
-                    let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-                    w.push_str(&wrapped);
-                    w.push('\n');
-                    pending_inlines.clear();
-                    wrote_child = true;
+                    pending.clear();
                 }
-                if wrote_child {
+                if wrote {
                     w.push('\n');
                 }
                 format_quote(w, nested, depth + 1);
                 w.push('\n');
-                wrote_child = true;
+                wrote = true;
             }
         }
     }
-
-    if !pending_inlines.is_empty() {
-        if wrote_child {
+    if !pending.is_empty() {
+        let body = format_inlines(&pending);
+        if !body.is_empty() {
+            if wrote {
+                w.push('\n');
+            }
+            w.push_str(&wrap_prose(&body, depth + 1, MAX_LINE_WIDTH));
             w.push('\n');
         }
-        let text = format_inlines(&pending_inlines);
-        let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-        w.push_str(&wrapped);
-        w.push('\n');
     }
 
     w.push_str(&ind);
@@ -349,8 +324,7 @@ fn format_quote(w: &mut String, q: &QuoteNode, depth: usize) {
 }
 
 fn format_image(w: &mut String, img: &ImageNode, depth: usize) {
-    let ind = indent_str(depth);
-    w.push_str(&ind);
+    w.push_str(&indent_str(depth));
     w.push_str("image(\"");
     w.push_str(&escape_du_string(&img.src));
     w.push('"');
@@ -362,19 +336,19 @@ fn format_image(w: &mut String, img: &ImageNode, depth: usize) {
     w.push(')');
 }
 
-fn format_table(w: &mut String, t: &TableNode, depth: usize) {
+fn format_table(w: &mut String, table: &TableNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
     w.push_str("table {\n");
-
-    for (row_idx, row) in t.rows.iter().enumerate() {
-        if row_idx > 0 {
+    for (i, row) in table.rows.iter().enumerate() {
+        if i > 0 {
             w.push('\n');
         }
         format_row(w, row, depth + 1);
     }
-
-    w.push('\n');
+    if !table.rows.is_empty() {
+        w.push('\n');
+    }
     w.push_str(&ind);
     w.push('}');
 }
@@ -387,73 +361,92 @@ fn format_row(w: &mut String, row: &RowNode, depth: usize) {
     } else {
         w.push_str("row {\n");
     }
-
-    let cell_ind = indent_str(depth + 1);
     for cell in &row.cells {
-        let text = format_inlines(&cell.children);
-        w.push_str(&cell_ind);
-        w.push_str("cell { ");
-        w.push_str(&text);
-        w.push_str(" }\n");
+        let body = format_inlines(&cell.children);
+        write_prose_block(w, &indent_str(depth + 1), "cell", &body);
+        w.push('\n');
     }
-
     w.push_str(&ind);
     w.push('}');
 }
 
-fn format_callout(w: &mut String, c: &CalloutNode, depth: usize) {
+fn format_callout(w: &mut String, callout: &CalloutNode, depth: usize) {
     let ind = indent_str(depth);
-    w.push_str(&ind);
-    w.push_str(&format!("callout(type: \"{}\") {{\n", c.kind.as_str()));
-    let text = format_inlines(&c.children);
-    let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-    w.push_str(&wrapped);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push('}');
+    let head = format!("callout(type: \"{}\")", callout.kind.as_str());
+    let body = format_inlines(&callout.children);
+    write_prose_block(w, &ind, &head, &body);
 }
 
-fn format_raw(w: &mut String, r: &RawNode, depth: usize) {
+fn format_raw(w: &mut String, raw: &RawNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    w.push_str("raw {!\n");
-    let escaped_raw = escape_raw_block_content(r.html.trim_end());
-    w.push_str(&escaped_raw);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push_str("!}");
+    w.push_str("raw");
+    write_raw_scope(w, &ind, &raw.html);
 }
 
-fn format_math(w: &mut String, m: &MathBlockNode, depth: usize) {
+fn format_math(w: &mut String, math: &MathBlockNode, depth: usize) {
     let ind = indent_str(depth);
     w.push_str(&ind);
-    w.push_str("math {!\n");
-    let escaped_raw = escape_raw_block_content(m.latex.trim_end());
-    w.push_str(&escaped_raw);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push_str("!}");
+    w.push_str("math");
+    write_raw_scope(w, &ind, &math.latex);
 }
 
-fn format_footnote(w: &mut String, f: &FootnoteDefNode, depth: usize) {
+fn format_footnote(w: &mut String, note: &FootnoteDefNode, depth: usize) {
     let ind = indent_str(depth);
-    w.push_str(&ind);
-    w.push_str(&format!(
-        "footnote(id: \"{}\") {{\n",
-        escape_du_string(&f.id)
-    ));
-    let text = format_inlines(&f.children);
-    let wrapped = wrap_text(&text, depth + 1, MAX_LINE_WIDTH);
-    w.push_str(&wrapped);
-    w.push('\n');
-    w.push_str(&ind);
-    w.push('}');
+    let head = format!("footnote(id: \"{}\")", escape_du_string(&note.id));
+    let body = format_inlines(&note.children);
+    write_prose_block(w, &ind, &head, &body);
 }
 
 fn format_include(w: &mut String, inc: &IncludeNode, depth: usize) {
-    let ind = indent_str(depth);
-    w.push_str(&ind);
-    w.push_str(&format!("include \"{}\"", escape_du_string(&inc.path)));
+    w.push_str(&indent_str(depth));
+    w.push_str("include \"");
+    w.push_str(&escape_du_string(&inc.path));
+    w.push('"');
+}
+
+fn write_raw_scope(w: &mut String, ind: &str, body: &str) {
+    let escaped = escape_raw_block_content(body.trim_end_matches([' ', '\t', '\r', '\n']));
+    w.push_str(" {!\n");
+    if !escaped.is_empty() {
+        w.push_str(&escaped);
+        w.push('\n');
+    }
+    w.push_str(ind);
+    w.push_str("!}");
+}
+
+/// One-line form when it fits, otherwise a wrapped body.
+/// Empty bodies stay `name {}` so the second pass prints the same text.
+fn write_prose_block(w: &mut String, ind: &str, name: &str, body: &str) {
+    if body.is_empty() {
+        w.push_str(ind);
+        w.push_str(name);
+        w.push_str(" {}");
+        return;
+    }
+    let one = format!("{ind}{name} {{ {body} }}");
+    if char_len(&one) <= MAX_LINE_WIDTH && !body.contains('\n') {
+        w.push_str(&one);
+        return;
+    }
+    w.push_str(ind);
+    w.push_str(name);
+    w.push_str(" {\n");
+    w.push_str(&wrap_prose(body, ind_depth(ind) + 1, MAX_LINE_WIDTH));
+    w.push('\n');
+    w.push_str(ind);
+    w.push('}');
+}
+
+fn inline_only(children: &[ItemChild]) -> Vec<InlineNode> {
+    children
+        .iter()
+        .filter_map(|c| match c {
+            ItemChild::Inline(n) => Some(n.clone()),
+            ItemChild::List(_) => None,
+        })
+        .collect()
 }
 
 pub fn format_inlines(inlines: &[InlineNode]) -> String {
@@ -466,9 +459,7 @@ pub fn format_inlines(inlines: &[InlineNode]) -> String {
 
 fn format_inline_into(w: &mut String, inline: &InlineNode) {
     match &inline.kind {
-        InlineKind::Text(t) => {
-            w.push_str(&escape_prose_text(t));
-        }
+        InlineKind::Text(t) => w.push_str(&escape_prose_text(t)),
         InlineKind::Bold(children) => {
             w.push_str("b{");
             w.push_str(&format_inlines(children));
@@ -491,171 +482,267 @@ fn format_inline_into(w: &mut String, inline: &InlineNode) {
         }
         InlineKind::Math(math) => {
             w.push_str("m{");
-            w.push_str(math);
+            w.push_str(&escape_inline_math(math));
             w.push('}');
         }
         InlineKind::Link { url, children } => {
-            w.push_str(&format!("link(\"{}\"){{", escape_du_string(url)));
+            w.push_str("link(\"");
+            w.push_str(&escape_du_string(url));
+            w.push_str("\"){");
             w.push_str(&format_inlines(children));
             w.push('}');
         }
         InlineKind::FootnoteRef(id) => {
-            w.push_str(&format!("fn(\"{}\")", escape_du_string(id)));
+            w.push_str("fn(\"");
+            w.push_str(&escape_du_string(id));
+            w.push_str("\")");
         }
     }
 }
 
 fn escape_raw_block_content(raw: &str) -> String {
+    let chars: Vec<char> = raw.chars().collect();
     let mut out = String::with_capacity(raw.len());
-    let bytes = raw.as_bytes();
     let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] == b'\\' && i + 2 < bytes.len() && bytes[i + 1] == b'!' && bytes[i + 2] == b'}'
-        {
+    while i < chars.len() {
+        if chars[i] == '\\' && i + 2 < chars.len() && chars[i + 1] == '!' && chars[i + 2] == '}' {
             out.push_str("\\\\!}");
             i += 3;
-        } else if bytes[i] == b'!' && i + 1 < bytes.len() && bytes[i + 1] == b'}' {
+            continue;
+        }
+        if chars[i] == '!' && i + 1 < chars.len() && chars[i + 1] == '}' {
             out.push_str("\\!}");
             i += 2;
-        } else {
-            out.push(bytes[i] as char);
-            i += 1;
+            continue;
         }
+        out.push(chars[i]);
+        i += 1;
     }
     out
 }
 
 fn escape_inline_code(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    let mut depth: usize = 0;
+    escape_balanced_literal(s, false)
+}
+
+fn escape_inline_math(s: &str) -> String {
+    escape_balanced_literal(s, true)
+}
+
+/// Reprint a code or math literal so the lexer reads the same bytes back.
+///
+/// Code unescapes `\{`, `\}`, and `\\`. Math keeps those sequences, so a
+/// stored backslash has to be doubled only for code.
+fn escape_balanced_literal(s: &str, is_math: bool) -> String {
     let chars: Vec<char> = s.chars().collect();
+    let mut out = String::with_capacity(s.len());
+    let mut depth: usize = 1;
     let mut i = 0;
     while i < chars.len() {
         let c = chars[i];
+        if c == '\\' {
+            let next = chars.get(i + 1).copied();
+            if is_math {
+                if matches!(next, Some('{') | Some('}') | Some('\\')) {
+                    out.push('\\');
+                    out.push(next.unwrap());
+                    i += 2;
+                    continue;
+                }
+                out.push('\\');
+                i += 1;
+                continue;
+            }
+            out.push_str("\\\\");
+            i += 1;
+            continue;
+        }
         if c == '{' {
             depth += 1;
             out.push(c);
-        } else if c == '}' {
-            if depth == 0 {
+            i += 1;
+            continue;
+        }
+        if c == '}' {
+            if depth <= 1 {
                 out.push('\\');
                 out.push('}');
             } else {
                 depth -= 1;
-                out.push(c);
+                out.push('}');
             }
-        } else if c == '\\' {
-            if i + 1 < chars.len() && (chars[i + 1] == '{' || chars[i + 1] == '}') {
-                out.push('\\');
-                out.push(chars[i + 1]);
-                i += 1;
-            } else {
-                out.push(c);
-            }
-        } else {
-            out.push(c);
+            i += 1;
+            continue;
         }
+        out.push(c);
         i += 1;
     }
     out
 }
 
 fn escape_prose_text(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
     let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        match c {
-            '{' => out.push_str("\\{"),
-            '}' => out.push_str("\\}"),
-            _ => out.push(c),
+    let mut i = 0;
+    while i < chars.len() {
+        match chars[i] {
+            '\\' => {
+                out.push_str("\\\\");
+                i += 1;
+            }
+            '{' => {
+                out.push_str("\\{");
+                i += 1;
+            }
+            '}' => {
+                out.push_str("\\}");
+                i += 1;
+            }
+            '!' => {
+                out.push('!');
+                i += 1;
+            }
+            c => {
+                out.push(c);
+                i += 1;
+            }
         }
     }
     out
 }
 
-fn wrap_text(text: &str, depth: usize, max_width: usize) -> String {
+fn wrap_prose(text: &str, depth: usize, max_width: usize) -> String {
     let ind = indent_str(depth);
-    let words = split_prose_words(text);
+    let words = split_atoms(text);
     if words.is_empty() {
-        return ind;
+        return String::new();
     }
 
+    let limit = max_width.max(ind.chars().count() + 1);
     let mut lines = Vec::new();
-    let mut current_line = String::from(&ind);
+    let mut current = ind.clone();
 
     for word in words {
-        if current_line.len() == ind.len() {
-            current_line.push_str(&word);
-        } else if current_line.len() + 1 + word.len() <= max_width {
-            current_line.push(' ');
-            current_line.push_str(&word);
+        if current.chars().count() == ind.chars().count() {
+            current.push_str(&word);
+            continue;
+        }
+        if current.chars().count() + 1 + word.chars().count() <= limit {
+            current.push(' ');
+            current.push_str(&word);
         } else {
-            lines.push(current_line);
-            current_line = format!("{ind}{word}");
+            lines.push(std::mem::take(&mut current));
+            current = ind.clone();
+            current.push_str(&word);
         }
     }
-
-    if !current_line.is_empty() {
-        lines.push(current_line);
+    if !current.is_empty() {
+        lines.push(current);
     }
-
     lines.join("\n")
 }
 
-fn split_prose_words(text: &str) -> Vec<String> {
+/// Split prose on whitespace, but keep `code{}` and `m{}` in one piece.
+/// A newline inside those spans would change the stored literal.
+fn split_atoms(text: &str) -> Vec<String> {
+    let chars: Vec<char> = text.chars().collect();
     let mut words = Vec::new();
     let mut cur = String::new();
-    let chars: Vec<char> = text.chars().collect();
     let mut i = 0;
 
     while i < chars.len() {
-        if (text[i..].starts_with("code{") || text[i..].starts_with("m{"))
-            && (cur.is_empty() || cur.ends_with(' '))
-        {
-            let is_code = text[i..].starts_with("code{");
-            let tag_len = if is_code { 5 } else { 2 };
-            cur.push_str(if is_code { "code{" } else { "m{" });
-            i += tag_len;
-            let mut depth = 1;
-            while i < chars.len() && depth > 0 {
-                let c = chars[i];
-                if c == '\\' && i + 1 < chars.len() {
-                    cur.push(c);
-                    i += 1;
-                    cur.push(chars[i]);
-                    i += 1;
-                    continue;
-                }
-                if c == '{' {
-                    depth += 1;
-                } else if c == '}' {
-                    depth -= 1;
-                }
-                cur.push(c);
-                i += 1;
+        if chars[i].is_whitespace() {
+            if !cur.is_empty() {
+                words.push(std::mem::take(&mut cur));
             }
+            i += 1;
             continue;
         }
-
-        let c = chars[i];
-        if c == ' ' || c == '\t' || c == '\n' || c == '\r' {
-            if !cur.is_empty() {
-                words.push(cur.clone());
-                cur.clear();
+        if let Some(end) = atomic_inline(&chars, i) {
+            for ch in &chars[i..end] {
+                cur.push(*ch);
             }
-        } else {
-            cur.push(c);
+            i = end;
+            continue;
         }
+        cur.push(chars[i]);
         i += 1;
     }
-
     if !cur.is_empty() {
         words.push(cur);
     }
-
     words
+}
+
+fn atomic_inline(chars: &[char], i: usize) -> Option<usize> {
+    let (tag_len, math) = if starts_with_at(chars, i, "code{") {
+        (5, false)
+    } else if starts_with_at(chars, i, "m{") {
+        (2, true)
+    } else {
+        return None;
+    };
+    consume_balanced(chars, i + tag_len - 1, math).map(|end| end)
+}
+
+fn consume_balanced(chars: &[char], open: usize, _math: bool) -> Option<usize> {
+    if open >= chars.len() || chars[open] != '{' {
+        return None;
+    }
+    let mut depth = 1;
+    let mut i = open + 1;
+    while i < chars.len() {
+        if chars[i] == '\\' && i + 1 < chars.len() {
+            let next = chars[i + 1];
+            if next == '{' || next == '}' || next == '\\' {
+                i += 2;
+                continue;
+            }
+        }
+        if chars[i] == '{' {
+            depth += 1;
+        } else if chars[i] == '}' {
+            depth -= 1;
+            i += 1;
+            if depth == 0 {
+                return Some(i);
+            }
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
+fn starts_with_at(chars: &[char], i: usize, pat: &str) -> bool {
+    let pat: Vec<char> = pat.chars().collect();
+    if i + pat.len() > chars.len() {
+        return false;
+    }
+    chars[i..i + pat.len()] == pat[..]
 }
 
 fn indent_str(depth: usize) -> String {
     INDENT.repeat(depth)
+}
+
+fn ind_depth(ind: &str) -> usize {
+    ind.len() / INDENT.len()
+}
+
+fn char_len(s: &str) -> usize {
+    s.chars().count()
+}
+
+fn attr_order(a: &str, b: &str) -> std::cmp::Ordering {
+    fn rank(k: &str) -> u8 {
+        match k {
+            "id" => 0,
+            "class" => 1,
+            _ => 2,
+        }
+    }
+    rank(a).cmp(&rank(b)).then_with(|| a.cmp(b))
 }
 
 fn escape_du_string(s: &str) -> String {
@@ -677,36 +764,44 @@ fn format_line_ranges(lines: &[usize]) -> String {
     if lines.is_empty() {
         return String::new();
     }
-    let mut ranges = Vec::new();
-    let mut start = lines[0];
-    let mut end = lines[0];
+    let mut sorted = lines.to_vec();
+    sorted.sort_unstable();
+    sorted.dedup();
 
-    for &num in &lines[1..] {
+    let mut ranges = Vec::new();
+    let mut start = sorted[0];
+    let mut end = sorted[0];
+    for &num in &sorted[1..] {
         if num == end + 1 {
             end = num;
         } else {
-            if start == end {
-                ranges.push(format!("{start}"));
-            } else {
-                ranges.push(format!("{start}-{end}"));
-            }
+            ranges.push(range_text(start, end));
             start = num;
             end = num;
         }
     }
-
-    if start == end {
-        ranges.push(format!("{start}"));
-    } else {
-        ranges.push(format!("{start}-{end}"));
-    }
-
+    ranges.push(range_text(start, end));
     ranges.join(",")
+}
+
+fn range_text(start: usize, end: usize) -> String {
+    if start == end {
+        format!("{start}")
+    } else {
+        format!("{start}-{end}")
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn round_trip(src: &str) -> String {
+        let once = format_source(src).unwrap_or_else(|e| panic!("parse failed: {e:?}\n{src}"));
+        let twice = format_source(&once).unwrap_or_else(|e| panic!("reparse failed: {e:?}\n{once}"));
+        assert_eq!(once, twice, "formatter is not stable\n{once}");
+        once
+    }
 
     #[test]
     fn test_format_meta_and_heading() {
@@ -724,8 +819,8 @@ mod tests {
 print("\nvalue: {\!}\n", .{val});
 !}
 "#;
-        let formatted = format_source(src).expect("must parse");
-        assert!(formatted.contains(r#"{\!}"#));
+        let formatted = round_trip(src);
+        assert!(formatted.contains(r#"{\!}"#), "{formatted}");
     }
 
     #[test]
@@ -757,8 +852,51 @@ fn main() {
 }
 !}
 "#;
-        let formatted1 = format_source(src).expect("pass 1");
-        let formatted2 = format_source(&formatted1).expect("pass 2");
-        assert_eq!(formatted1, formatted2);
+        round_trip(src);
+    }
+
+    #[test]
+    fn test_unicode_prose_does_not_panic() {
+        let src = "p { Width is 80 — and infinity is ∞, so wrapping must stay on char bounds. }\n";
+        let formatted = round_trip(src);
+        assert!(formatted.contains('—'), "{formatted}");
+        assert!(formatted.contains('∞'), "{formatted}");
+    }
+
+    #[test]
+    fn test_inline_code_is_not_split() {
+        let src = "p { Before code{let answer = 42; let name = \"docup\";} after the span, and more words so the line has to wrap cleanly. }\n";
+        let formatted = round_trip(src);
+        assert!(formatted.contains("code{let answer = 42; let name = \"docup\";}"), "{formatted}");
+    }
+
+    #[test]
+    fn test_literal_braces_round_trip() {
+        let src = "p { Use \\{ and \\} so braces stay text, and b{bold} still works. }\n";
+        let formatted = round_trip(src);
+        assert!(formatted.contains("\\{"), "{formatted}");
+        assert!(formatted.contains("\\}"), "{formatted}");
+    }
+
+    #[test]
+    fn test_nested_list_and_quote() {
+        let src = r#"
+list {
+item { outer
+list(ordered: true) {
+item { inner }
+}
+}
+}
+quote { hello quote { nested } }
+"#;
+        round_trip(src);
+    }
+
+    #[test]
+    fn test_raw_unicode_not_corrupted() {
+        let src = "raw {!\n<p>café — ∞</p>\n!}\n";
+        let formatted = round_trip(src);
+        assert!(formatted.contains("café — ∞"), "{formatted}");
     }
 }

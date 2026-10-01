@@ -110,7 +110,7 @@ struct IncludeError {
 pub fn build_cli() -> Xarp {
     Xarp::new("docup")
         .version(VERSION)
-        .about("DocUP Compiler — compiles .du documents to standalone HTML5")
+        .about("DocUP compiler. Compiles .du documents to standalone HTML5")
         .styles(Styles::styled())
         .arg(
             Arg::new("v")
@@ -208,26 +208,24 @@ pub fn build_cli() -> Xarp {
         )
         .subcommand(
             Xarp::new("fmt")
-                .about("Format .du documents to canonical style")
+                .about("Format .du files")
                 .arg(
                     Arg::new("path")
                         .value_name("path")
-                        .help("File or directory to format (defaults to current directory)")
+                        .help("File or directory to format (default: current directory)")
                         .default_value("."),
                 )
                 .arg(
                     Arg::new("check")
                         .long("check")
                         .action(ArgAction::SetTrue)
-                        .help(
-                        "Check formatting without writing changes to disk (exits 1 if unformatted)",
-                    ),
+                        .help("Check formatting without writing. Exits 1 if a file would change"),
                 )
                 .arg(
                     Arg::new("stdout")
                         .long("stdout")
                         .action(ArgAction::SetTrue)
-                        .help("Print formatted document to stdout (single file only)")
+                        .help("Print the formatted file to stdout (one file only)")
                         .conflicts_with("check"),
                 ),
         )
@@ -679,10 +677,20 @@ fn run_fmt(c: Colors, target: &str, check: bool, stdout: bool) -> i32 {
             }
         };
 
-        let formatted = match format_source(&content) {
-            Ok(f) => f,
-            Err(err) => {
+        let formatted = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            format_source(&content)
+        })) {
+            Ok(Ok(f)) => f,
+            Ok(Err(err)) => {
                 report_compile_error(c, &path.to_string_lossy(), content.as_bytes(), &err);
+                error_count += 1;
+                continue;
+            }
+            Err(_) => {
+                fail(
+                    c,
+                    &format!("formatter panicked on {}, so this file was left unchanged", path.display()),
+                );
                 error_count += 1;
                 continue;
             }
@@ -716,28 +724,22 @@ fn run_fmt(c: Colors, target: &str, check: bool, stdout: bool) -> i32 {
     if check {
         if changed_count > 0 {
             eprintln!(
-                "\n{}✗ {changed_count} file(s) require formatting. Run `docup fmt` to update.{}",
+                "\n{}✗ {changed_count} file(s) need formatting. Run `docup fmt` to update.{}",
                 c.red, c.reset
             );
             return 1;
         }
         if error_count == 0 {
-            println!(
-                "\n{}{}✓ All files are properly formatted.{}",
-                c.bold, c.green, c.reset
-            );
+            println!("\n{}{}✓ All files are formatted.{}", c.bold, c.green, c.reset);
         }
     } else if error_count == 0 {
         if changed_count > 0 {
             println!(
-                "\n{}{}✓ Successfully formatted {changed_count} file(s).{}",
+                "\n{}{}✓ Formatted {changed_count} file(s).{}",
                 c.bold, c.green, c.reset
             );
         } else {
-            println!(
-                "{}All files already follow canonical style. Nothing to change.{}",
-                c.dim, c.reset
-            );
+            println!("{}All files are already formatted.{}", c.dim, c.reset);
         }
     }
 

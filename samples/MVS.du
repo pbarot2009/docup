@@ -17,7 +17,10 @@ hr {}
 
 h(1) { Read-Only (Default / None) }
 
-p { The caller retains full ownership. The function gets a read-only view and cannot modify the variable. }
+p {
+    The caller retains full ownership. The function gets a read-only view and
+    cannot modify the variable.
+}
 
 p { b{i{Syntax Exmaple:}} }
 
@@ -53,14 +56,18 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} Modifying code{buf} inside code{print_info} triggers a compile error before C code is ever generated.
+    b{Compiler Guarantee:} Modifying code{buf} inside code{print_info} triggers
+    a compile error before C code is ever generated.
 }
 
 hr {}
 
 h(1) { In-Place Mutation (code{mut}) }
 
-p { The function receives exclusive mutable access to an existing variable in the caller's scope. }
+p {
+    The function receives exclusive mutable access to an existing variable in
+    the caller's scope.
+}
 
 p { b{i{Syntax Example:}} }
 
@@ -96,14 +103,18 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} The call site must pass a code{var} binding. Passing a code{let} variable to code{mut} is a compile error.
+    b{Compiler Guarantee:} The call site must pass a code{var} binding. Passing
+    a code{let} variable to code{mut} is a compile error.
 }
 
 hr {}
 
 h(1) { Ownership Move / Consume (code{move}) }
 
-p { The caller surrenders ownership of the variable to the function. The function takes responsibility for destroying the resource when it exits. }
+p {
+    The caller surrenders ownership of the variable to the function. The
+    function takes responsibility for destroying the resource when it exits.
+}
 
 p { b{i{Syntax Exmaple:}} }
 
@@ -145,14 +156,19 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee}: After code{move my_buf}, the variable code{my_buf} is marked as invalidated in the compiler AST. Any subsequent access to code{my_buf} causes a compile-time error.
+    b{Compiler Guarantee}: After code{move my_buf}, the variable code{my_buf} is
+    marked as invalidated in the compiler AST. Any subsequent access to
+    code{my_buf} causes a compile-time error.
 }
 
 hr {}
 
 h(1) { Initialize / Out (code{set}) }
 
-p { The function receives uninitialized memory provided by the caller and b{must} populate it before returning. }
+p {
+    The function receives uninitialized memory provided by the caller and
+    b{must} populate it before returning.
+}
 
 p { b{i{Syntax Example:}} }
 
@@ -192,7 +208,9 @@ int main() {
 !}
 
 quote {
-    b{Compiler Guarantee:} The compiler verifies that every field in code{buf} is assigned inside code{init_default}. Returning without initializing code{buf} triggers a compile error.
+    b{Compiler Guarantee:} The compiler verifies that every field in code{buf}
+    is assigned inside code{init_default}. Returning without initializing
+    code{buf} triggers a compile error.
 }
 
 hr {}
@@ -274,4 +292,3 @@ int main() {
     return 0;
 }
 !}
-

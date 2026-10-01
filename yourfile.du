@@ -7,7 +7,8 @@ meta {
 h(1, id: "overview") { 1. Architecture Overview }
 
 p {
-    This is standard paragraph text. It supports b{bold text}, i{italic text}, and code{var x = 42;} inline formatting!
+    This is standard paragraph text. It supports b{bold text}, i{italic text},
+    and code{var x = 42;} inline formatting!
 }
 
 h(2) { 2. Embedded Go Code }
@@ -22,4 +23,3 @@ codeblock(lang: "go", file: "main.go") {!
         fmt.Println("Hello from DocUP raw block!")
     }
 !}
-

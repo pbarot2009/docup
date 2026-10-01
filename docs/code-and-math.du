@@ -1,6 +1,9 @@
 h(2, id: "codeblock") { 9. codeblock }
 
-p { Fenced source. Content comes from a raw scope (section 3.5) or from a file named by code{src}. Use one of those two forms, not both. }
+p {
+    Fenced source. Content comes from a raw scope (section 3.5) or from a file
+    named by code{src}. Use one of those two forms, not both.
+}
 
 codeblock(lang: "text") {!
 codeblock(lang: "rust", file: "main.rs", line_numbers: true, highlight: "1,3-5") {!
@@ -10,46 +13,72 @@ fn main() {}
 codeblock(lang: "rust", src: "fragments/sample.rs", line_numbers: true)
 !}
 
-p { The first form follows the attribute list with a raw scope. The second form loads a file and may omit the body. A plain code{{}} body is a parse error; the body, when present, must be a raw scope. }
+p {
+    The first form follows the attribute list with a raw scope. The second form
+    loads a file and may omit the body. A plain code{{}} body is a parse error;
+    the body, when present, must be a raw scope.
+}
 
 p { Attributes: }
 
 table {
-  row(header: true) {
-    cell { Key }
-    cell { Type }
-    cell { Effect }
-  }
-  row {
-    cell { lang }
-    cell { string }
-    cell { Language label, code{language-*} class, and highlight grammar. Empty means no language class. If omitted and code{src} is set, the file extension is normalized to a language name. }
-  }
-  row {
-    cell { file }
-    cell { string }
-    cell { Label in the header. If omitted and code{src} is set, the source file's base name is used. }
-  }
-  row {
-    cell { src }
-    cell { string }
-    cell { Path of a file to load as the block body. Relative to the .du file that contains the block, not the process working directory. }
-  }
-  row {
-    cell { line_numbers }
-    cell { boolean }
-    cell { Show line numbers. Default false. }
-  }
-  row {
-    cell { highlight }
-    cell { string }
-    cell { Line numbers to mark. Comma-separated items, each a number or an inclusive range written start-hyphen-end. }
-  }
+    row(header: true) {
+        cell { Key }
+        cell { Type }
+        cell { Effect }
+    }
+    row {
+        cell { lang }
+        cell { string }
+        cell {
+            Language label, code{language-*} class, and highlight grammar. Empty
+            means no language class. If omitted and code{src} is set, the file
+            extension is normalized to a language name.
+        }
+    }
+    row {
+        cell { file }
+        cell { string }
+        cell {
+            Label in the header. If omitted and code{src} is set, the source
+            file's base name is used.
+        }
+    }
+    row {
+        cell { src }
+        cell { string }
+        cell {
+            Path of a file to load as the block body. Relative to the .du file
+            that contains the block, not the process working directory.
+        }
+    }
+    row {
+        cell { line_numbers }
+        cell { boolean }
+        cell { Show line numbers. Default false. }
+    }
+    row {
+        cell { highlight }
+        cell { string }
+        cell {
+            Line numbers to mark. Comma-separated items, each a number or an
+            inclusive range written start-hyphen-end.
+        }
+    }
 }
 
-p { Resolution of code{src} matches include paths: join to the parent file's directory, canonicalize, then read. Failure is an error on the codeblock. Cycles are not a concern; the file is raw text and is not parsed as DocUP. Watch mode adds every successfully resolved code{src} file to the watch set. }
+p {
+    Resolution of code{src} matches include paths: join to the parent file's
+    directory, canonicalize, then read. Failure is an error on the codeblock.
+    Cycles are not a concern; the file is raw text and is not parsed as DocUP.
+    Watch mode adds every successfully resolved code{src} file to the watch set.
+}
 
-p { Combining code{src} with a non-empty raw body is a parse error. Content empty after trim (including an empty loaded file) is a semantic error. The output header always includes a Copy button. }
+p {
+    Combining code{src} with a non-empty raw body is a parse error. Content
+    empty after trim (including an empty loaded file) is a semantic error. The
+    output header always includes a Copy button.
+}
 
 codeblock(lang: "rust", file: "parse_heading.rs", line_numbers: true, highlight: "1,4-6") {!
 fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
@@ -63,36 +92,62 @@ fn parse_heading(&mut self) -> Result<HeadingNode, ParseError> {
 }
 !}
 
-p { The next block loads code{fragments/sample.rs} through code{src}. Language and the header label are inferred from the path when you omit code{lang} and code{file}. }
+p {
+    The next block loads code{fragments/sample.rs} through code{src}. Language
+    and the header label are inferred from the path when you omit code{lang} and
+    code{file}.
+}
 
 codeblock(src: "fragments/sample.rs", line_numbers: true)
 
-
 h(3, id: "highlight-langs") { 9.1 Highlight languages }
 
-p { code{lang} is normalized to a profile. Unknown names still get a generic highlighter (line comments with code{//} or code{#}, block comments, quoted strings). Aliases and extensions map to the same profile: code{rs} is rust, code{py} is python, code{c++} is cpp. }
+p {
+    code{lang} is normalized to a profile. Unknown names still get a generic
+    highlighter (line comments with code{//} or code{#}, block comments, quoted
+    strings). Aliases and extensions map to the same profile: code{rs} is rust,
+    code{py} is python, code{c++} is cpp.
+}
 
 p { Profiles with keyword lists include: }
 
 list {
-  item { Systems: rust, c, cpp, go, zig, odin, nim, d, assembly }
-  item { Functional: haskell, ocaml, elixir, erlang, clojure, fsharp, lisp, scheme, elm, purescript, sml }
-  item { JVM and similar: java, kotlin, scala, csharp, swift, dart, groovy, apex, vb }
-  item { Scripting: python, ruby, php, perl, lua, r, julia, crystal }
-  item { Web: javascript, typescript, html, xml, css, scss, json, yaml, toml, ini, graphql, markdown }
-  item { Shell: bash, powershell, batch, dockerfile, makefile, cmake, terraform }
-  item { Data and hardware: sql, solidity, vhdl, verilog, systemverilog }
-  item { Classical: cobol, fortran, pascal, ada }
+    item { Systems: rust, c, cpp, go, zig, odin, nim, d, assembly }
+    item {
+        Functional: haskell, ocaml, elixir, erlang, clojure, fsharp, lisp,
+        scheme, elm, purescript, sml
+    }
+    item {
+        JVM and similar: java, kotlin, scala, csharp, swift, dart, groovy, apex,
+        vb
+    }
+    item { Scripting: python, ruby, php, perl, lua, r, julia, crystal }
+    item {
+        Web: javascript, typescript, html, xml, css, scss, json, yaml, toml,
+        ini, graphql, markdown
+    }
+    item {
+        Shell: bash, powershell, batch, dockerfile, makefile, cmake, terraform
+    }
+    item { Data and hardware: sql, solidity, vhdl, verilog, systemverilog }
+    item { Classical: cobol, fortran, pascal, ada }
 }
 
 p { Tokens are marked as keyword, type, string, comment, or number. }
+
 h(2, id: "math") { 10. Math }
 
-p { Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags only if the document contains at least one math node. }
+p {
+    Two forms. Both need KaTeX at runtime. The generator adds the KaTeX tags
+    only if the document contains at least one math node.
+}
 
 h(3, id: "math-block") { 10.1 Display }
 
-p { Header line is code{math}, then a raw scope of LaTeX. Empty content is a semantic error. Output is wrapped as display math. }
+p {
+    Header line is code{math}, then a raw scope of LaTeX. Empty content is a
+    semantic error. Output is wrapped as display math.
+}
 
 math {!
 \int_{0}^{1} x \, dx = \frac{1}{2}
@@ -100,7 +155,11 @@ math {!
 
 h(3, id: "math-inline") { 10.2 Inline }
 
-p { code{m{...}} is a raw brace body. No nested inlines inside it. Backslash-brace is kept for KaTeX. In inline code the same sequence is unescaped to a brace. }
+p {
+    code{m{...}} is a raw brace body. No nested inlines inside it.
+    Backslash-brace is kept for KaTeX. In inline code the same sequence is
+    unescaped to a brace.
+}
 
 codeblock(lang: "text") {!
 p { The area is m{\frac{1}{2}}. }
