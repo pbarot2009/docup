@@ -26,6 +26,7 @@
 - [Build from Source](#build-from-source)
 - [Example Document](#example-document)
 - [Usage](#usage)
+- [Editor Support](#editor-support)
 - [Features (v0.3.1)](#features-v020)
 - [Roadmap: v0.3.0](#roadmap-v030)
 - [Documentation](#documentation)
@@ -127,6 +128,32 @@ Flags for `build` and `watch`:
 | `-q`, `--quiet` | No progress lines |
 
 `--verbose` and `--quiet` cannot be used together.
+
+---
+
+## Editor Support
+
+Syntax highlighting for `.du` files is provided by a tree-sitter grammar:
+
+- Repository: https://github.com/pbarot2009/tree-sitter-docup
+- Covers every block and inline in [Features](#features-v020) below, plus
+  `highlights`, `injections`, `folds`, `indents`, and `textobjects` queries.
+- Versioned to match the compiler: grammar `0.3.2` supports DocUP `0.3.2`
+  (`docup version`). Grammar `MAJOR.MINOR` always tracks the compiler.
+
+Helix (25.x) quick setup — see the grammar repo README for details:
+
+```bash
+cd tree-sitter-docup
+tree-sitter build -o ~/.config/helix/runtime/grammars/docup.so .
+mkdir -p ~/.config/helix/runtime/queries/docup
+cp queries/*.scm ~/.config/helix/runtime/queries/docup/
+```
+
+then register `docup` (`source.docup`, `file-types = ["du"]`) in
+`~/.config/helix/languages.toml` and check `hx --health docup`.
+
+Neovim users can point `nvim-treesitter` at the same repository.
 
 ---
 

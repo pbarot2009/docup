@@ -54,6 +54,8 @@ include "semantics.du"
 
 include "examples.du"
 
+include "tree-sitter.du"
+
 footnote(id: "required-title") {
     If a document contains a meta block, that block must include a title field.
     A document with no meta block is valid; the generated page title then

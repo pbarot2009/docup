@@ -557,6 +557,11 @@ table tr:last-child td {
     <li class="toc-level-4"><a href="#heading-levels">Heading levels</a></li>
     <li class="toc-level-5"><a href="#heading-level-5">Level 5</a></li>
     <li class="toc-level-6"><a href="#heading-level-6">Level 6</a></li>
+    <li class="toc-level-2"><a href="#tree-sitter">18. tree-sitter grammar</a></li>
+    <li class="toc-level-3"><a href="#tree-sitter-covered">18.1 What is covered</a></li>
+    <li class="toc-level-3"><a href="#tree-sitter-parse-vs-sema">18.2 Parsing versus checking</a></li>
+    <li class="toc-level-3"><a href="#tree-sitter-helix">18.3 Helix setup</a></li>
+    <li class="toc-level-3"><a href="#tree-sitter-queries">18.4 Queries</a></li>
   </ul>
 </nav>
 <h2 id="overview">1. Overview</h2>
@@ -1587,6 +1592,90 @@ docup fmt index.du --check</code></pre>
 <p>Level 5.</p>
 <h6 id="heading-level-6">Level 6</h6>
 <p>Level 6. Compiler version <code>0.3.2</code>.</p>
+<h2 id="tree-sitter">18. tree-sitter grammar</h2>
+<p>Editor highlighting for <strong>.du</strong> files comes from a tree-sitter grammar: <a href="https://github.com/pbarot2009/tree-sitter-docup">tree-sitter-docup</a>. It parses the same language this compiler accepts, so editors see the same blocks and inlines described in sections 4 to 15.</p>
+<p>The grammar version tracks the compiler. Grammar <code>0.3.2</code> supports DocUP <code>0.3.2</code> (see <code>docup version</code>). Grammar <code>MAJOR.MINOR</code> always equals the compiler it supports; grammar <code>PATCH</code> bumps for grammar-only fixes.</p>
+<h3 id="tree-sitter-covered">18.1 What is covered</h3>
+<p>Every block from section 5 onward:</p>
+<ul>
+  <li><code>meta</code>, <code>h</code>, <code>p</code>, <code>codeblock</code>, <code>hr</code></li>
+  <li><code>list</code> with <code>item</code> and <code>task</code>, nestable</li>
+  <li><code>quote</code>, nestable</li>
+  <li><code>image</code>, <code>table</code> with <code>row</code> and <code>cell</code></li>
+  <li><code>callout</code>, <code>raw</code>, <code>math</code>, <code>toc</code></li>
+  <li><code>footnote</code> with <code>fn</code> references, <code>include</code></li>
+</ul>
+<p>Every inline from section 6:</p>
+<ul>
+  <li><code>b</code>, <code>i</code>, <code>strike</code>, <code>code</code>, <code>m</code></li>
+  <li><code>link(&quot;url&quot;)</code>, <code>fn(id)</code></li>
+  <li>Prose escapes <code>{}, code{}}, code{\!}, code{\} </code></li>
+</ul>
+<p>Strings, numbers, booleans, attribute lists, comments, and verbatim <code>{! ... !}</code> scopes (with <code>\!</code>, <code>!}</code>, and <code>\!</code> escapes) follow sections 3.2, 3.3, and 3.5 exactly.</p>
+<h3 id="tree-sitter-parse-vs-sema">18.2 Parsing versus checking</h3>
+<p>The grammar parses structure; it does not repeat section 16. A heading outside <code>h(1)</code> to <code>h(6)</code>, an unknown callout type, a ragged table, or a codeblock with both <code>src</code> and a raw body all parse, and the compiler reports them. One document, one reading — the grammar and the compiler agree on the tree, and only the compiler judges it.</p>
+<h3 id="tree-sitter-helix">18.3 Helix setup</h3>
+<p>Build the grammar library from the grammar repository:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">cd tree-sitter-docup
+tree-sitter build -o ~/.config/helix/runtime/grammars/docup.so .
+mkdir -p ~/.config/helix/runtime/queries/docup
+cp queries<span class="tok-comment">/*.scm ~/.config/helix/runtime/queries/docup/</span></code></pre>
+</div>
+<p>Register the language in <code>~/.config/helix/languages.toml</code>:</p>
+<div class="codeblock">
+  <div class="codeblock-header">
+    <span></span>
+    <div class="codeblock-actions">
+      <span>text</span>
+      <button type="button" class="codeblock-copy-btn" onclick="copyCode(this)" title="Copy code">Copy</button>
+    </div>
+  </div>
+  <pre><code class="language-text">[[language]]
+name = <span class="tok-string">&quot;docup&quot;</span>
+scope = <span class="tok-string">&quot;source.docup&quot;</span>
+file-types = [<span class="tok-string">&quot;du&quot;</span>]
+comment-token = <span class="tok-string">&quot;//&quot;</span>
+grammar = <span class="tok-string">&quot;docup&quot;</span></code></pre>
+</div>
+<p>Then <code>hx --health docup</code> shows the parser and the highlight queries as ready, and <code>hx file.du</code> highlights.</p>
+<h3 id="tree-sitter-queries">18.4 Queries</h3>
+<p>The grammar ships five query files:</p>
+<div class="table-wrap">
+<table>
+  <tr>
+    <th>File</th>
+    <th>Used for</th>
+  </tr>
+  <tr>
+    <td><code>highlights.scm</code></td>
+    <td>Keywords, strings, numbers, links</td>
+  </tr>
+  <tr>
+    <td><code>injections.scm</code></td>
+    <td>codeblock <code>lang</code> into that language, math into LaTeX</td>
+  </tr>
+  <tr>
+    <td><code>folds.scm</code></td>
+    <td>Foldable blocks</td>
+  </tr>
+  <tr>
+    <td><code>indents.scm</code></td>
+    <td>Auto-indent</td>
+  </tr>
+  <tr>
+    <td><code>textobjects.scm</code></td>
+    <td>Blocks as functions, attributes as parameters</td>
+  </tr>
+</table>
+</div>
 <section class="footnotes" aria-label="Footnotes">
   <hr>
   <ol>

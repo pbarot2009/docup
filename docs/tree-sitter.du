@@ -1,0 +1,110 @@
+h(2, id: "tree-sitter") { 18. tree-sitter grammar }
+
+p {
+    Editor highlighting for b{.du} files comes from a tree-sitter grammar:
+    link("https://github.com/pbarot2009/tree-sitter-docup"){tree-sitter-docup}.
+    It parses the same language this compiler accepts, so editors see the same
+    blocks and inlines described in sections 4 to 15.
+}
+
+p {
+    The grammar version tracks the compiler. Grammar code{0.3.2} supports DocUP
+    code{0.3.2} (see code{docup version}). Grammar code{MAJOR.MINOR} always
+    equals the compiler it supports; grammar code{PATCH} bumps for grammar-only
+    fixes.
+}
+
+h(3, id: "tree-sitter-covered") { 18.1 What is covered }
+
+p { Every block from section 5 onward: }
+
+list {
+    item { code{meta}, code{h}, code{p}, code{codeblock}, code{hr} }
+    item { code{list} with code{item} and code{task}, nestable }
+    item { code{quote}, nestable }
+    item { code{image}, code{table} with code{row} and code{cell} }
+    item { code{callout}, code{raw}, code{math}, code{toc} }
+    item { code{footnote} with code{fn} references, code{include} }
+}
+
+p { Every inline from section 6: }
+
+list {
+    item { code{b}, code{i}, code{strike}, code{code}, code{m} }
+    item { code{link("url")}, code{fn(id)} }
+    item { Prose escapes code{{}, code{\}}, code{\\!}, code{\\} }}
+}
+
+p {
+    Strings, numbers, booleans, attribute lists, comments, and verbatim
+    code{{! ... !}} scopes (with code{\\!}, code{!\}}, and code{\\!} escapes)
+    follow sections 3.2, 3.3, and 3.5 exactly.
+}
+
+h(3, id: "tree-sitter-parse-vs-sema") { 18.2 Parsing versus checking }
+
+p {
+    The grammar parses structure; it does not repeat section 16. A heading
+    outside code{h(1)} to code{h(6)}, an unknown callout type, a ragged table,
+    or a codeblock with both code{src} and a raw body all parse, and the
+    compiler reports them. One document, one reading — the grammar and the
+    compiler agree on the tree, and only the compiler judges it.
+}
+
+h(3, id: "tree-sitter-helix") { 18.3 Helix setup }
+
+p { Build the grammar library from the grammar repository: }
+
+codeblock(lang: "text") {!
+cd tree-sitter-docup
+tree-sitter build -o ~/.config/helix/runtime/grammars/docup.so .
+mkdir -p ~/.config/helix/runtime/queries/docup
+cp queries/*.scm ~/.config/helix/runtime/queries/docup/
+!}
+
+p { Register the language in code{~/.config/helix/languages.toml}: }
+
+codeblock(lang: "text") {!
+[[language]]
+name = "docup"
+scope = "source.docup"
+file-types = ["du"]
+comment-token = "//"
+grammar = "docup"
+!}
+
+p {
+    Then code{hx --health docup} shows the parser and the highlight queries as
+    ready, and code{hx file.du} highlights.
+}
+
+h(3, id: "tree-sitter-queries") { 18.4 Queries }
+
+p { The grammar ships five query files: }
+
+table {
+    row(header: true) {
+        cell { File }
+        cell { Used for }
+    }
+    row {
+        cell { code{highlights.scm} }
+        cell { Keywords, strings, numbers, links }
+    }
+    row {
+        cell { code{injections.scm} }
+        cell { codeblock code{lang} into that language, math into LaTeX }
+    }
+    row {
+        cell { code{folds.scm} }
+        cell { Foldable blocks }
+    }
+    row {
+        cell { code{indents.scm} }
+        cell { Auto-indent }
+    }
+    row {
+        cell { code{textobjects.scm} }
+        cell { Blocks as functions, attributes as parameters }
+    }
+}
